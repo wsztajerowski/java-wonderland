@@ -34,7 +34,6 @@
 
     <properties>
         <jmh.version>1.36</jmh.version>
-        <uberjar.name>benchmarks</uberjar.name>
     </properties>
 
     <build>
@@ -42,15 +41,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${uberjar.name}</finalName>
+                        <id>run-maven-shade-plugin</id>
+                        <configuration  combine.self="append">
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.openjdk.jmh.Main</mainClass>

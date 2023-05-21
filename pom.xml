@@ -20,6 +20,7 @@
         <!-- plugin versions -->
         <maven-test-plugins.version>3.1.0</maven-test-plugins.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
         <!-- dependency versions -->
         <testcontainers.version>1.17.3</testcontainers.version>
         <junit-jupiter.version>5.9.0</junit-jupiter.version>
@@ -71,6 +72,23 @@
                                 <goal>integration-test</goal>
                                 <goal>verify</goal>
                             </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>run-maven-shade-plugin</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <finalName>${artifactId}</finalName>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
