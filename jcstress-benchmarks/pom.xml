@@ -12,6 +12,8 @@
     <artifactId>jcstress-benchmarks</artifactId>
     <packaging>jar</packaging>
 
+    <name>JCSTRESS benchmarks</name>
+
     <dependencies>
         <dependency>
             <groupId>pl.symentis</groupId>

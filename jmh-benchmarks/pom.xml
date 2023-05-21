@@ -12,6 +12,8 @@
     <artifactId>jmh-benchmarks</artifactId>
     <packaging>jar</packaging>
 
+    <name>JMH benchmarks</name>
+
     <dependencies>
         <dependency>
             <groupId>pl.symentis</groupId>
