@@ -10,6 +10,7 @@
   <artifactId>dekkers-lock</artifactId>
   <version>1.0-SNAPSHOT</version>
 
+  <name>Dekker's lock</name>
 
   <dependencies>
     <dependency>
