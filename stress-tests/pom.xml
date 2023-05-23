@@ -7,10 +7,10 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-    <artifactId>jcstress-benchmarks</artifactId>
+    <artifactId>stress-tests</artifactId>
     <packaging>jar</packaging>
 
-    <name>JCStress benchmarks</name>
+    <name>JCStress tests</name>
 
     <dependencies>
         <dependency>
