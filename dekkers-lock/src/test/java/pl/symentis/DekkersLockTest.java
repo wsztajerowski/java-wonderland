@@ -21,18 +21,18 @@ class DekkersLockTest {
     DekkersLock lock1 = lockFactory.getLock1();
     SharedObject sharedObject = new SharedObject();
     var t0 = new Thread(() -> {
-      lock0.lock();
-      for (int i = 0; i < 100_000_000; i++) {
+      for (int i = 0; i < 10_000_000; i++) {
+        lock0.lock();
         sharedObject.counter++;
+        lock0.unlock();
       }
-      lock0.unlock();
     });
     var t1 = new Thread(() -> {
-      lock1.lock();
-      for (int i = 0; i < 100_000_000; i++) {
+      for (int i = 0; i < 10_000_000; i++) {
+        lock1.lock();
         sharedObject.counter++;
+        lock1.unlock();
       }
-      lock1.unlock();
     });
 
     // when
@@ -44,7 +44,7 @@ class DekkersLockTest {
 
     //then
     assertThat(sharedObject.counter)
-        .isEqualTo(200_000_000);
+        .isEqualTo(20_000_000);
 
   }
 
