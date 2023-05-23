@@ -37,15 +37,4 @@ public class DekkersLock {
     wantToEnter = false;
   }
 
-  public long startTest() throws InterruptedException {
-    Thread firstThread = new Thread(process0);
-    firstThread.start();
-    Thread secondThread = new Thread(process1);
-    secondThread.start();
-
-    firstThread.join();
-    secondThread.join();
-
-    return sharedObject.counter;
-  }
 }
