@@ -7,11 +7,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class DekkersLockTest {
 
-  private DekkerLockFactory lockFactory;
+  private DekkersLockFactory lockFactory;
 
   @BeforeEach
   void setUp() {
-    this.lockFactory = DekkerLockFactory.get();
+    this.lockFactory = DekkersLockFactory.get();
   }
 
   @Test
