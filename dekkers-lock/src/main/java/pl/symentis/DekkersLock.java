@@ -1,7 +1,7 @@
 package pl.symentis;
 
 public class DekkersLock {
-  private final Turn turn;
+  private static volatile int turn = 0;
   final int lockNo;
   volatile boolean wantToEnter;
   private DekkersLock otherLock;
@@ -11,20 +11,18 @@ public class DekkersLock {
   }
 
   static class Turn {
-    public volatile int turn = 0;
   }
 
-  DekkersLock(Turn turn, int lockNo) {
-    this.turn = turn;
+  DekkersLock(int lockNo) {
     this.lockNo = lockNo;
   }
 
   public void lock(){
     wantToEnter = true;
     while (otherLock.wantToEnter){
-      if (turn.turn != lockNo){
+      if (turn != lockNo){
         wantToEnter = false;
-        while (turn.turn != lockNo){
+        while (turn != lockNo){
           // busy wait
         }
         wantToEnter = true;
@@ -33,7 +31,7 @@ public class DekkersLock {
   }
 
   public void unlock(){
-    turn.turn = otherLock.lockNo;
+    turn = otherLock.lockNo;
     wantToEnter = false;
   }
 
