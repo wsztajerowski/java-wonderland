@@ -10,9 +10,6 @@ public class DekkersLock {
     this.otherLock = otherLock;
   }
 
-  static class Turn {
-  }
-
   DekkersLock(int lockNo) {
     this.lockNo = lockNo;
   }
