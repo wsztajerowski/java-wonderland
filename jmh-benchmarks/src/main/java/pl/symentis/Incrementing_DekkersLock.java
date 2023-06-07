@@ -19,7 +19,7 @@ public class Incrementing_DekkersLock {
 
     @Benchmark
     @GroupThreads(1)
-    @Group()
+    @Group("g1")
     public int incrementUsingLock1() {
         lock1.lock();
         v++;
@@ -29,7 +29,7 @@ public class Incrementing_DekkersLock {
 
     @Benchmark
     @GroupThreads(1)
-    @Group()
+    @Group("g1")
     public int incrementUsingLock2() {
         lock2.lock();
         v++;
