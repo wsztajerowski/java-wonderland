@@ -31,4 +31,5 @@ jobs:
           echo "test" >> test.txt
       - name: Copy files to the test bucket with the AWS CLI
         run: |
+          ls
           aws s3 sync test.txt s3://java-wonderland
