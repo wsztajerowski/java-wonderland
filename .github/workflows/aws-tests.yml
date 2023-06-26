@@ -1,0 +1,32 @@
+name: Run tests on AWS
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    name: Run anything on AWS
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Set up JDK 20
+        uses: actions/setup-java@v3
+        with:
+          java-version: '20'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B verify --file pom.xml
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::653932013369:role/java-wonderland-github-access-role
+          aws-region: eu-north-1
+      - name: Copy files to the test bucket with the AWS CLI
+        run: |
+          aws s3 sync stress-tests/target/stress-tests.jar s3://java-wonderland
