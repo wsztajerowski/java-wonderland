@@ -45,7 +45,7 @@ jobs:
         uses: machulav/ec2-github-runner@v2
         with:
           mode: start
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GHA_EC2_PAT }}
           ec2-image-id: ami-0a32b54520652b8b1
           ec2-instance-type: t3.nano
           subnet-id: subnet-3914dd42
@@ -87,6 +87,6 @@ jobs:
         uses: machulav/ec2-github-runner@v2
         with:
           mode: stop
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GHA_EC2_PAT }}
           label: ${{ needs.start-runners.outputs.label }}
           ec2-instance-id: ${{ needs.start-runners.outputs.ec2-instance-id }}
