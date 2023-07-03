@@ -50,6 +50,10 @@ jobs:
           ec2-instance-type: t3.nano
           subnet-id: subnet-3914dd42
           security-group-id: sg-09ab440252230df2a
+      - name: print runner details
+        run: |
+          echo "Runner label: >> ${{ steps.start_ec2_runner.outputs.label }} <<"
+          echo "Runner EC2 instance id: >> ${{ steps.start_ec2_runner.outputs.ec2-instance-id }} <<"
 
   do-the-job:
     name: Do the job on the runner
