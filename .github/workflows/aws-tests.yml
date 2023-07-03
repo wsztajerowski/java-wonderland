@@ -53,7 +53,8 @@ jobs:
 
   do-the-job:
     name: Do the job on the runner
-    needs: start-runners # required to start the main job when the runner is ready
+    needs:
+     - start-runners
     runs-on: ${{ needs.start-runners.outputs.label }} # run the job on the newly created runner
     steps:
       - name: create test file
