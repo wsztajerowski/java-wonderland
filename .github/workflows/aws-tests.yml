@@ -30,8 +30,8 @@ jobs:
       contents: read
 
     outputs:
-      label: ${{ steps.start_ec2_runner.outputs.label }}
-      ec2-instance-id: ${{ steps.start_ec2_runner.outputs.ec2-instance-id }}
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
 
     steps:
       - name: Configure AWS credentials
@@ -52,8 +52,8 @@ jobs:
           security-group-id: sg-09ab440252230df2a
       - name: print runner details
         run: |
-          echo "Runner label: >> ${{ steps.start_ec2_runner.outputs.label }} <<"
-          echo "Runner EC2 instance id: >> ${{ steps.start_ec2_runner.outputs.ec2-instance-id }} <<"
+          echo "Runner label: >> ${{ steps.start-ec2-runner.outputs.label }} <<"
+          echo "Runner EC2 instance id: >> ${{ steps.start-ec2-runner.outputs.ec2-instance-id }} <<"
 
   do-the-job:
     name: Do the job on the runner
