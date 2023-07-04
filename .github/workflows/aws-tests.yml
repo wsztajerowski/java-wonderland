@@ -50,6 +50,7 @@ jobs:
           ec2-instance-type: t3.micro
           subnet-id: subnet-3914dd42
           security-group-id: sg-09ab440252230df2a
+          iam-role-name: java-wonderland-ec2-role
       - name: print runner details
         run: |
           echo "Runner label: >> ${{ steps.start-ec2-runner.outputs.label }} <<"
