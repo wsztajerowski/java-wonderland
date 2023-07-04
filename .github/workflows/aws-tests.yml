@@ -64,9 +64,14 @@ jobs:
       - name: create test file
         run: |
           echo "hello world" >> hello.txt
-      - name: Copy files to the test bucket with the AWS CLI
+      - name: print test file
+        run: |
+          cat hello.txt
+      - name: list files
         run: |
           ls
+      - name: Copy files to the test bucket with the AWS CLI
+        run: |
           aws s3 cp hello.txt s3://java-wonderland
 
   stop-runners:
