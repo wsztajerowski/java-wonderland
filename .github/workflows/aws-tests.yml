@@ -53,8 +53,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: $WORKFLOW_ROLE_ARN
-          aws-region: $AWS_REGION
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Start EC2 runner
         id: start-ec2-runner
@@ -62,11 +62,11 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GHA_EC2_PAT }}
-          ec2-image-id: $AMI_ID
-          ec2-instance-type: $EC2_INSTANCE_TYPE
-          subnet-id: $SUBNET_ID
-          security-group-id: $SECURITY_GROUP_ID
-          iam-role-name: $RUNNER_ROLE_NAME
+          ec2-image-id: ${{ env.AMI_ID }}
+          ec2-instance-type: ${{ env.EC2_INSTANCE_TYPE }}
+          subnet-id: ${{ env.SUBNET_ID }}
+          security-group-id: ${{ env.SECURITY_GROUP_ID }}
+          iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
 
   do-the-job:
     name: Do the job on the runner
@@ -97,8 +97,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: $WORKFLOW_ROLE_ARN
-          aws-region: $AWS_REGION
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
       - name: Stop EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
