@@ -37,6 +37,13 @@ jobs:
           path: jmh-benchmarks/target/jmh-benchmarks.jar
           retention-days: 7
           if-no-files-found: error
+      - name: Upload JCStress runner jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: jcstress-runner
+          path: stress-tests/target/stress-tests.jar
+          retention-days: 7
+          if-no-files-found: error
 
   start-runner-1:
     name: Start first runner
@@ -45,18 +52,15 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     outputs:
       label: ${{ steps.start-ec2-runner.outputs.label }}
       ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
-
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-
       - name: Start EC2 runner
         id: start-ec2-runner
         uses: machulav/ec2-github-runner@v2
@@ -68,8 +72,7 @@ jobs:
           subnet-id: ${{ env.SUBNET_ID }}
           security-group-id: ${{ env.SECURITY_GROUP_ID }}
           iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
-
-  do-the-job:
+  run-jmh:
     name: Run JMH tests
     needs:
      - start-runner-1
@@ -81,14 +84,14 @@ jobs:
           name: jmh-runner
       - name: Display structure of downloaded files
         run: ls -R
-      - name: Copy files to the test bucket with the AWS CLI
-        run: |
-          aws s3 cp jmh-benchmarks.jar s3://java-wonderland
+#      - name: Copy files to the test bucket with the AWS CLI
+#        run: |
+#          aws s3 cp jmh-benchmarks.jar s3://java-wonderland
 
   stop-runner-1:
     needs:
       - start-runner-1
-      - do-the-job
+      - run-jmh
     if: always()
     runs-on: ubuntu-latest
     permissions:
@@ -107,3 +110,134 @@ jobs:
           github-token: ${{ secrets.GHA_EC2_PAT }}
           label: ${{ needs.start-runner-1.outputs.label }}
           ec2-instance-id: ${{ needs.start-runner-1.outputs.ec2-instance-id }}
+
+  start-runner-2:
+    name: Start second runner
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GHA_EC2_PAT }}
+          ec2-image-id: ${{ env.AMI_ID }}
+          ec2-instance-type: ${{ env.EC2_INSTANCE_TYPE }}
+          subnet-id: ${{ env.SUBNET_ID }}
+          security-group-id: ${{ env.SECURITY_GROUP_ID }}
+          iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
+  run-jmh-with-async:
+    name: Run JMH tests with async prof
+    needs:
+     - start-runner-2
+    runs-on: ${{ needs.start-runner-2.outputs.label }} # run the job on the newly created runner
+    steps:
+      - name: Download JMH runner
+        uses: actions/download-artifact@v3
+        with:
+          name: jmh-runner
+      - name: Display structure of downloaded files
+        run: ls -R
+#      - name: Copy files to the test bucket with the AWS CLI
+#        run: |
+#          aws s3 cp jmh-benchmarks.jar s3://java-wonderland
+  stop-runner-2:
+    needs:
+      - start-runner-2
+      - run-jmh-with-async
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GHA_EC2_PAT }}
+          label: ${{ needs.start-runner-2.outputs.label }}
+          ec2-instance-id: ${{ needs.start-runner-2.outputs.ec2-instance-id }}
+
+  start-runner-3:
+    name: Start third runner
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GHA_EC2_PAT }}
+          ec2-image-id: ${{ env.AMI_ID }}
+          ec2-instance-type: ${{ env.EC2_INSTANCE_TYPE }}
+          subnet-id: ${{ env.SUBNET_ID }}
+          security-group-id: ${{ env.SECURITY_GROUP_ID }}
+          iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
+  run-jcstress:
+    name: Run JCStress tests
+    needs:
+     - start-runner-3
+    runs-on: ${{ needs.start-runner-3.outputs.label }} # run the job on the newly created runner
+    steps:
+      - name: Download JMH runner
+        uses: actions/download-artifact@v3
+        with:
+          name: jcstress-runner
+      - name: Display structure of downloaded files
+        run: ls -R
+      - name: Copy files to the test bucket with the AWS CLI
+        run: |
+          aws s3 cp stress-tests.jar s3://java-wonderland
+
+  stop-runner-3:
+    needs:
+      - start-runner-3
+      - run-jmh
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GHA_EC2_PAT }}
+          label: ${{ needs.start-runner-3.outputs.label }}
+          ec2-instance-id: ${{ needs.start-runner-3.outputs.ec2-instance-id }}
