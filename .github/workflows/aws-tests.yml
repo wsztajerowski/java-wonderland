@@ -76,7 +76,7 @@ jobs:
           aws-resource-tags: > 
             [
               {"Key": "project", "Value": "java-wonderland"},
-              {"Key": "run_id", "Value": ${{ github.run_id }} },
+              {"Key": "run_id", "Value": "${{ github.run_id }}" },
               {"Key": "runner", "Value": "runner-1"}
             ]
   run-jmh:
@@ -149,7 +149,7 @@ jobs:
           aws-resource-tags: >
             [
               {"Key": "project", "Value": "java-wonderland"},
-              {"Key": "run_id", "Value": ${{ github.run_id }} },
+              {"Key": "run_id", "Value": "${{ github.run_id }}" },
               {"Key": "runner", "Value": "runner-2"}
             ]
   run-jmh-with-async:
@@ -221,7 +221,7 @@ jobs:
           aws-resource-tags: >
             [
               {"Key": "project", "Value": "java-wonderland"},
-              {"Key": "run_id", "Value": ${{ github.run_id }} },
+              {"Key": "run_id", "Value": "${{ github.run_id }}" },
               {"Key": "runner", "Value": "runner-3"}
             ]
   run-jcstress:
