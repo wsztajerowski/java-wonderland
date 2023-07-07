@@ -46,7 +46,7 @@ jobs:
           if-no-files-found: error
 
   start-runner-1:
-    name: Start first runner
+    name: Start EC2 runner 1
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -75,7 +75,8 @@ jobs:
           aws-resource-tags: > 
             [
               {"Key": "project", "Value": "java-wonderland"},
-              {"Key": "name", "Value": "ec2-github-runner"}
+              {"Key": "name", "Value": "ec2-github-runner"},
+              {"Key": "runner", "Value": "runner-1"}
             ]
   run-jmh:
     name: Run JMH tests
@@ -94,6 +95,7 @@ jobs:
 #          aws s3 cp jmh-benchmarks.jar s3://java-wonderland
 
   stop-runner-1:
+    name: Stop EC2 runner 1
     needs:
       - start-runner-1
       - run-jmh
@@ -117,7 +119,7 @@ jobs:
           ec2-instance-id: ${{ needs.start-runner-1.outputs.ec2-instance-id }}
 
   start-runner-2:
-    name: Start second runner
+    name: Start EC2 runner 2
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -143,6 +145,12 @@ jobs:
           subnet-id: ${{ env.SUBNET_ID }}
           security-group-id: ${{ env.SECURITY_GROUP_ID }}
           iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
+          aws-resource-tags: >
+            [
+              {"Key": "project", "Value": "java-wonderland"},
+              {"Key": "name", "Value": "ec2-github-runner"},
+              {"Key": "runner", "Value": "runner-2"}
+            ]
   run-jmh-with-async:
     name: Run JMH tests with async prof
     needs:
@@ -159,6 +167,7 @@ jobs:
 #        run: |
 #          aws s3 cp jmh-benchmarks.jar s3://java-wonderland
   stop-runner-2:
+    name: Stop EC2 runner 2
     needs:
       - start-runner-2
       - run-jmh-with-async
@@ -182,7 +191,7 @@ jobs:
           ec2-instance-id: ${{ needs.start-runner-2.outputs.ec2-instance-id }}
 
   start-runner-3:
-    name: Start third runner
+    name: Start EC2 runner 3
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -208,6 +217,12 @@ jobs:
           subnet-id: ${{ env.SUBNET_ID }}
           security-group-id: ${{ env.SECURITY_GROUP_ID }}
           iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
+          aws-resource-tags: >
+            [
+              {"Key": "project", "Value": "java-wonderland"},
+              {"Key": "name", "Value": "ec2-github-runner"},
+              {"Key": "runner", "Value": "runner-3"}
+            ]
   run-jcstress:
     name: Run JCStress tests
     needs:
@@ -225,6 +240,7 @@ jobs:
           aws s3 cp stress-tests.jar s3://java-wonderland
 
   stop-runner-3:
+    name: Stop EC2 runner 3
     needs:
       - start-runner-3
       - run-jcstress
