@@ -11,6 +11,7 @@ env:
   EC2_INSTANCE_TYPE: t3.micro
   SUBNET_ID: subnet-3914dd42
   SECURITY_GROUP_ID: sg-09ab440252230df2a
+  S3_BUILD_OUTPUT_PATH: ${{ github.event.number != '' && github.event.number || github.ref }}
 
 jobs:
   build:
@@ -75,12 +76,13 @@ jobs:
           aws-resource-tags: > 
             [
               {"Key": "project", "Value": "java-wonderland"},
-              {"Key": "name", "Value": "ec2-github-runner"},
+              {"Key": "run_id", "Value": ${{ github.run_id }} },
               {"Key": "runner", "Value": "runner-1"}
             ]
   run-jmh:
     name: Run JMH tests
     needs:
+     - build
      - start-runner-1
     runs-on: ${{ needs.start-runner-1.outputs.label }} # run the job on the newly created runner
     steps:
@@ -88,11 +90,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: jmh-runner
-      - name: Display structure of downloaded files
-        run: ls -R
-#      - name: Copy files to the test bucket with the AWS CLI
-#        run: |
-#          aws s3 cp jmh-benchmarks.jar s3://java-wonderland
+      - name: print envs
+        run: echo ${{ env.S3_BUILD_OUTPUT_PATH }}
+      - name: Copy files to the test bucket with the AWS CLI
+        run: |
+          aws s3 cp jmh-benchmarks.jar s3://java-wonderland/gha-outputs/${{ env.S3_BUILD_OUTPUT_PATH }}/${{ github.run_number }}
 
   stop-runner-1:
     name: Stop EC2 runner 1
@@ -148,7 +150,7 @@ jobs:
           aws-resource-tags: >
             [
               {"Key": "project", "Value": "java-wonderland"},
-              {"Key": "name", "Value": "ec2-github-runner"},
+              {"Key": "run_id", "Value": ${{ github.run_id }} },
               {"Key": "runner", "Value": "runner-2"}
             ]
   run-jmh-with-async:
@@ -220,7 +222,7 @@ jobs:
           aws-resource-tags: >
             [
               {"Key": "project", "Value": "java-wonderland"},
-              {"Key": "name", "Value": "ec2-github-runner"},
+              {"Key": "run_id", "Value": ${{ github.run_id }} },
               {"Key": "runner", "Value": "runner-3"}
             ]
   run-jcstress:
