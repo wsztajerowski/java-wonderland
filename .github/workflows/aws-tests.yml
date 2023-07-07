@@ -11,7 +11,7 @@ env:
   EC2_INSTANCE_TYPE: t3.micro
   SUBNET_ID: subnet-3914dd42
   SECURITY_GROUP_ID: sg-09ab440252230df2a
-  S3_BUILD_OUTPUT_PATH: java-wonderland/gha-outputs/${{ github.event.number != '' && github.event.number || github.ref }}/${{ github.run_number }}/
+  S3_BUILD_OUTPUT_PATH: java-wonderland/gha-outputs/${{ ( github.event.number != '' && format('PR-{0}', github.event.number) ) || github.ref }}/RUN-NO-${{ github.run_number }}/
 
 jobs:
   build:
