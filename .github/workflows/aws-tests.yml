@@ -11,7 +11,7 @@ env:
   EC2_INSTANCE_TYPE: t3.micro
   SUBNET_ID: subnet-3914dd42
   SECURITY_GROUP_ID: sg-09ab440252230df2a
-  S3_BUILD_OUTPUT_PATH: ${{ github.event.number != '' && github.event.number || github.ref }}
+  S3_BUILD_OUTPUT_PATH: java-wonderland/gha-outputs/${{ github.event.number != '' && github.event.number || github.ref }}/${{ github.run_number }}/
 
 jobs:
   build:
@@ -93,7 +93,7 @@ jobs:
         run: echo ${{ env.S3_BUILD_OUTPUT_PATH }}
       - name: Copy files to the test bucket with the AWS CLI
         run: |
-          aws s3 cp jmh-benchmarks.jar s3://java-wonderland/gha-outputs/${{ env.S3_BUILD_OUTPUT_PATH }}/${{ github.run_number }}
+          aws s3 cp jmh-benchmarks.jar s3://${{ env.S3_BUILD_OUTPUT_PATH }}
 
   stop-runner-1:
     name: Stop EC2 runner 1
