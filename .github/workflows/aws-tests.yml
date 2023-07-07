@@ -164,9 +164,9 @@ jobs:
           name: jmh-runner
       - name: Display structure of downloaded files
         run: ls -R
-#      - name: Copy files to the test bucket with the AWS CLI
-#        run: |
-#          aws s3 cp jmh-benchmarks.jar s3://java-wonderland
+      - name: Copy files to the test bucket with the AWS CLI
+        run: |
+          aws s3 cp jmh-benchmarks.jar s3://${{ env.S3_BUILD_OUTPUT_PATH }}
   stop-runner-2:
     name: Stop EC2 runner 2
     needs:
@@ -238,7 +238,7 @@ jobs:
         run: ls -R
       - name: Copy files to the test bucket with the AWS CLI
         run: |
-          aws s3 cp stress-tests.jar s3://java-wonderland
+          aws s3 cp stress-tests.jar s3://${{ env.S3_BUILD_OUTPUT_PATH }}
 
   stop-runner-3:
     name: Stop EC2 runner 3
