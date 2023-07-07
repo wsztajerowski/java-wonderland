@@ -82,7 +82,6 @@ jobs:
   run-jmh:
     name: Run JMH tests
     needs:
-     - build
      - start-runner-1
     runs-on: ${{ needs.start-runner-1.outputs.label }} # run the job on the newly created runner
     steps:
