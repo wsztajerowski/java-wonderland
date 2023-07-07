@@ -1,0 +1,12 @@
+Resources:
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: java-wonderland
+      Tags:
+        - Key: "project"
+          Value: "java-wonderland"
+Outputs:
+  S3BucketArn:
+    Value: !GetAtt S3Bucket.Arn
