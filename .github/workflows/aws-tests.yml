@@ -72,6 +72,11 @@ jobs:
           subnet-id: ${{ env.SUBNET_ID }}
           security-group-id: ${{ env.SECURITY_GROUP_ID }}
           iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
+          aws-resource-tags: > 
+            [
+              {"Key": "project", "Value": "java-wonderland"},
+              {"Key": "name", "Value": "ec2-github-runner"}
+            ]
   run-jmh:
     name: Run JMH tests
     needs:
@@ -222,7 +227,7 @@ jobs:
   stop-runner-3:
     needs:
       - start-runner-3
-      - run-jmh
+      - run-jcstress
     if: always()
     runs-on: ubuntu-latest
     permissions:
