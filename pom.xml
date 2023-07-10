@@ -24,6 +24,7 @@
         <!-- dependency versions -->
         <junit-jupiter.version>5.9.0</junit-jupiter.version>
         <assertj.version>3.23.1</assertj.version>
+        <aws.java.sdk.version>2.20.100</aws.java.sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -40,6 +41,13 @@
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.java.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -91,5 +99,6 @@
         <module>dekkers-lock</module>
         <module>jmh-benchmarks</module>
         <module>stress-tests</module>
+        <module>test-wrapper</module>
     </modules>
 </project>
