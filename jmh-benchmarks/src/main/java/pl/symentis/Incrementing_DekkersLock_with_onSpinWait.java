@@ -3,7 +3,7 @@ package pl.symentis;
 import org.openjdk.jmh.annotations.*;
 
 @State(Scope.Benchmark)
-public class Incrementing_DekkersLock {
+public class Incrementing_DekkersLock_with_onSpinWait {
 
     int v;
     DekkersLock lock1;
@@ -11,7 +11,7 @@ public class Incrementing_DekkersLock {
 
     @Setup
     public void setup(){
-        DekkersLockFactory factory = DekkersLockFactory.get(false);
+        DekkersLockFactory factory = DekkersLockFactory.get(true);
         lock1 = factory.getLock0();
         lock2 = factory.getLock1();
     }

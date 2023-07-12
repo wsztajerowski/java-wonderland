@@ -6,13 +6,16 @@ public class DekkersLock {
   volatile boolean wantToEnter;
   private DekkersLock otherLock;
 
+  private boolean useOnSpinWait;
+
   void setOtherLock(DekkersLock otherLock) {
     this.otherLock = otherLock;
   }
 
-  DekkersLock(int lockNo, Turn turn) {
+  DekkersLock(int lockNo, Turn turn, boolean useOnSpinWait) {
     this.lockNo = lockNo;
     this.turn = turn;
+    this.useOnSpinWait = useOnSpinWait;
   }
 
   static class Turn {
@@ -26,6 +29,9 @@ public class DekkersLock {
         wantToEnter = false;
         while (turn.turn != lockNo){
           // busy wait
+          if (useOnSpinWait){
+            Thread.onSpinWait();
+          }
         }
         wantToEnter = true;
       }
