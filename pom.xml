@@ -25,6 +25,11 @@
         <junit-jupiter.version>5.9.0</junit-jupiter.version>
         <assertj.version>3.23.1</assertj.version>
         <aws.java.sdk.version>2.20.100</aws.java.sdk.version>
+        <mongodb-driver-sync.version>4.10.1</mongodb-driver-sync.version>
+        <morphia-core.version>2.3.5</morphia-core.version>
+        <picocli.version>4.7.4</picocli.version>
+        <gson.version>2.10.1</gson.version>
+        <gson-javatime-serialisers.version>1.1.2</gson-javatime-serialisers.version>
     </properties>
 
     <dependencyManagement>
@@ -35,6 +40,31 @@
                 <version>${junit-jupiter.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-sync</artifactId>
+                <version>${mongodb-driver-sync.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.morphia.morphia</groupId>
+                <artifactId>morphia-core</artifactId>
+                <version>${morphia-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
+                <artifactId>gson-javatime-serialisers</artifactId>
+                <version>${gson-javatime-serialisers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>${picocli.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
