@@ -37,7 +37,11 @@ public class JmhSubcommand implements Callable<Integer> {
         }
 
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults()) {
-            JmhBenchmarkId benchmarkId = new JmhBenchmarkId(sharedJmhOptions.commitSha, jmhResult.getBenchmark(), jmhResult.getMode(), sharedJmhOptions.runAttempt);
+            JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
+                .withCommitSha(sharedJmhOptions.commitSha)
+                .withBenchmarkName(jmhResult.benchmark)
+                .withBenchmarkType(jmhResult.mode)
+                .withRunAttempt( sharedJmhOptions.runAttempt);
             getMorphiaService()
                 .getBenchmarkDatastore()
                 .find(JmhBenchmark.class)
