@@ -190,10 +190,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: jmh-benchmarks
-      - name: Display structure of downloaded files
-        run: ls -R
-      - name: ls async-prof
-        run: ls -R  /home/ec2-user/
+      - name: Run JMH benchmarks
+        env:
+          MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+        run: java -jar test-wrapper.jar jmh-with-async --async-path /home/ec2-user/async-profiler-2.9-linux-x64/build/libasyncProfiler.so
   stop-runner-2:
     name: Stop EC2 runner 2
     needs:
@@ -302,9 +302,6 @@ jobs:
           echo "The run id is: $GITHUB_RUN_ID"
           echo "The GitHub Actor's username is: $GITHUB_ACTOR"
           echo "GitHub SHA: $GITHUB_SHA"
-      - name: Copy files to the test bucket with the AWS CLI
-        run: |
-          aws s3 cp stress-tests.jar s3://${{ env.S3_BUILD_OUTPUT_PATH }}
 
   stop-runner-3:
     name: Stop EC2 runner 3
