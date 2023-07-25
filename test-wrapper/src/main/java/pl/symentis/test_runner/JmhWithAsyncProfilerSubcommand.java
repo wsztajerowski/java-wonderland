@@ -57,7 +57,7 @@ public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
 
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults()) {
             BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata();
-            String flamegraphsDir = jmhResult.getBenchmark() + getFlamegraphsDirSuffix(jmhResult.getMode());
+            String flamegraphsDir = jmhResult.benchmark + getFlamegraphsDirSuffix(jmhResult.mode);
             list(Path.of(flamegraphsDir))
                 .forEach(path -> {
                     String s3Key = s3Prefix + path.toString();
@@ -67,7 +67,11 @@ public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
                     benchmarkMetadata.addFlamegraphPath(flamegraphName, s3Key);
                 });
 
-            JmhBenchmarkId benchmarkId = new JmhBenchmarkId(sharedJmhOptions.commitSha, jmhResult.getBenchmark(), jmhResult.getMode(), sharedJmhOptions.runAttempt);
+            JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
+                .withCommitSha(sharedJmhOptions.commitSha)
+                .withBenchmarkName(jmhResult.benchmark)
+                .withBenchmarkType(jmhResult.mode)
+                .withRunAttempt( sharedJmhOptions.runAttempt);
             getMorphiaService()
                 .getBenchmarkDatastore()
                 .find(JmhBenchmark.class)

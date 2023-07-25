@@ -4,28 +4,13 @@ import dev.morphia.annotations.Entity;
 
 @Entity
 public class JmhBenchmarkId {
-    private String commitSha;
+    public String commitSha;
 
-    private String benchmarkName;
-    private String benchmarkType;
-    private Integer runAttempt;
+    public String benchmarkName;
+    public String benchmarkType;
+    public Integer runAttempt;
 
     public JmhBenchmarkId() {
-    }
-
-    public JmhBenchmarkId(String commitSha, String benchmarkName, String benchmarkType, Integer runAttempt) {
-        this.commitSha = commitSha;
-        this.benchmarkName = benchmarkName;
-        this.benchmarkType = benchmarkType;
-        this.runAttempt = runAttempt;
-    }
-
-    public String getCommitSha() {
-        return commitSha;
-    }
-
-    public void setCommitSha(String commitSha) {
-        this.commitSha = commitSha;
     }
 
     public JmhBenchmarkId withCommitSha(String commitSha) {
@@ -33,33 +18,19 @@ public class JmhBenchmarkId {
         return this;
     }
 
-    public Integer getRunAttempt() {
-        return runAttempt;
+    public JmhBenchmarkId withBenchmarkName(String benchmarkName) {
+        this.benchmarkName = benchmarkName;
+        return this;
     }
 
-    public void setRunAttempt(Integer runAttempt) {
-        this.runAttempt = runAttempt;
+    public JmhBenchmarkId withBenchmarkType(String benchmarkType) {
+        this.benchmarkType = benchmarkType;
+        return this;
     }
 
     public JmhBenchmarkId withRunAttempt(Integer runAttempt) {
         this.runAttempt = runAttempt;
         return this;
-    }
-
-    public String getBenchmarkType() {
-        return benchmarkType;
-    }
-
-    public void setBenchmarkType(String benchmarkType) {
-        this.benchmarkType = benchmarkType;
-    }
-
-    public String getBenchmarkName() {
-        return benchmarkName;
-    }
-
-    public void setBenchmarkName(String benchmarkName) {
-        this.benchmarkName = benchmarkName;
     }
 
     @Override
