@@ -34,18 +34,25 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -B verify --file pom.xml
-      - name: Upload JMH runner jar
+      - name: Upload JMH benchmarks jar
         uses: actions/upload-artifact@v3
         with:
-          name: jmh-runner
+          name: jmh-benchmarks
           path: jmh-benchmarks/target/jmh-benchmarks.jar
           retention-days: 7
           if-no-files-found: error
       - name: Upload JCStress runner jar
         uses: actions/upload-artifact@v3
         with:
-          name: jcstress-runner
+          name: stress-tests
           path: stress-tests/target/stress-tests.jar
+          retention-days: 7
+          if-no-files-found: error
+      - name: Upload test wrapper jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-wrapper
+          path: test-wrapper/target/test-wrapper.jar
           retention-days: 7
           if-no-files-found: error
 
@@ -88,15 +95,18 @@ jobs:
      - start-runner-1
     runs-on: ${{ needs.start-runner-1.outputs.label }} # run the job on the newly created runner
     steps:
-      - name: Download JMH runner
+      - name: Download Test wrapper
         uses: actions/download-artifact@v3
         with:
-          name: jmh-runner
-      - name: print envs
-        run: echo "$GITHUB_REPOSITORY"
-      - name: Copy files to the test bucket with the AWS CLI
-        run: |
-          aws s3 cp jmh-benchmarks.jar s3://${{ env.S3_BUILD_OUTPUT_PATH }}
+          name: test-wrapper
+      - name: Download JMH runner jar
+        uses: actions/download-artifact@v3
+        with:
+          name: jmh-benchmarks
+      - name: Run JMH benchmarks
+        env:
+          MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+        run: java -jar test-wrapper.jar jmh
 
   stop-runner-1:
     name: Stop EC2 runner 1
@@ -161,15 +171,18 @@ jobs:
      - start-runner-2
     runs-on: ${{ needs.start-runner-2.outputs.label }} # run the job on the newly created runner
     steps:
-      - name: Download JMH runner
+      - name: Download Test wrapper
         uses: actions/download-artifact@v3
         with:
-          name: jmh-runner
+          name: test-wrapper
+      - name: Download JMH runner jar
+        uses: actions/download-artifact@v3
+        with:
+          name: jmh-benchmarks
       - name: Display structure of downloaded files
         run: ls -R
-      - name: Copy files to the test bucket with the AWS CLI
-        run: |
-          aws s3 cp jmh-benchmarks.jar s3://${{ env.S3_BUILD_OUTPUT_PATH }}
+      - name: ls async-prof
+        run: ls -R  /home/ec2-user/async-profiler/build
   stop-runner-2:
     name: Stop EC2 runner 2
     needs:
@@ -233,10 +246,14 @@ jobs:
      - start-runner-3
     runs-on: ${{ needs.start-runner-3.outputs.label }} # run the job on the newly created runner
     steps:
-      - name: Download JMH runner
+      - name: Download Test wrapper
         uses: actions/download-artifact@v3
         with:
-          name: jcstress-runner
+          name: test-wrapper
+      - name: Download JCStress runner jar
+        uses: actions/download-artifact@v3
+        with:
+          name: stress-tests
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
