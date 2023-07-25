@@ -11,7 +11,8 @@ import static picocli.CommandLine.HelpCommand;
 public class TestWrapper {
 
     public static void main(String... args) {
-        int exitCode = new CommandLine(new TestWrapper()).execute(args);
+        int exitCode = new CommandLine(new TestWrapper())
+            .execute(args);
         System.exit(exitCode);
     }
 

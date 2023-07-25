@@ -14,7 +14,6 @@ import java.util.List;
 
 public class ResultLoaderService {
     public static final String JMH_RESULT_FILENAME = "jmh-result.json";
-    private static ResultLoaderService INSTANCE;
     private final Gson gson;
 
     private ResultLoaderService(){
@@ -25,10 +24,7 @@ public class ResultLoaderService {
     }
 
     public static ResultLoaderService getResultLoaderService() {
-        if(INSTANCE == null){
-            INSTANCE = new ResultLoaderService();
-        }
-        return INSTANCE;
+        return new ResultLoaderService();
     }
 
 
