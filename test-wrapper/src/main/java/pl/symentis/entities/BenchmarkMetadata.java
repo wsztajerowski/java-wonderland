@@ -17,25 +17,9 @@ public class BenchmarkMetadata {
         }
     }
 
-    private LocalDateTime createdAt;
+    public LocalDateTime createdAt;
 
-    private Map<String, String> flamegraphPaths = new HashMap<>();
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Map<String, String> getFlamegraphPaths() {
-        return flamegraphPaths;
-    }
-
-    public void setFlamegraphPaths(Map<String, String> flamegraphPaths) {
-        this.flamegraphPaths = flamegraphPaths;
-    }
+    public Map<String, String> flamegraphPaths = new HashMap<>();
 
     public void addFlamegraphPath(String graphType, String graphPath) {
         this.flamegraphPaths.put(graphType, graphPath);
