@@ -8,7 +8,6 @@ import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 
 public class MorphiaService {
-    private static MorphiaService INSTANCE;
     private final Datastore benchmarkDatastore;
 
     private MorphiaService(){
@@ -23,10 +22,7 @@ public class MorphiaService {
     }
 
     public static MorphiaService getMorphiaService() {
-        if (INSTANCE == null){
-            INSTANCE = new MorphiaService();
-        }
-        return INSTANCE;
+        return new MorphiaService();
     }
 
     public Datastore getBenchmarkDatastore() {
