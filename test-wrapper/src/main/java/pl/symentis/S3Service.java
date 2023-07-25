@@ -9,7 +9,6 @@ import java.nio.file.Path;
 
 public class S3Service {
     public static final String BUCKET_NAME = "java-wonderland";
-    private static S3Service INSTANCE;
     private final S3Client s3Client;
 
     private S3Service() {
@@ -20,10 +19,7 @@ public class S3Service {
     }
 
     public static S3Service getS3Service() {
-        if (INSTANCE == null) {
-            INSTANCE = new S3Service();
-        }
-        return INSTANCE;
+        return new S3Service();
     }
 
     public void saveFileOnS3(String objectKey, Path pathToFile) {
