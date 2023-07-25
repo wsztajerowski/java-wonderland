@@ -181,15 +181,19 @@ class WrapperTest {
             int counter = 7;
             String commitSha = "129345abcefe";
             for (JmhResult jmhResult : benchmarks) {
-                String dirSuffix = switch (jmhResult.getMode()) {
+                String dirSuffix = switch (jmhResult.mode) {
                     case "thrpt":
                         yield "-Throughput";
                     default:
-                        throw new IllegalArgumentException("Unknown benchmark mode: " + jmhResult.getMode());
+                        throw new IllegalArgumentException("Unknown benchmark mode: " + jmhResult.mode);
                 };
-                JmhBenchmarkId benchmarkId = new JmhBenchmarkId(commitSha, jmhResult.getBenchmark(), jmhResult.getMode(), counter++);
-                String flamegraphsDir = jmhResult.getBenchmark() + dirSuffix;
-                String s3Preffix = format("gha-outputs/commit-{0}/attempt-{1}/", benchmarkId.getCommitSha(), benchmarkId.getRunAttempt());
+                JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
+                    .withCommitSha(commitSha)
+                    .withBenchmarkName(jmhResult.benchmark)
+                    .withBenchmarkType(jmhResult.mode)
+                    .withRunAttempt( counter++);
+                String flamegraphsDir = jmhResult.benchmark + dirSuffix;
+                String s3Preffix = format("gha-outputs/commit-{0}/attempt-{1}/", benchmarkId.commitSha, benchmarkId.runAttempt);
                 BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata();
                 list(Path.of(flamegraphsDir))
                     .forEach(path -> {
