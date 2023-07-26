@@ -61,6 +61,7 @@ jobs:
     name: Start EC2 runner 1
     needs: build
     runs-on: ubuntu-latest
+    if: false
     permissions:
       id-token: write
       contents: read
@@ -112,7 +113,7 @@ jobs:
       - name: Run JMH benchmarks
         env:
           MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
-        run: java -jar test-wrapper.jar jmh
+        run: java -jar test-wrapper.jar jmh -wi 2 -f 2 -i 2
 
   stop-runner-1:
     name: Stop EC2 runner 1
@@ -142,6 +143,7 @@ jobs:
     name: Start EC2 runner 2
     needs: build
     runs-on: ubuntu-latest
+    if: false
     permissions:
       id-token: write
       contents: read
@@ -193,7 +195,7 @@ jobs:
       - name: Run JMH benchmarks
         env:
           MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
-        run: java -jar test-wrapper.jar jmh-with-async --async-path /home/ec2-user/async-profiler-2.9-linux-x64/build/libasyncProfiler.so
+        run: java -jar test-wrapper.jar jmh-with-async -wi 2 -f 2 -i 2 --async-path /home/ec2-user/async-profiler-2.9-linux-x64/build/libasyncProfiler.so
   stop-runner-2:
     name: Stop EC2 runner 2
     needs:
@@ -302,6 +304,11 @@ jobs:
           echo "The run id is: $GITHUB_RUN_ID"
           echo "The GitHub Actor's username is: $GITHUB_ACTOR"
           echo "GitHub SHA: $GITHUB_SHA"
+          echo "AWS default region: $AWS_DEFAULT_REGION"
+          echo "AWS region: $AWS_REGION"
+          echo "AWS access key: $AWS_ACCESS_KEY_ID"
+          echo "AWS secret access key: $AWS_SECRET_ACCESS_KEY"
+          echo "AWS session token: $AWS_SESSION_TOKEN"
 
   stop-runner-3:
     name: Stop EC2 runner 3
