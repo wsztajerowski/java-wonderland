@@ -1,6 +1,5 @@
 package pl.symentis;
 
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -12,9 +11,7 @@ public class S3Service {
     private final S3Client s3Client;
 
     private S3Service() {
-        ProfileCredentialsProvider credentialsProvider = ProfileCredentialsProvider.create();
         s3Client = S3Client.builder()
-            .credentialsProvider(credentialsProvider)
             .build();
     }
 
