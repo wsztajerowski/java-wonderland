@@ -61,7 +61,6 @@ jobs:
     name: Start EC2 runner 1
     needs: build
     runs-on: ubuntu-latest
-    if: false
     permissions:
       id-token: write
       contents: read
@@ -143,7 +142,6 @@ jobs:
     name: Start EC2 runner 2
     needs: build
     runs-on: ubuntu-latest
-    if: false
     permissions:
       id-token: write
       contents: read
