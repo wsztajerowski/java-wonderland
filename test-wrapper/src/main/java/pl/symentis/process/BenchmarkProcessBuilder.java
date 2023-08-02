@@ -1,5 +1,7 @@
 package pl.symentis.process;
 
+import pl.symentis.JavaWonderlandException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +34,13 @@ public class BenchmarkProcessBuilder {
         return this;
     }
 
-    public Process buildAndStartProcess() throws IOException {
-        // creating the process
-        ProcessBuilder pb = new ProcessBuilder(commands);
-        pb.inheritIO();
-        // starting the process
-        return pb.start();
+    public Process buildAndStartProcess() {
+        ProcessBuilder processBuilder = new ProcessBuilder(commands);
+        processBuilder.inheritIO();
+        try {
+            return processBuilder.start();
+        } catch (IOException e) {
+            throw new JavaWonderlandException(e);
+        }
     }
 }

@@ -5,26 +5,28 @@ import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import pl.symentis.process.BenchmarkProcessBuilder;
+import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jmh.BenchmarkMetadata;
 import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.entities.jmh.JmhBenchmarkId;
 import pl.symentis.entities.jmh.JmhResult;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import static dev.morphia.query.filters.Filters.eq;
 import static dev.morphia.query.updates.UpdateOperators.set;
 import static java.nio.file.Files.list;
 import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
+import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
 import static pl.symentis.services.MorphiaService.getMorphiaService;
 import static pl.symentis.services.ResultLoaderService.getResultLoaderService;
 import static pl.symentis.services.S3Service.getS3Service;
 
 @Command(name = "jmh-with-async", description = "Run JHM benchmarks with Async profiler")
-public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
+public class JmhWithAsyncProfilerSubcommand implements Runnable {
     @CommandLine.Mixin
     private JmhBenchmarksSharedOptions sharedJmhOptions;
 
@@ -41,40 +43,44 @@ public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
     String output = "flamegraph";
 
     @Override
-    public Integer call() throws Exception {
+    public void run() {
         String s3Prefix = createS3PathPrefix();
         // Build process
-        int processExitCode = BenchmarkProcessBuilder.benchmarkProcessBuilder(sharedJmhOptions.benchmarkPath)
-            .addArgumentWithValue("-f", sharedJmhOptions.forks)
-            .addArgumentWithValue("-i", sharedJmhOptions.iterations)
-            .addArgumentWithValue("-wi", sharedJmhOptions.warmupIterations)
-            .addArgumentWithValue("-rf", "json")
-            .addArgumentWithValue("-prof", createAsyncCommand())
-            .addOptionalArgument(commonSharedOptions.testNameRegex)
-            .buildAndStartProcess()
-            .waitFor();
-
-        if (processExitCode != 0) {
-            return processExitCode;
+        try {
+            benchmarkProcessBuilder(sharedJmhOptions.benchmarkPath)
+                .addArgumentWithValue("-f", sharedJmhOptions.forks)
+                .addArgumentWithValue("-i", sharedJmhOptions.iterations)
+                .addArgumentWithValue("-wi", sharedJmhOptions.warmupIterations)
+                .addArgumentWithValue("-rf", "json")
+                .addArgumentWithValue("-prof", createAsyncCommand())
+                .addOptionalArgument(commonSharedOptions.testNameRegex)
+                .buildAndStartProcess()
+                .waitFor();
+        } catch (InterruptedException e) {
+            throw new JavaWonderlandException(e);
         }
 
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults()) {
             BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata();
             String flamegraphsDir = jmhResult.benchmark + getFlamegraphsDirSuffix(jmhResult.mode);
-            list(Path.of(flamegraphsDir))
-                .forEach(path -> {
-                    String s3Key = s3Prefix + path.toString();
-                    getS3Service()
-                        .saveFileOnS3(s3Key, path);
-                    String flamegraphName = getFilenameWithoutExtension(path);
-                    benchmarkMetadata.addFlamegraphPath(flamegraphName, s3Key);
-                });
+            try (Stream<Path> paths = list(Path.of(flamegraphsDir))) {
+                paths
+                    .forEach(path -> {
+                        String s3Key = s3Prefix + path.toString();
+                        getS3Service()
+                            .saveFileOnS3(s3Key, path);
+                        String flamegraphName = getFilenameWithoutExtension(path);
+                        benchmarkMetadata.addFlamegraphPath(flamegraphName, s3Key);
+                    });
+            } catch (IOException e) {
+                throw new JavaWonderlandException(e);
+            }
 
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
                 .withCommitSha(commonSharedOptions.commitSha)
                 .withBenchmarkName(jmhResult.benchmark)
                 .withBenchmarkType(jmhResult.mode)
-                .withRunAttempt( commonSharedOptions.runAttempt);
+                .withRunAttempt(commonSharedOptions.runAttempt);
             getMorphiaService()
                 .getTestResultsDatastore()
                 .find(JmhBenchmark.class)
@@ -82,8 +88,6 @@ public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
                 .update(new UpdateOptions().upsert(true),
                     set("benchmarkMetadata", benchmarkMetadata));
         }
-
-        return 0;
     }
 
     @NotNull

@@ -1,10 +1,10 @@
 package pl.symentis.commands;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import static java.lang.Integer.*;
+import static java.lang.Integer.parseInt;
+import static pl.symentis.commands.HtmlParser.getHtmlParser;
 
 public class JCStressHtmlResultParser {
 
@@ -14,20 +14,20 @@ public class JCStressHtmlResultParser {
         this.htmlParser = htmlParser;
     }
 
-    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath) throws IOException {
-        HtmlParser htmlParser = HtmlParser.getHtmlParser(resultFilepath);
+    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath) {
+        HtmlParser htmlParser = getHtmlParser(resultFilepath);
         return new JCStressHtmlResultParser(htmlParser);
     }
 
-    public List<String> getTestsWithFailedResults(){
+    public List<String> getTestsWithFailedResults() {
         return getTestsWithResults("FAILED");
     }
 
-    public List<String> getTestsWithErrorResults(){
+    public List<String> getTestsWithErrorResults() {
         return getTestsWithResults("ERROR");
     }
 
-    public List<String> getTestsWithInterestingResults(){
+    public List<String> getTestsWithInterestingResults() {
         return getTestsWithResults("INTERESTING");
     }
 
@@ -39,31 +39,31 @@ public class JCStressHtmlResultParser {
         return getOverallRate()[1];
     }
 
-    public String getJavaVendor(){
+    public String getJavaVendor() {
         return getEnvironmentProperty("java.vendor");
     }
 
-    public String getJavaVmName(){
+    public String getJavaVmName() {
         return getEnvironmentProperty("java.vm.name");
     }
 
-    public String getJavaVmVendor(){
+    public String getJavaVmVendor() {
         return getEnvironmentProperty("java.vm.vendor");
     }
 
-    public String getJavaVmVersion(){
+    public String getJavaVmVersion() {
         return getEnvironmentProperty("java.vm.version");
     }
 
-    public String getOsArch(){
+    public String getOsArch() {
         return getEnvironmentProperty("os.arch");
     }
 
-    public String getOsName(){
+    public String getOsName() {
         return getEnvironmentProperty("os.name");
     }
 
-    public String getOsVersion(){
+    public String getOsVersion() {
         return getEnvironmentProperty("os.version");
     }
 
@@ -73,7 +73,7 @@ public class JCStressHtmlResultParser {
             .getTextOfNextSibling(selector);
     }
 
-    private List<String> getTestsWithResults(String resultType){
+    private List<String> getTestsWithResults(String resultType) {
         String selector = "h3:containsOwn(" + resultType + ") ~ table";
         return htmlParser
             .getParserForSelector(selector)
