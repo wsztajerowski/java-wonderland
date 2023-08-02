@@ -1,4 +1,4 @@
-package pl.symentis;
+package pl.symentis.services;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -10,20 +10,21 @@ public class S3Service {
     public static final String BUCKET_NAME = "java-wonderland";
     private final S3Client s3Client;
 
-    private S3Service() {
-        s3Client = S3Client.builder()
-            .build();
+    private S3Service(S3Client client) {
+        s3Client = client;
     }
 
     public static S3Service getS3Service() {
-        return new S3Service();
+        S3Client client = S3Client
+            .builder()
+            .build();
+        return new S3Service(client);
     }
 
     public void saveFileOnS3(String objectKey, Path pathToFile) {
         PutObjectRequest putOb = PutObjectRequest.builder()
             .bucket(BUCKET_NAME)
             .key(objectKey)
-//                .metadata(metadata)
             .build();
 
         s3Client.putObject(putOb, RequestBody.fromFile(pathToFile));

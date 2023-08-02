@@ -1,4 +1,4 @@
-package pl.symentis;
+package pl.symentis.services;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
@@ -16,15 +16,16 @@ public class ResultLoaderService {
     public static final String JMH_RESULT_FILENAME = "jmh-result.json";
     private final Gson gson;
 
-    private ResultLoaderService(){
-        gson = Converters.registerLocalDateTime(new GsonBuilder()
-                .enableComplexMapKeySerialization()
-                .setVersion(1.0))
-            .create();
+    ResultLoaderService(Gson gson){
+        this.gson = gson;
     }
 
     public static ResultLoaderService getResultLoaderService() {
-        return new ResultLoaderService();
+        Gson gson = Converters.registerLocalDateTime(new GsonBuilder()
+                .enableComplexMapKeySerialization()
+                .setVersion(1.0))
+            .create();
+        return new ResultLoaderService(gson);
     }
 
 
