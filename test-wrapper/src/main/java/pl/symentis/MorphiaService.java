@@ -8,7 +8,7 @@ import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 
 public class MorphiaService {
-    private final Datastore benchmarkDatastore;
+    private final Datastore testResultsDatastore;
 
     private MorphiaService(){
         String connectionString = System.getenv("MONGO_CONNECTION_STRING");
@@ -16,16 +16,18 @@ public class MorphiaService {
             .applyConnectionString(new ConnectionString(connectionString))
             .build();
         MongoClient mongoClient = MongoClients.create(settings);
-        Datastore datastore = Morphia.createDatastore(mongoClient, "benchmarks");
-        datastore.getMapper().mapPackage("pl.symentis.entites");
-        this.benchmarkDatastore = datastore;
+        Datastore benchmarks = Morphia.createDatastore(mongoClient, "test-results");
+        benchmarks
+            .getMapper()
+            .mapPackage("pl.symentis.entites");
+        this.testResultsDatastore = benchmarks;
     }
 
     public static MorphiaService getMorphiaService() {
         return new MorphiaService();
     }
 
-    public Datastore getBenchmarkDatastore() {
-        return benchmarkDatastore;
+    public Datastore getTestResultsDatastore() {
+        return testResultsDatastore;
     }
 }

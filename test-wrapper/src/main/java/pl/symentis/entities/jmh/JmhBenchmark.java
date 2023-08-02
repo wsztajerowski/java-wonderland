@@ -1,4 +1,4 @@
-package pl.symentis.entities;
+package pl.symentis.entities.jmh;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;

@@ -1,5 +1,5 @@
 
-package pl.symentis.entities;
+package pl.symentis.entities.jmh;
 
 import dev.morphia.annotations.Entity;
 
