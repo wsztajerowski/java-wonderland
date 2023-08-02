@@ -3,9 +3,9 @@ package pl.symentis.test_runner;
 import dev.morphia.UpdateOptions;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
-import pl.symentis.entities.JmhBenchmark;
-import pl.symentis.entities.JmhBenchmarkId;
-import pl.symentis.entities.JmhResult;
+import pl.symentis.entities.jmh.JmhBenchmark;
+import pl.symentis.entities.jmh.JmhBenchmarkId;
+import pl.symentis.entities.jmh.JmhResult;
 
 import java.util.concurrent.Callable;
 
@@ -21,6 +21,9 @@ public class JmhSubcommand implements Callable<Integer> {
     @Mixin
     private JmhBenchmarksSharedOptions sharedJmhOptions;
 
+    @Mixin
+    private CommonSharedOptions commonSharedOptions;
+
     @Override
     public Integer call() throws Exception {
         int processExitCode = benchmarkProcessBuilder(sharedJmhOptions.benchmarkPath)
@@ -28,7 +31,7 @@ public class JmhSubcommand implements Callable<Integer> {
             .addArgumentWithValue("-i", sharedJmhOptions.iterations)
             .addArgumentWithValue("-wi", sharedJmhOptions.warmupIterations)
             .addArgumentWithValue("-rf", "json")
-            .addOptionalArgument(sharedJmhOptions.benchmarkNameRegex)
+            .addOptionalArgument(commonSharedOptions.testNameRegex)
             .buildAndStartProcess()
             .waitFor();
 
@@ -38,12 +41,12 @@ public class JmhSubcommand implements Callable<Integer> {
 
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults()) {
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
-                .withCommitSha(sharedJmhOptions.commitSha)
+                .withCommitSha(commonSharedOptions.commitSha)
                 .withBenchmarkName(jmhResult.benchmark)
                 .withBenchmarkType(jmhResult.mode)
-                .withRunAttempt( sharedJmhOptions.runAttempt);
+                .withRunAttempt( commonSharedOptions.runAttempt);
             getMorphiaService()
-                .getBenchmarkDatastore()
+                .getTestResultsDatastore()
                 .find(JmhBenchmark.class)
                 .filter(eq("benchmarkId", benchmarkId))
                 .update(new UpdateOptions().upsert(true),

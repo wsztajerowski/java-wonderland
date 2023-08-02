@@ -6,10 +6,10 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import pl.symentis.benchmark_builder.BenchmarkProcessBuilder;
-import pl.symentis.entities.BenchmarkMetadata;
-import pl.symentis.entities.JmhBenchmark;
-import pl.symentis.entities.JmhBenchmarkId;
-import pl.symentis.entities.JmhResult;
+import pl.symentis.entities.jmh.BenchmarkMetadata;
+import pl.symentis.entities.jmh.JmhBenchmark;
+import pl.symentis.entities.jmh.JmhBenchmarkId;
+import pl.symentis.entities.jmh.JmhResult;
 
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -27,6 +27,9 @@ import static pl.symentis.S3Service.getS3Service;
 public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
     @CommandLine.Mixin
     private JmhBenchmarksSharedOptions sharedJmhOptions;
+
+    @CommandLine.Mixin
+    private CommonSharedOptions commonSharedOptions;
 
     @Option(names = "--async-path", defaultValue = "${ASYNC_PATH:-/home/ec2-user/async-profiler/build/libasyncProfiler.so}", description = "Path to Async profiler (default: ${DEFAULT-VALUE})")
     String asyncPath;
@@ -47,7 +50,7 @@ public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
             .addArgumentWithValue("-wi", sharedJmhOptions.warmupIterations)
             .addArgumentWithValue("-rf", "json")
             .addArgumentWithValue("-prof", createAsyncCommand())
-            .addOptionalArgument(sharedJmhOptions.benchmarkNameRegex)
+            .addOptionalArgument(commonSharedOptions.testNameRegex)
             .buildAndStartProcess()
             .waitFor();
 
@@ -68,25 +71,24 @@ public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {
                 });
 
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
-                .withCommitSha(sharedJmhOptions.commitSha)
+                .withCommitSha(commonSharedOptions.commitSha)
                 .withBenchmarkName(jmhResult.benchmark)
                 .withBenchmarkType(jmhResult.mode)
-                .withRunAttempt( sharedJmhOptions.runAttempt);
+                .withRunAttempt( commonSharedOptions.runAttempt);
             getMorphiaService()
-                .getBenchmarkDatastore()
+                .getTestResultsDatastore()
                 .find(JmhBenchmark.class)
                 .filter(eq("benchmarkId", benchmarkId))
                 .update(new UpdateOptions().upsert(true),
                     set("benchmarkMetadata", benchmarkMetadata));
         }
 
-
         return 0;
     }
 
     @NotNull
     private String createS3PathPrefix() {
-        return format("gha-outputs/commit-{0}/attempt-{1}/", sharedJmhOptions.commitSha, sharedJmhOptions.runAttempt);
+        return format("gha-outputs/commit-{0}/attempt-{1}/jmh/", commonSharedOptions.commitSha, commonSharedOptions.runAttempt);
     }
 
 
