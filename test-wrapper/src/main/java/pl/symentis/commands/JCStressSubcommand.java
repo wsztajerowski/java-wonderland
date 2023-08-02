@@ -1,4 +1,4 @@
-package pl.symentis.test_runner;
+package pl.symentis.commands;
 
 import picocli.CommandLine;
 import pl.symentis.entities.jcstress.JCStressResult;
@@ -9,10 +9,10 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import static java.text.MessageFormat.format;
-import static pl.symentis.MorphiaService.getMorphiaService;
-import static pl.symentis.S3Service.getS3Service;
-import static pl.symentis.benchmark_builder.BenchmarkProcessBuilder.benchmarkProcessBuilder;
-import static pl.symentis.test_runner.JCStressHtmlResultParser.getJCStressHtmlResultParser;
+import static pl.symentis.services.MorphiaService.getMorphiaService;
+import static pl.symentis.services.S3Service.getS3Service;
+import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
+import static pl.symentis.commands.JCStressHtmlResultParser.getJCStressHtmlResultParser;
 
 @CommandLine.Command(name = "jcstress", description = "Run JCStress performance tests")
 public class JCStressSubcommand implements Callable<Integer> {
@@ -21,6 +21,7 @@ public class JCStressSubcommand implements Callable<Integer> {
 
     @CommandLine.Mixin
     private CommonSharedOptions commonSharedOptions;
+
     @CommandLine.Option(names = "--benchmark-path", defaultValue = "${BENCHMARK_PATH:-stress-tests.jar}", description = "Path to JCStress benchmark jar (default: ${DEFAULT-VALUE})")
     String benchmarkPath;
 

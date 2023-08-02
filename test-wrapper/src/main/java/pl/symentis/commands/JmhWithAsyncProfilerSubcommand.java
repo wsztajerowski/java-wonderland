@@ -1,11 +1,11 @@
-package pl.symentis.test_runner;
+package pl.symentis.commands;
 
 import dev.morphia.UpdateOptions;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import pl.symentis.benchmark_builder.BenchmarkProcessBuilder;
+import pl.symentis.process.BenchmarkProcessBuilder;
 import pl.symentis.entities.jmh.BenchmarkMetadata;
 import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.entities.jmh.JmhBenchmarkId;
@@ -19,9 +19,9 @@ import static dev.morphia.query.updates.UpdateOperators.set;
 import static java.nio.file.Files.list;
 import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
-import static pl.symentis.MorphiaService.getMorphiaService;
-import static pl.symentis.ResultLoaderService.getResultLoaderService;
-import static pl.symentis.S3Service.getS3Service;
+import static pl.symentis.services.MorphiaService.getMorphiaService;
+import static pl.symentis.services.ResultLoaderService.getResultLoaderService;
+import static pl.symentis.services.S3Service.getS3Service;
 
 @Command(name = "jmh-with-async", description = "Run JHM benchmarks with Async profiler")
 public class JmhWithAsyncProfilerSubcommand implements Callable<Integer> {

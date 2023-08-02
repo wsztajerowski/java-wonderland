@@ -1,4 +1,4 @@
-package pl.symentis.test_runner;
+package pl.symentis.commands;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;

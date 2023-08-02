@@ -1,4 +1,4 @@
-package pl.symentis.benchmark_builder;
+package pl.symentis.process;
 
 import java.io.IOException;
 import java.util.ArrayList;
