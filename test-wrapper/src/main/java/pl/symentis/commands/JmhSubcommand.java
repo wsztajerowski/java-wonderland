@@ -1,4 +1,4 @@
-package pl.symentis.test_runner;
+package pl.symentis.commands;
 
 import dev.morphia.UpdateOptions;
 import picocli.CommandLine.Command;
@@ -11,9 +11,9 @@ import java.util.concurrent.Callable;
 
 import static dev.morphia.query.filters.Filters.eq;
 import static dev.morphia.query.updates.UpdateOperators.set;
-import static pl.symentis.MorphiaService.getMorphiaService;
-import static pl.symentis.ResultLoaderService.getResultLoaderService;
-import static pl.symentis.benchmark_builder.BenchmarkProcessBuilder.benchmarkProcessBuilder;
+import static pl.symentis.services.MorphiaService.getMorphiaService;
+import static pl.symentis.services.ResultLoaderService.getResultLoaderService;
+import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
 
 @Command(name = "jmh", description = "Run JHM benchmarks")
 public class JmhSubcommand implements Callable<Integer> {

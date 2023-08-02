@@ -42,7 +42,7 @@ import static dev.morphia.query.filters.Filters.eq;
 import static java.nio.file.Files.list;
 import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
-import static pl.symentis.MorphiaService.getMorphiaService;
+import static pl.symentis.services.MorphiaService.getMorphiaService;
 
 @Disabled
 class Sandbox {

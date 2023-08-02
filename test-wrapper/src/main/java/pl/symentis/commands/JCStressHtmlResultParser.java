@@ -1,4 +1,4 @@
-package pl.symentis.test_runner;
+package pl.symentis.commands;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -8,10 +8,9 @@ import static java.lang.Integer.*;
 
 public class JCStressHtmlResultParser {
 
-
     private final HtmlParser htmlParser;
 
-    public JCStressHtmlResultParser(HtmlParser htmlParser) {
+    JCStressHtmlResultParser(HtmlParser htmlParser) {
         this.htmlParser = htmlParser;
     }
 
