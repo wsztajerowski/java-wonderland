@@ -4,6 +4,7 @@ import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.testcontainers.shaded.com.google.common.reflect.TypeToken;
+import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jmh.JmhResult;
 
 import java.io.BufferedReader;
@@ -29,9 +30,14 @@ public class ResultLoaderService {
     }
 
 
-    public List<JmhResult> loadJmhResults() throws FileNotFoundException {
-        BufferedReader bufferedReader = new BufferedReader(
-            new FileReader(JMH_RESULT_FILENAME));
+    public List<JmhResult> loadJmhResults() {
+        BufferedReader bufferedReader;
+        try {
+            bufferedReader = new BufferedReader(
+                new FileReader(JMH_RESULT_FILENAME));
+        } catch (FileNotFoundException e) {
+            throw new JavaWonderlandException(e);
+        }
         Type listType = new TypeToken<List<JmhResult>>() {
         }.getType();
         return gson.fromJson(bufferedReader, listType);
