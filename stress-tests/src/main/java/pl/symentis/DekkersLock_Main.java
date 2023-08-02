@@ -3,13 +3,10 @@ package pl.symentis;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.II_Result;
 
-import java.util.Random;
-
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 
 @Outcome(id = "1, 1", expect = ACCEPTABLE_INTERESTING, desc = "Both actors came up with the same value: atomicity failure.")
-@Outcome(id = "0, 1", expect = ACCEPTABLE_INTERESTING, desc = "test")
 @Outcome(id = "1, 2", expect = ACCEPTABLE,             desc = "actor1 incremented, then actor2.")
 @Outcome(id = "2, 1", expect = ACCEPTABLE,             desc = "actor2 incremented, then actor1.")
 public class DekkersLock_Main {
@@ -17,31 +14,20 @@ public class DekkersLock_Main {
     @JCStressMeta(DekkersLock_Main.class)
     @State
     public static class PlainTest {
-        private final Random random;
         int v;
         DekkersLock lock0;
         DekkersLock lock1;
-
 
         PlainTest(){
             DekkersLockFactory lockFactory = DekkersLockFactory.get();
             lock0 = lockFactory.getLock0();
             lock1 = lockFactory.getLock1();
-            random = new Random();
         }
 
         @Actor
         public void actor1(II_Result r) {
-            int randomVal = random.nextInt(100);
             lock0.lock();
-            if( randomVal > 95){
-//                throw new RuntimeException("bla bla bla");
-                r.r1 = --v;
-            } else if (randomVal > 90) {
-                // do nothing
-            } else {
-                r.r1 = ++v;
-            }
+            r.r1 = ++v;
             lock0.unlock();
         }
 
