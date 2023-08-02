@@ -4,7 +4,7 @@ import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.testcontainers.shaded.com.google.common.reflect.TypeToken;
-import pl.symentis.entities.JmhResult;
+import pl.symentis.entities.jmh.JmhResult;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
