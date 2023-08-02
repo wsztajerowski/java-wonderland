@@ -1,21 +1,21 @@
 package pl.symentis.commands;
 
 import picocli.CommandLine;
+import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jcstress.JCStressResult;
 import pl.symentis.entities.jcstress.JCStressTest;
 import pl.symentis.entities.jcstress.JCStressTestId;
 
 import java.nio.file.Path;
-import java.util.concurrent.Callable;
 
 import static java.text.MessageFormat.format;
+import static pl.symentis.commands.JCStressHtmlResultParser.getJCStressHtmlResultParser;
+import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
 import static pl.symentis.services.MorphiaService.getMorphiaService;
 import static pl.symentis.services.S3Service.getS3Service;
-import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
-import static pl.symentis.commands.JCStressHtmlResultParser.getJCStressHtmlResultParser;
 
 @CommandLine.Command(name = "jcstress", description = "Run JCStress performance tests")
-public class JCStressSubcommand implements Callable<Integer> {
+public class JCStressSubcommand implements Runnable {
 
     private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
 
@@ -26,7 +26,7 @@ public class JCStressSubcommand implements Callable<Integer> {
     String benchmarkPath;
 
     @Override
-    public Integer call() throws Exception {
+    public void run() {
         try {
             benchmarkProcessBuilder(benchmarkPath)
                 .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
@@ -34,6 +34,8 @@ public class JCStressSubcommand implements Callable<Integer> {
                 .waitFor();
         } catch (AssertionError e) {
             // do nothing
+        } catch (InterruptedException e) {
+            throw new JavaWonderlandException(e);
         }
 
         Path resultFilepath = Path.of(JCSTRESS_RESULTS_DIR, "index.html");
@@ -57,8 +59,6 @@ public class JCStressSubcommand implements Callable<Integer> {
                 getS3Service()
                     .saveFileOnS3(s3Key, Path.of(JCSTRESS_RESULTS_DIR, testName + ".html"))
             );
-
-        return 0;
     }
 
     private JCStressResult createJCStressResult(JCStressHtmlResultParser resultParser) {

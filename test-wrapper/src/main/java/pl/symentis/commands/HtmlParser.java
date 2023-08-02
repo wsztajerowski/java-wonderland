@@ -3,6 +3,7 @@ package pl.symentis.commands;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import pl.symentis.JavaWonderlandException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,12 +20,16 @@ public class HtmlParser {
         this.rootElement = rootElement;
     }
 
-    public static HtmlParser getHtmlParser(Path filepath) throws IOException {
-        Document doc = Jsoup.parse(filepath.toFile(), "UTF-8");
-        return new HtmlParser(doc);
+    public static HtmlParser getHtmlParser(Path filepath) {
+        try {
+            Document doc = Jsoup.parse(filepath.toFile(), "UTF-8");
+            return new HtmlParser(doc);
+        } catch (IOException e) {
+            throw new JavaWonderlandException(e);
+        }
     }
 
-    public static HtmlParser getEmptyParser(){
+    public static HtmlParser getEmptyParser() {
         Document document = Jsoup.parse("<html></html>");
         return new HtmlParser(document);
     }
@@ -51,7 +56,7 @@ public class HtmlParser {
             .orElse("");
     }
 
-    public List<String> getListOfAttributeValuesForSelector(String selector, String attributeName){
+    public List<String> getListOfAttributeValuesForSelector(String selector, String attributeName) {
         return rootElement
             .select(selector)
             .stream()
@@ -61,7 +66,7 @@ public class HtmlParser {
             .toList();
     }
 
-    public List<String> getListValuesForSelector(String selector){
+    public List<String> getListValuesForSelector(String selector) {
         return rootElement
             .select(selector)
             .stream()
@@ -71,7 +76,7 @@ public class HtmlParser {
             .toList();
     }
 
-    public Optional<HtmlParser> getParserForSelector(String selector){
+    public Optional<HtmlParser> getParserForSelector(String selector) {
         return getFirstElementForSelector(selector)
             .map(HtmlParser::new);
     }
