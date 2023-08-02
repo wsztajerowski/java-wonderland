@@ -13,13 +13,16 @@ import dev.morphia.Morphia;
 import dev.morphia.UpdateOptions;
 import dev.morphia.query.updates.UpdateOperators;
 import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.reflect.TypeToken;
-import pl.symentis.entities.BenchmarkMetadata;
-import pl.symentis.entities.JmhBenchmark;
-import pl.symentis.entities.JmhBenchmarkId;
-import pl.symentis.entities.JmhResult;
+import pl.symentis.entities.jmh.BenchmarkMetadata;
+import pl.symentis.entities.jmh.JmhBenchmark;
+import pl.symentis.entities.jmh.JmhBenchmarkId;
+import pl.symentis.entities.jmh.JmhResult;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
@@ -42,7 +45,7 @@ import static pl.symentis.FileUtils.getFilenameWithoutExtension;
 import static pl.symentis.MorphiaService.getMorphiaService;
 
 @Disabled
-class WrapperTest {
+class Sandbox {
 
     @Test
     void run_jmh_benchmark() throws IOException, InterruptedException {
@@ -120,7 +123,7 @@ class WrapperTest {
     @Test
     void count_docs_from_mongo() {
         List<JmhBenchmark> jmhBenchmarks = getMorphiaService()
-            .getBenchmarkDatastore()
+            .getTestResultsDatastore()
             .find(JmhBenchmark.class)
             .iterator()
             .toList();
@@ -232,5 +235,62 @@ class WrapperTest {
 
             s3.putObject(putOb, RequestBody.fromFile(pathToFile));
         }
+    }
+
+    @Test
+    void scrapHtml() throws IOException {
+        list(Path.of("target", "jcstress-results"))
+            .filter(path -> path.endsWith("index.html"))
+            .forEach(path -> {
+                try {
+                    scrapJcstressResult(path);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
+
+    private void scrapJcstressResult(Path path) throws IOException {
+        System.out.println(path);
+        Document doc = Jsoup.parse(path.toFile(), "UTF-8");
+        Element endResult = doc.getElementsByClass("endResult")
+            .first();
+        endResult
+            .siblingElements()
+            .forEach(element -> System.out.println("endResult data: " + element.text()));
+        System.out.println("endResult data: " + endResult.text());
+        String text = endResult
+            .nextElementSibling()
+            .text();
+//        String overallRate = doc.getElementsMatchingText("Overall pass rate")
+        List<String> hrefs = doc.select("h3:containsOwn(INTERESTING) ~ table")
+            .first()
+            .select("td > a")
+            .stream()
+//            .map(a -> a.attr("href"))
+            .map(Element::text)
+            .toList();
+        hrefs
+            .forEach( a -> System.out.println(a));
+        String overallRate = doc.select("h3:containsOwn(INTERESTING) ~ table")
+            .first()
+//            .select("td > a")
+//            .forEach( a -> System.out.println(a))
+//            .parent()
+//            .nextElementSibling()
+//            .firstElementSibling()
+//            .firstElementChild()
+            .text();
+        System.out.println("Overall rate: " + overallRate);
+        String specName = doc
+            .select("td:containsOwn(java.specification.name)")
+//            .getElementsContainingText("java.specification.name")
+
+            .first()
+            .nextElementSibling()
+//            .firstElementSibling()
+//            .text()
+            .toString();
+        System.out.println("Spec name: " + specName);
     }
 }
