@@ -130,5 +130,6 @@
         <module>jmh-benchmarks</module>
         <module>stress-tests</module>
         <module>test-wrapper</module>
+        <module>lamport-buffer</module>
     </modules>
 </project>
