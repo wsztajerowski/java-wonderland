@@ -1,6 +1,8 @@
-package pl.symentis;
+package pl.symentis.dekker;
 
 import org.openjdk.jmh.annotations.*;
+import pl.symentis.DekkersLock;
+import pl.symentis.DekkersLockFactory;
 
 @State(Scope.Benchmark)
 public class Incrementing_DekkersLock_with_onSpinWait {

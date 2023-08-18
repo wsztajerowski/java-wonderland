@@ -1,4 +1,4 @@
-package pl.symentis;
+package pl.symentis.dekker;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.GroupThreads;
