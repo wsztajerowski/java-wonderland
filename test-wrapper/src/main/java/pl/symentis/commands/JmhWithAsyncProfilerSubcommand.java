@@ -13,6 +13,8 @@ import pl.symentis.entities.jmh.JmhResult;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static dev.morphia.query.filters.Filters.eq;
@@ -61,8 +63,8 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
         }
 
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults()) {
-            BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata();
-            String flamegraphsDir = jmhResult.benchmark + getFlamegraphsDirSuffix(jmhResult.mode);
+            Map<String, String> flamegraphs = new HashMap<>();
+            String flamegraphsDir = jmhResult.benchmark() + getFlamegraphsDirSuffix(jmhResult.mode());
             try (Stream<Path> paths = list(Path.of(flamegraphsDir))) {
                 paths
                     .forEach(path -> {
@@ -70,17 +72,18 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
                         getS3Service()
                             .saveFileOnS3(s3Key, path);
                         String flamegraphName = getFilenameWithoutExtension(path);
-                        benchmarkMetadata.addFlamegraphPath(flamegraphName, s3Key);
+                        flamegraphs.put(flamegraphName, s3Key);
                     });
             } catch (IOException e) {
                 throw new JavaWonderlandException(e);
             }
 
-            JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
-                .withCommitSha(commonSharedOptions.commitSha)
-                .withBenchmarkName(jmhResult.benchmark)
-                .withBenchmarkType(jmhResult.mode)
-                .withRunAttempt(commonSharedOptions.runAttempt);
+            JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
+                commonSharedOptions.commitSha,
+                jmhResult.benchmark(),
+                jmhResult.mode(),
+                commonSharedOptions.runAttempt);
+            BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata(flamegraphs);
             getMorphiaService()
                 .getTestResultsDatastore()
                 .find(JmhBenchmark.class)

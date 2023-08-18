@@ -36,6 +36,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static dev.morphia.query.filters.Filters.eq;
@@ -182,37 +183,35 @@ class Sandbox {
 //            List<Benchmark> benchmarks = mapJsonFileToJavaList();
             List<JmhResult> benchmarks = loadBenchamrkResultAndAddFlamegraphPaths();
             int counter = 7;
-            String commitSha = "129345abcefe";
+            String commitSha = "129345abceff";
             for (JmhResult jmhResult : benchmarks) {
-                String dirSuffix = switch (jmhResult.mode) {
+                String dirSuffix = switch (jmhResult.mode()) {
                     case "thrpt":
                         yield "-Throughput";
                     default:
-                        throw new IllegalArgumentException("Unknown benchmark mode: " + jmhResult.mode);
+                        throw new IllegalArgumentException("Unknown benchmark mode: " + jmhResult.mode());
                 };
-                JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
-                    .withCommitSha(commitSha)
-                    .withBenchmarkName(jmhResult.benchmark)
-                    .withBenchmarkType(jmhResult.mode)
-                    .withRunAttempt( counter++);
-                String flamegraphsDir = jmhResult.benchmark + dirSuffix;
-                String s3Preffix = format("gha-outputs/commit-{0}/attempt-{1}/", benchmarkId.commitSha, benchmarkId.runAttempt);
-                BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata();
-                list(Path.of(flamegraphsDir))
-                    .forEach(path -> {
-                        String s3Key = s3Preffix + path.toString();
-                        saveFlamegraphOnS3(s3Key, path);
-                        String flamegraphName = getFilenameWithoutExtension(path);
-                        benchmarkMetadata.addFlamegraphPath(flamegraphName, s3Key);
-                    });
+                JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
+                    commitSha, jmhResult.benchmark(), jmhResult.mode(), counter++);
+//                String flamegraphsDir = jmhResult.benchmark + dirSuffix;
+//                String s3Preffix = format("gha-outputs/commit-{0}/attempt-{1}/", benchmarkId.commitSha(), benchmarkId.runAttempt());
+                BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata(Collections.emptyMap());
+//                list(Path.of(flamegraphsDir))
+//                    .forEach(path -> {
+//                        String s3Key = s3Preffix + path.toString();
+//                        saveFlamegraphOnS3(s3Key, path);
+//                        String flamegraphName = getFilenameWithoutExtension(path);
+//                        benchmarkMetadata.addFlamegraphPath(flamegraphName, s3Key);
+//                    });
 
-
-                UpdateResult update = datastore
-                    .find(JmhBenchmark.class)
-                    .filter(eq("benchmarkId", benchmarkId))
-                    .update(new UpdateOptions()
-                        .upsert(true), UpdateOperators.set("benchmarkMetadata", benchmarkMetadata));
-                System.out.println("Update results: " + update);
+                JmhBenchmark jmhBenchmark = new JmhBenchmark(benchmarkId, jmhResult, benchmarkMetadata);
+                datastore
+                    .insert(jmhBenchmark);
+//                    .find(JmhBenchmark.class)
+//                    .filter(eq("benchmarkId", benchmarkId))
+//                    .update(new UpdateOptions()
+//                        .upsert(true), UpdateOperators.set("benchmarkMetadata", benchmarkMetadata));
+//                System.out.println("Update results: " + update);
             }
 
         }

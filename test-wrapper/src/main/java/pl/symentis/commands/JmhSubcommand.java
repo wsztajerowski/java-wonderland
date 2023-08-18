@@ -39,11 +39,11 @@ public class JmhSubcommand implements Runnable {
         }
 
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults()) {
-            JmhBenchmarkId benchmarkId = new JmhBenchmarkId()
-                .withCommitSha(commonSharedOptions.commitSha)
-                .withBenchmarkName(jmhResult.benchmark)
-                .withBenchmarkType(jmhResult.mode)
-                .withRunAttempt(commonSharedOptions.runAttempt);
+            JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
+                commonSharedOptions.commitSha,
+                jmhResult.benchmark(),
+                jmhResult.mode(),
+                commonSharedOptions.runAttempt);
             getMorphiaService()
                 .getTestResultsDatastore()
                 .find(JmhBenchmark.class)
