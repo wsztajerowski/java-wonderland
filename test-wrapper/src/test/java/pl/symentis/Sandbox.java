@@ -7,11 +7,8 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
-import dev.morphia.UpdateOptions;
-import dev.morphia.query.updates.UpdateOperators;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,11 +36,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static dev.morphia.query.filters.Filters.eq;
 import static java.nio.file.Files.list;
-import static java.text.MessageFormat.format;
-import static pl.symentis.FileUtils.getFilenameWithoutExtension;
-import static pl.symentis.services.MorphiaService.getMorphiaService;
+import static pl.symentis.infra.MorphiaService.getMorphiaService;
 
 @Disabled
 class Sandbox {
@@ -124,10 +118,7 @@ class Sandbox {
     @Test
     void count_docs_from_mongo() {
         List<JmhBenchmark> jmhBenchmarks = getMorphiaService()
-            .getTestResultsDatastore()
-            .find(JmhBenchmark.class)
-            .iterator()
-            .toList();
+            .listAll(JmhBenchmark.class);
 
         jmhBenchmarks
             .forEach(System.out::println);
@@ -270,7 +261,7 @@ class Sandbox {
             .map(Element::text)
             .toList();
         hrefs
-            .forEach( a -> System.out.println(a));
+            .forEach(a -> System.out.println(a));
         String overallRate = doc.select("h3:containsOwn(INTERESTING) ~ table")
             .first()
 //            .select("td > a")
