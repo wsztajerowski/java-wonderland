@@ -1,4 +1,4 @@
-package pl.symentis.services;
+package pl.symentis.infra;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;

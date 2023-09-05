@@ -1,22 +1,31 @@
 package pl.symentis.commands;
 
+import pl.symentis.entities.jcstress.JCStressResult;
+import pl.symentis.entities.jcstress.JCStressResultBuilder;
+
 import java.nio.file.Path;
 import java.util.List;
 
 import static java.lang.Integer.parseInt;
+import static java.text.MessageFormat.format;
 import static pl.symentis.commands.HtmlParser.getHtmlParser;
+import static pl.symentis.entities.jcstress.JCStressResultBuilder.*;
 
 public class JCStressHtmlResultParser {
 
     private final HtmlParser htmlParser;
+    private final String commitSha;
+    private final int runAttempt;
 
-    JCStressHtmlResultParser(HtmlParser htmlParser) {
+    JCStressHtmlResultParser(HtmlParser htmlParser, String commitSha, int runAttempt) {
         this.htmlParser = htmlParser;
+        this.commitSha = commitSha;
+        this.runAttempt = runAttempt;
     }
 
-    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath) {
+    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath, String commitSha, int runAttempt) {
         HtmlParser htmlParser = getHtmlParser(resultFilepath);
-        return new JCStressHtmlResultParser(htmlParser);
+        return new JCStressHtmlResultParser(htmlParser, commitSha, runAttempt);
     }
 
     public List<String> getTestsWithFailedResults() {
@@ -92,4 +101,33 @@ public class JCStressHtmlResultParser {
             parseInt(rate[1])
         };
     }
+
+    public JCStressResult parse() {
+        JCStressResultBuilder jcStressResultBuilder = getJCStressResult()
+            .withTotalTests(this.getTotalTests())
+            .withPassedTests(this.getPassedTests())
+            .withJavaVendor(this.getJavaVendor())
+            .withJavaVmVendor(this.getJavaVmVendor())
+            .withJavaVmName(this.getJavaVmName())
+            .withJavaVmVersion(this.getJavaVmVersion())
+            .withOsArch(this.getOsArch())
+            .withOsName(this.getOsName())
+            .withOsVersion(this.getOsVersion());
+        getTestsWithErrorResults()
+            .forEach(test -> jcStressResultBuilder.addTestWithErrorResults(test, createS3Path(this.commitSha, this.runAttempt, test)));
+        getTestsWithFailedResults()
+            .forEach(test -> jcStressResultBuilder.addTestWithFailedResults(test, createS3Path(this.commitSha, this.runAttempt, test)));
+        getTestsWithInterestingResults()
+            .forEach(test -> jcStressResultBuilder.addTestWithInterestingResults(test, createS3Path(this.commitSha, this.runAttempt, test)));
+        return jcStressResultBuilder
+            .build();
+    }
+
+    private String createS3Path(String commitSha, int runAttempt, String testName) {
+        return format("gha-outputs/commit-{0}/attempt-{1}/jcstress/{2}.html",
+            commitSha,
+            runAttempt,
+            testName);
+    }
+
 }
