@@ -3,7 +3,7 @@ package pl.symentis.infra;
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.testcontainers.shaded.com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jmh.JmhResult;
 
@@ -17,7 +17,7 @@ public class ResultLoaderService {
     public static final String JMH_RESULT_FILENAME = "jmh-result.json";
     private final Gson gson;
 
-    ResultLoaderService(Gson gson){
+    ResultLoaderService(Gson gson) {
         this.gson = gson;
     }
 
@@ -29,17 +29,15 @@ public class ResultLoaderService {
         return new ResultLoaderService(gson);
     }
 
-
     public List<JmhResult> loadJmhResults() {
-        BufferedReader bufferedReader;
         try {
-            bufferedReader = new BufferedReader(
-                new FileReader(JMH_RESULT_FILENAME));
+            Type listType = new TypeToken<List<JmhResult>>() {
+            }.getType();
+            return gson.fromJson(
+                new BufferedReader(new FileReader(JMH_RESULT_FILENAME)),
+                listType);
         } catch (FileNotFoundException e) {
             throw new JavaWonderlandException(e);
         }
-        Type listType = new TypeToken<List<JmhResult>>() {
-        }.getType();
-        return gson.fromJson(bufferedReader, listType);
     }
 }
