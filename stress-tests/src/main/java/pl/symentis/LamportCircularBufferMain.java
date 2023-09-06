@@ -22,7 +22,7 @@ public class LamportCircularBufferMain {
 
         SimpleImplementationTest(){
             circularBuffer = integerCircularBufferBuilder()
-                .withBufferSize(1024*1024)
+                .withBufferSize(1)
                 .build();
         }
 
