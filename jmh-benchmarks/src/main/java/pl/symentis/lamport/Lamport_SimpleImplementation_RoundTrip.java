@@ -29,24 +29,26 @@ public class Lamport_SimpleImplementation_RoundTrip {
     @GroupThreads(1)
     @Group("pingpong")
     public boolean ping(Control cnt) {
-        boolean sended = outbox
+        boolean sent = outbox
             .push(1);
         while (!cnt.stopMeasurement && inbox.pop().isEmpty()) {
             // this body is intentionally left blank
         }
-        return sended;
+        return sent;
     }
 
     @Benchmark
     @GroupThreads(1)
     @Group("pingpong")
     public boolean pong(Control cnt) {
-        while (!cnt.stopMeasurement && outbox.pop().isEmpty()) {
-            // this body is intentionally left blank
-        }
-        boolean sended = inbox
-            .push(1);
-        return sended;
+        Optional<Integer> received;
+        do {
+            received = outbox.pop();
+        } while (!cnt.stopMeasurement && received.isEmpty());
+
+        boolean sent = inbox
+            .push(received.orElseThrow());
+        return sent;
     }
 
 }
