@@ -47,7 +47,7 @@ public class Lamport_SimpleImplementation_RoundTrip {
         } while (!cnt.stopMeasurement && received.isEmpty());
 
         boolean sent = inbox
-            .push(received.orElseThrow());
+            .push(received.orElse(-1));
         return sent;
     }
 
