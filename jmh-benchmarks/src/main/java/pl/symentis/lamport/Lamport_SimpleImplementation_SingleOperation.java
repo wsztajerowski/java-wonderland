@@ -8,7 +8,7 @@ import java.util.Optional;
 import static pl.symentis.CircularBufferBuilder.integerCircularBufferBuilder;
 
 @State(Scope.Benchmark)
-public class Lamport_SimpleImplementation {
+public class Lamport_SimpleImplementation_SingleOperation {
 
     CircularBuffer<Integer> circularBuffer;
 
