@@ -17,23 +17,19 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 public class JCStressSubcommandService {
 
     private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
+    private final CommonSharedOptions commonOptions;
     private final String benchmarkPath;
-    private final String commitSha;
-    private final int runAttempt;
-    private final String testNameRegex;
 
     JCStressSubcommandService(CommonSharedOptions commonOptions, String benchmarkPath) {
+        this.commonOptions = commonOptions;
         this.benchmarkPath = benchmarkPath;
-        this.commitSha = commonOptions.commitSha();
-        this.runAttempt = commonOptions.runAttempt();
-        this.testNameRegex = commonOptions.testNameRegex();
     }
 
     public void executeCommand() {
         try {
             int exitCode = benchmarkProcessBuilder(benchmarkPath)
                 .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
-                .addOptionalArgument(testNameRegex)
+                .addOptionalArgument(commonOptions.testNameRegex())
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0){
@@ -44,12 +40,12 @@ public class JCStressSubcommandService {
         }
 
         Path resultFilepath = Path.of(JCSTRESS_RESULTS_DIR, "index.html");
-        JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, commitSha, runAttempt)
+        JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, commonOptions.commitSha(), commonOptions.runAttempt())
             .parse();
 
         getMorphiaService()
             .save(new JCStressTest(
-                new JCStressTestId(commitSha,runAttempt),
+                new JCStressTestId(commonOptions.commitSha(), commonOptions.runAttempt()),
                 new JCStressTestMetadata(),
                 jcStressResult));
 

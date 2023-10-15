@@ -12,32 +12,22 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 
 public class JmhSubcommandService {
 
-    private final String benchmarkPath;
-    private final int forks;
-    private final int iterations;
-    private final int warmupIterations;
-    private final String testNameRegex;
-    private final String commitSha;
-    private final int runAttempt;
+    private final CommonSharedOptions commonOptions;
+    private final JmhBenchmarksSharedOptions jmhBenchmarksOptions;
 
     JmhSubcommandService(CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions) {
-        this.benchmarkPath = jmhBenchmarksOptions.benchmarkPath();
-        this.forks = jmhBenchmarksOptions.forks();
-        this.iterations = jmhBenchmarksOptions.iterations();
-        this.warmupIterations = jmhBenchmarksOptions.warmupIterations();
-        this.commitSha = commonOptions.commitSha();
-        this.runAttempt = commonOptions.runAttempt();
-        this.testNameRegex = commonOptions.testNameRegex();
+        this.commonOptions = commonOptions;
+        this.jmhBenchmarksOptions = jmhBenchmarksOptions;
     }
 
     public void executeCommand() {
         try {
-            int exitCode = benchmarkProcessBuilder(benchmarkPath)
-                .addArgumentWithValue("-f", forks)
-                .addArgumentWithValue("-i", iterations)
-                .addArgumentWithValue("-wi", warmupIterations)
+            int exitCode = benchmarkProcessBuilder(jmhBenchmarksOptions.benchmarkPath())
+                .addArgumentWithValue("-f", jmhBenchmarksOptions.forks())
+                .addArgumentWithValue("-i", jmhBenchmarksOptions.iterations())
+                .addArgumentWithValue("-wi", jmhBenchmarksOptions.warmupIterations())
                 .addArgumentWithValue("-rf", "json")
-                .addOptionalArgument(testNameRegex)
+                .addOptionalArgument(commonOptions.testNameRegex())
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0) {
@@ -49,10 +39,10 @@ public class JmhSubcommandService {
 
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults()) {
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
-                commitSha,
+                commonOptions.commitSha(),
                 jmhResult.benchmark(),
                 jmhResult.mode(),
-                runAttempt);
+                commonOptions.runAttempt());
             getMorphiaService()
                 .upsert(JmhBenchmark.class)
                 .byFieldValue("benchmarkId", benchmarkId)
