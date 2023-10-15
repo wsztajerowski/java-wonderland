@@ -9,21 +9,16 @@ import static pl.symentis.services.JmhSubcommandServiceBuilder.getJmhSubcommandS
 public class JmhSubcommand implements Runnable {
 
     @Mixin
-    private JmhBenchmarksSharedOptions sharedJmhOptions;
+    private ApiJmhBenchmarksSharedOptions sharedJmhOptions;
 
     @Mixin
-    private CommonSharedOptions commonSharedOptions;
+    private ApiCommonSharedOptions apiCommonSharedOptions;
 
     @Override
     public void run() {
         getJmhSubcommandService()
-            .withCommitSha(commonSharedOptions.commitSha)
-            .withRunAttempt(commonSharedOptions.runAttempt)
-            .withTestNameRegex(commonSharedOptions.testNameRegex)
-            .withBenchmarkPath(sharedJmhOptions.benchmarkPath)
-            .withForks(sharedJmhOptions.forks)
-            .withIterations(sharedJmhOptions.iterations)
-            .withWarmupIterations(sharedJmhOptions.warmupIterations)
+            .withCommonOptions(apiCommonSharedOptions.getValues())
+            .withJmhOptions(sharedJmhOptions.getValues())
             .build()
             .executeCommand();
     }

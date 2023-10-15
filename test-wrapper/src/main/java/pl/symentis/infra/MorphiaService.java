@@ -6,8 +6,11 @@ import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
 import dev.morphia.UpdateOptions;
 import dev.morphia.query.filters.Filter;
+import dev.morphia.query.updates.UpdateOperator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static dev.morphia.Morphia.createDatastore;
 import static dev.morphia.query.filters.Filters.eq;
@@ -52,6 +55,9 @@ public class MorphiaService {
         private final Class<T> entity;
         private Filter filter;
 
+        private final Map<String, Object> updates = new HashMap<>();
+
+
         public MorphiaUpsertService(Class<T> entity) {
             this.entity = entity;
         }
@@ -61,13 +67,22 @@ public class MorphiaService {
             return this;
         }
 
-        public void setValue(String fieldName, Object fieldValue) {
+        public MorphiaUpsertService<T> setValue(String fieldName, Object fieldValue) {
+            updates.put(fieldName, fieldValue);
+            return this;
+        }
+
+        public void execute(){
             requireNonNull(filter, "Please set filter (e.g. by using byFieldValue method) before executing this method!");
+            UpdateOperator[] updateOperators = updates.entrySet()
+                .stream()
+                .map(entry -> set(entry.getKey(), entry.getValue()))
+                .toArray(UpdateOperator[]::new);
             datastore
                 .find(entity)
                 .filter(filter)
                 .update(new UpdateOptions().upsert(true),
-                    set(fieldName, fieldValue));
+                    updateOperators);
         }
     }
 }

@@ -1,16 +1,11 @@
 package pl.symentis.services;
 
 public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
-    private String benchmarkPath;
-    private int forks;
-    private int iterations;
-    private int warmupIterations;
-    private String testNameRegex;
-    private String commitSha;
-    private int runAttempt;
     private String asyncPath;
     private int interval;
     private String output;
+    private CommonSharedOptions commonOptions;
+    private JmhBenchmarksSharedOptions jmhBenchmarksOptions;
 
     private JmhWithAsyncProfilerSubcommandServiceBuilder() {
     }
@@ -19,38 +14,13 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
         return new JmhWithAsyncProfilerSubcommandServiceBuilder();
     }
 
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withBenchmarkPath(String benchmarkPath) {
-        this.benchmarkPath = benchmarkPath;
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withCommonOptions(CommonSharedOptions commonOptions) {
+        this.commonOptions = commonOptions;
         return this;
     }
 
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withForks(int forks) {
-        this.forks = forks;
-        return this;
-    }
-
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withIterations(int iterations) {
-        this.iterations = iterations;
-        return this;
-    }
-
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withWarmupIterations(int warmupIterations) {
-        this.warmupIterations = warmupIterations;
-        return this;
-    }
-
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withTestNameRegex(String testNameRegex) {
-        this.testNameRegex = testNameRegex;
-        return this;
-    }
-
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withCommitSha(String commitSha) {
-        this.commitSha = commitSha;
-        return this;
-    }
-
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withRunAttempt(int runAttempt) {
-        this.runAttempt = runAttempt;
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withJmhOptions(JmhBenchmarksSharedOptions sharedOptions) {
+        this.jmhBenchmarksOptions = sharedOptions;
         return this;
     }
 
@@ -70,6 +40,6 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     }
 
     public JmhWithAsyncProfilerSubcommandService build() {
-        return new JmhWithAsyncProfilerSubcommandService(benchmarkPath, forks, iterations, warmupIterations, testNameRegex, commitSha, runAttempt, asyncPath, interval, output);
+        return new JmhWithAsyncProfilerSubcommandService(commonOptions, jmhBenchmarksOptions, asyncPath, interval, output);
     }
 }

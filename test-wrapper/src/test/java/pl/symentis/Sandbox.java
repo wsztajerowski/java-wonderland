@@ -195,7 +195,7 @@ class Sandbox {
 //                        benchmarkMetadata.addFlamegraphPath(flamegraphName, s3Key);
 //                    });
 
-                JmhBenchmark jmhBenchmark = new JmhBenchmark(benchmarkId, jmhResult, benchmarkMetadata);
+                JmhBenchmark jmhBenchmark = new JmhBenchmark(benchmarkId, jmhResult,jmhResult, benchmarkMetadata);
                 datastore
                     .insert(jmhBenchmark);
 //                    .find(JmhBenchmark.class)

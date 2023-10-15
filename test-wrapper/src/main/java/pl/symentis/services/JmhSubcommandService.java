@@ -20,14 +20,14 @@ public class JmhSubcommandService {
     private final String commitSha;
     private final int runAttempt;
 
-    JmhSubcommandService(String benchmarkPath, int forks, int iterations, int warmupIterations, String testNameRegex, String commitSha, int runAttempt) {
-        this.benchmarkPath = benchmarkPath;
-        this.forks = forks;
-        this.iterations = iterations;
-        this.warmupIterations = warmupIterations;
-        this.testNameRegex = testNameRegex;
-        this.commitSha = commitSha;
-        this.runAttempt = runAttempt;
+    JmhSubcommandService(CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions) {
+        this.benchmarkPath = jmhBenchmarksOptions.benchmarkPath();
+        this.forks = jmhBenchmarksOptions.forks();
+        this.iterations = jmhBenchmarksOptions.iterations();
+        this.warmupIterations = jmhBenchmarksOptions.warmupIterations();
+        this.commitSha = commonOptions.commitSha();
+        this.runAttempt = commonOptions.runAttempt();
+        this.testNameRegex = commonOptions.testNameRegex();
     }
 
     public void executeCommand() {
@@ -56,7 +56,8 @@ public class JmhSubcommandService {
             getMorphiaService()
                 .upsert(JmhBenchmark.class)
                 .byFieldValue("benchmarkId", benchmarkId)
-                .setValue("jmhResult", jmhResult);
+                .setValue("jmhResult", jmhResult)
+                .execute();
         }
     }
 }
