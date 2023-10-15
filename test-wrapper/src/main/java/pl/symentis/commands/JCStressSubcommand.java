@@ -8,7 +8,7 @@ import static pl.symentis.services.JCStressSubcommandServiceBuilder.getJCStressS
 public class JCStressSubcommand implements Runnable {
 
     @CommandLine.Mixin
-    private CommonSharedOptions commonSharedOptions;
+    private ApiCommonSharedOptions apiCommonSharedOptions;
 
     @CommandLine.Option(names = "--benchmark-path", defaultValue = "${BENCHMARK_PATH:-stress-tests.jar}", description = "Path to JCStress benchmark jar (default: ${DEFAULT-VALUE})")
     String benchmarkPath;
@@ -16,9 +16,7 @@ public class JCStressSubcommand implements Runnable {
     @Override
     public void run() {
         getJCStressSubcommandService()
-            .withCommitSha(commonSharedOptions.commitSha)
-            .withRunAttempt(commonSharedOptions.runAttempt)
-            .withTestNameRegex(commonSharedOptions.testNameRegex)
+            .withCommonOptions(apiCommonSharedOptions.getValues())
             .withBenchmarkPath(benchmarkPath)
             .build()
             .executeCommand();

@@ -24,6 +24,7 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 public class JmhWithAsyncProfilerSubcommandService {
 
     private final String benchmarkPath;
+    private final String jvmArgs;
     private final int forks;
     private final int iterations;
     private final int warmupIterations;
@@ -35,14 +36,15 @@ public class JmhWithAsyncProfilerSubcommandService {
     private final String output;
     private final String s3Prefix;
 
-    JmhWithAsyncProfilerSubcommandService(String benchmarkPath, int forks, int iterations, int warmupIterations, String testNameRegex, String commitSha, int runAttempt, String asyncPath, int interval, String output) {
-        this.benchmarkPath = benchmarkPath;
-        this.forks = forks;
-        this.iterations = iterations;
-        this.warmupIterations = warmupIterations;
-        this.testNameRegex = testNameRegex;
-        this.commitSha = commitSha;
-        this.runAttempt = runAttempt;
+    JmhWithAsyncProfilerSubcommandService(CommonSharedOptions commonSharedOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int interval, String output) {
+        this.benchmarkPath = jmhBenchmarksSharedOptions.benchmarkPath();
+        this.jvmArgs = commonSharedOptions.jvmArgs();
+        this.forks = jmhBenchmarksSharedOptions.forks();
+        this.iterations = jmhBenchmarksSharedOptions.iterations();
+        this.warmupIterations = jmhBenchmarksSharedOptions.warmupIterations();
+        this.commitSha = commonSharedOptions.commitSha();
+        this.runAttempt = commonSharedOptions.runAttempt();
+        this.testNameRegex = commonSharedOptions.testNameRegex();
         this.asyncPath = asyncPath;
         this.interval = interval;
         this.output = output;
@@ -58,6 +60,7 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .addArgumentWithValue("-wi", warmupIterations)
                 .addArgumentWithValue("-rf", "json")
                 .addArgumentWithValue("-prof", createAsyncCommand())
+                .addArgumentIfValueIsNotNull("-jvmArgs", jvmArgs)
                 .addOptionalArgument(testNameRegex)
                 .buildAndStartProcess()
                 .waitFor();
@@ -91,7 +94,9 @@ public class JmhWithAsyncProfilerSubcommandService {
                     jmhResult.benchmark(),
                     jmhResult.mode(),
                     runAttempt))
-                .setValue("benchmarkMetadata", new BenchmarkMetadata(flamegraphs));
+                .setValue("benchmarkMetadata", new BenchmarkMetadata(flamegraphs))
+                .setValue("jmhWithAsyncResult", jmhResult)
+                .execute();
         }
     }
 

@@ -34,6 +34,14 @@ public class BenchmarkProcessBuilder {
         return this;
     }
 
+    public BenchmarkProcessBuilder addArgumentIfValueIsNotNull(String name, Object value) {
+        if (value != null){
+            commands.add(name);
+            commands.add(value.toString());
+        }
+        return this;
+    }
+
     public Process buildAndStartProcess() {
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         processBuilder.inheritIO();

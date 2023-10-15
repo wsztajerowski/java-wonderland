@@ -9,10 +9,10 @@ import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.
 @Command(name = "jmh-with-async", description = "Run JHM benchmarks with Async profiler")
 public class JmhWithAsyncProfilerSubcommand implements Runnable {
     @CommandLine.Mixin
-    private JmhBenchmarksSharedOptions sharedJmhOptions;
+    private ApiJmhBenchmarksSharedOptions sharedJmhOptions;
 
     @CommandLine.Mixin
-    private CommonSharedOptions commonSharedOptions;
+    private ApiCommonSharedOptions apiCommonSharedOptions;
 
     @Option(names = "--async-path", defaultValue = "${ASYNC_PATH:-/home/ec2-user/async-profiler/build/libasyncProfiler.so}", description = "Path to Async profiler (default: ${DEFAULT-VALUE})")
     String asyncPath;
@@ -26,13 +26,8 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
     @Override
     public void run() {
         getJmhWithAsyncProfilerSubcommandService()
-            .withCommitSha(commonSharedOptions.commitSha)
-            .withRunAttempt(commonSharedOptions.runAttempt)
-            .withTestNameRegex(commonSharedOptions.testNameRegex)
-            .withBenchmarkPath(sharedJmhOptions.benchmarkPath)
-            .withForks(sharedJmhOptions.forks)
-            .withIterations(sharedJmhOptions.iterations)
-            .withWarmupIterations(sharedJmhOptions.warmupIterations)
+            .withCommonOptions(apiCommonSharedOptions.getValues())
+            .withJmhOptions(sharedJmhOptions.getValues())
             .withAsyncPath(asyncPath)
             .withInterval(interval)
             .withOutput(output)

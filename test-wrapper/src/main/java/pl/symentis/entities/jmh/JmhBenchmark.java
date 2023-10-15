@@ -8,5 +8,6 @@ public record JmhBenchmark(
     @Id
     JmhBenchmarkId benchmarkId,
     JmhResult jmhResult,
+    JmhResult jmhWithAsyncResult,
     BenchmarkMetadata benchmarkMetadata) {
 }

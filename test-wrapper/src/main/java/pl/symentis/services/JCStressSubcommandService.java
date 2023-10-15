@@ -22,17 +22,18 @@ public class JCStressSubcommandService {
     private final int runAttempt;
     private final String testNameRegex;
 
-    JCStressSubcommandService(String benchmarkPath, String commitSha, int runAttempt, String testNameRegex) {
+    JCStressSubcommandService(CommonSharedOptions commonOptions, String benchmarkPath) {
         this.benchmarkPath = benchmarkPath;
-        this.commitSha = commitSha;
-        this.runAttempt = runAttempt;
-        this.testNameRegex = testNameRegex;
+        this.commitSha = commonOptions.commitSha();
+        this.runAttempt = commonOptions.runAttempt();
+        this.testNameRegex = commonOptions.testNameRegex();
     }
 
     public void executeCommand() {
         try {
             int exitCode = benchmarkProcessBuilder(benchmarkPath)
                 .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
+                .addOptionalArgument(testNameRegex)
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0){
