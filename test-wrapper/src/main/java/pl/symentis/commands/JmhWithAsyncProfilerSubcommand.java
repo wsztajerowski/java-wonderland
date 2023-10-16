@@ -18,7 +18,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
     String asyncPath;
 
     @Option(names = {"-ai", "--async-interval"}, description = "Profiling interval (default: ${DEFAULT-VALUE})")
-    int interval = 999;
+    int interval = 9990;
 
     @Option(names = {"-ao", "--async-output"}, description = "Output format(s). Supported: [text, collapsed, flamegraph, tree, jfr] (default: ${DEFAULT-VALUE})")
     String output = "flamegraph";
