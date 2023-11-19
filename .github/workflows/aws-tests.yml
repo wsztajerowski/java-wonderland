@@ -7,7 +7,7 @@ on:
       - main
 
 env:
-  JAVA_VERSION: 20
+  JAVA_VERSION: 21
   JAVA_DISTRIBUTION: temurin
   AWS_REGION: eu-north-1
   WORKFLOW_ROLE_ARN: arn:aws:iam::653932013369:role/java-wonderland-github-actions-workflow-role
