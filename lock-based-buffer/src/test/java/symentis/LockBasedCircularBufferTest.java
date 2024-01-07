@@ -26,20 +26,12 @@ class LockBasedCircularBufferTest {
         // given
         var t0 = new Thread(() -> {
             for (int i = 0; i < 10_000_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var t1 = new Thread(() -> {
             for (int i = 0; i < 10_000_000; i++) {
-                try {
-                    counter.addAndGet(circularBuffer.pop());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                counter.addAndGet(circularBuffer.pop());
             }
         });
 
@@ -61,47 +53,27 @@ class LockBasedCircularBufferTest {
         // given
         var p1 = new Thread(() -> {
             for (int i = 0; i < 2_500_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var p2 = new Thread(() -> {
             for (int i = 2_500_000; i < 5_000_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var p3 = new Thread(() -> {
             for (int i = 5_000_000; i < 7_500_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var p4 = new Thread(() -> {
             for (int i = 7_500_000; i < 10_000_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var c1 = new Thread(() -> {
             for (int i = 0; i < 10_000_000; i++) {
-                try {
-                    counter.addAndGet(circularBuffer.pop());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                counter.addAndGet(circularBuffer.pop());
             }
         });
 
@@ -129,20 +101,12 @@ class LockBasedCircularBufferTest {
         // given
         var p1 = new Thread(() -> {
             for (int i = 0; i < 10_000_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         Runnable consumerLambda = () -> {
             for (int i = 0; i < 2_500_000; i++) {
-                try {
-                    counter.addAndGet(circularBuffer.pop());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                counter.addAndGet(circularBuffer.pop());
             }
         };
         var c1 = new Thread(consumerLambda);
@@ -174,47 +138,27 @@ class LockBasedCircularBufferTest {
         // given
         var p1 = new Thread(() -> {
             for (int i = 0; i < 2_500_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var p2 = new Thread(() -> {
             for (int i = 2_500_000; i < 5_000_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var p3 = new Thread(() -> {
             for (int i = 5_000_000; i < 7_500_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         var p4 = new Thread(() -> {
             for (int i = 7_500_000; i < 10_000_000; i++) {
-                try {
-                    circularBuffer.push(i);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                circularBuffer.push(i);
             }
         });
         Runnable consumerLambda = () -> {
             for (int i = 0; i < 2_500_000; i++) {
-                try {
-                    counter.addAndGet(circularBuffer.pop());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                counter.addAndGet(circularBuffer.pop());
             }
         };
         var c1 = new Thread(consumerLambda);
