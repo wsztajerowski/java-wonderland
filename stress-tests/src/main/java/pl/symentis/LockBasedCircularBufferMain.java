@@ -24,20 +24,12 @@ public class LockBasedCircularBufferMain {
 
         @Actor
         public void actor1() {
-            try {
-                circularBuffer.push(1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            circularBuffer.push(1);
         }
 
         @Actor
         public void actor2(I_Result r) {
-            try {
-                r.r1 = circularBuffer.pop();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            r.r1 = circularBuffer.pop();
         }
 
     }
