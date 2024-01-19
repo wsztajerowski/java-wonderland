@@ -1,6 +1,9 @@
 package pl.symentis;
 
 import java.lang.reflect.Array;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.temporal.TemporalUnit;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -48,9 +51,10 @@ public class LockBasedCircularBuffer<T> {
     public T pop(long timeout, TimeUnit unit) throws TimeoutException {
         lock.lock();
         try {
+            LocalTime timeoutTime = LocalTime.now().plus(timeout, unit.toChronoUnit());
             while (buffer[readPosition] == null) {
                 boolean awaitSuccessfully = canIReadCondition.await(timeout, unit);
-                if(!awaitSuccessfully){
+                if(!awaitSuccessfully || LocalTime.now().isAfter(timeoutTime)){
                     throw new TimeoutException();
                 }
             }
@@ -87,10 +91,11 @@ public class LockBasedCircularBuffer<T> {
     public void push(T element, long timeout, TimeUnit unit) throws TimeoutException {
         lock.lock();
         try {
+            LocalTime timeoutTime = LocalTime.now().plus(timeout, unit.toChronoUnit());
             while (buffer[writePosition] != null) {
                 canIWriteCondition.await();
                 boolean awaitSuccessfully = canIWriteCondition.await(timeout, unit);
-                if(!awaitSuccessfully){
+                if(!awaitSuccessfully || LocalTime.now().isAfter(timeoutTime)){
                     throw new TimeoutException();
                 }
             }
