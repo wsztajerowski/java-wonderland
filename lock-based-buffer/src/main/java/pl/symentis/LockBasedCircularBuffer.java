@@ -94,7 +94,6 @@ public class LockBasedCircularBuffer<T> {
         try {
             long timeoutTime = currentTimeMillis() + Duration.of(timeout, unit.toChronoUnit()).toMillis();
             while (buffer[writePosition] != null) {
-                canIWriteCondition.await();
                 boolean awaitSuccessfully = canIWriteCondition.await(timeout, unit);
                 if( !awaitSuccessfully ||  currentTimeMillis() > timeoutTime ){
                     throw new TimeoutException();
