@@ -140,5 +140,6 @@
         <module>stress-tests</module>
         <module>lamport-buffer</module>
         <module>lock-based-buffer</module>
+        <module>harris-linked-list</module>
     </modules>
 </project>
