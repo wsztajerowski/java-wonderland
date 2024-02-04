@@ -4,9 +4,9 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
-class Node<T extends Comparable> {
-    private T key;
-    private AtomicMarkableReference<Node<T>> next;
+class Node<T extends Comparable<T>> {
+    private final T key;
+    private final AtomicMarkableReference<Node<T>> next;
 
     Node(T key, Node<T> nextNode) {
         this.key = key;
