@@ -50,7 +50,7 @@ public class HarrisLinkedList<T extends Comparable<T>> {
         do {
             if (nodeRef.isMarked()) {
                 AtomicMarkableReference<Node<T>> firstUnmarkedNodeRef = nodeRef;
-                while (firstUnmarkedNodeRef != null && firstUnmarkedNodeRef.isMarked()) {
+                while (firstUnmarkedNodeRef.getReference() != null && firstUnmarkedNodeRef.isMarked()) {
                     firstUnmarkedNodeRef = firstUnmarkedNodeRef.getReference().getNextNodeMarkableReference();
                 }
                 nodeRef.compareAndSet(nextNode, firstUnmarkedNodeRef.getReference(), true, false);
