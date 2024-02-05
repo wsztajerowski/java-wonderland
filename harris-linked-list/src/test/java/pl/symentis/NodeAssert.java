@@ -1,7 +1,6 @@
 package pl.symentis;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.InstanceOfAssertFactory;
 
 import java.util.Objects;
 
@@ -14,11 +13,7 @@ public class NodeAssert<T extends Comparable<T>> extends AbstractAssert<NodeAsse
         return new NodeAssert<>(node);
     }
 
-    public static InstanceOfAssertFactory<Node, NodeAssert<?>> createAssertFactory() {
-        return new InstanceOfAssertFactory<>(Node.class, NodeAssert::assertThat);
-    }
-
-    public NodeAssert<T> hasKey(Object key) {
+    public NodeAssert<T> hasKey(T key) {
         isNotNull();
         checkNodeKey(actual, key);
         return this;
@@ -42,14 +37,14 @@ public class NodeAssert<T extends Comparable<T>> extends AbstractAssert<NodeAsse
         return this;
     }
 
-    public NodeAssert<T> hasNextNodeWithKey(Object key) {
+    public NodeAssert<T> hasNextNodeWithKey(T key) {
         hasNextNode();
         Node<T> nextNode = actual.getNextNodeMarkableReference().getReference();
         checkNodeKey(nextNode, key);
         return this;
     }
 
-    private void checkNodeKey(Node<T> node, Object key){
+    private void checkNodeKey(Node<T> node, T key){
         if (!Objects.equals(node.getKey(), key)) {
             failWithMessage("Expected node: \n %s\nto have key <%s>, but was <%s>", node, key, node.getKey());
         }
