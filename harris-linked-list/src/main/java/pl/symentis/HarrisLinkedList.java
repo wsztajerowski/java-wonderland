@@ -45,23 +45,30 @@ public class HarrisLinkedList<T extends Comparable<T>> {
     }
 
     private AtomicMarkableReference<Node<T>> searchPreviousNodeReference(T key) {
-        AtomicMarkableReference<Node<T>> nodeRef = head;
-        Node<T> nextNode = head.getReference();
-        do {
-            if (nodeRef.isMarked()) {
-                AtomicMarkableReference<Node<T>> firstUnmarkedNodeRef = nodeRef;
-                while (firstUnmarkedNodeRef.getReference() != null && firstUnmarkedNodeRef.isMarked()) {
-                    firstUnmarkedNodeRef = firstUnmarkedNodeRef.getReference().getNextNodeMarkableReference();
+        start_again:
+        while (true) {
+            AtomicMarkableReference<Node<T>> nodeRef = head;
+            Node<T> nextNode = head.getReference();
+            do {
+                if (nodeRef.isMarked()) {
+                    AtomicMarkableReference<Node<T>> firstUnmarkedNodeRef = nodeRef;
+                    while (firstUnmarkedNodeRef.getReference() != null && firstUnmarkedNodeRef.isMarked()) {
+                        firstUnmarkedNodeRef = firstUnmarkedNodeRef.getReference().getNextNodeMarkableReference();
+                    }
+                    if (nodeRef.compareAndSet(nextNode, firstUnmarkedNodeRef.getReference(), true, false)){
+                        nextNode = nodeRef.getReference();
+                    } else {
+                        break start_again;
+                    }
                 }
-                nodeRef.compareAndSet(nextNode, firstUnmarkedNodeRef.getReference(), true, false);
+                if (nextNode == null || nextNode.hasKeyEqualOrGreaterThan(key)) {
+                    return nodeRef;
+                }
+                nodeRef = nextNode.getNextNodeMarkableReference();
                 nextNode = nodeRef.getReference();
-            }
-            if (nextNode == null || nextNode.hasKeyEqualOrGreaterThan(key)) {
-                return nodeRef;
-            }
-            nodeRef = nextNode.getNextNodeMarkableReference();
-            nextNode = nodeRef.getReference();
-        } while (true);
+            } while (true);
+        }
+        return null;
     }
 
     /* for test only */
