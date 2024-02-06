@@ -8,7 +8,6 @@ import pl.symentis.entities.jcstress.JCStressTestMetadata;
 
 import java.nio.file.Path;
 
-import static java.text.MessageFormat.format;
 import static pl.symentis.commands.JCStressHtmlResultParser.getJCStressHtmlResultParser;
 import static pl.symentis.infra.MorphiaService.getMorphiaService;
 import static pl.symentis.infra.S3Service.getS3Service;
@@ -27,14 +26,11 @@ public class JCStressSubcommandService {
 
     public void executeCommand() {
         try {
-            int exitCode = benchmarkProcessBuilder(benchmarkPath)
+            benchmarkProcessBuilder(benchmarkPath)
                 .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
                 .addOptionalArgument(commonOptions.testNameRegex())
                 .buildAndStartProcess()
                 .waitFor();
-            if (exitCode != 0){
-                throw new JavaWonderlandException(format("Benchmark process exit with non-zero code: {0}", exitCode));
-            }
         } catch (AssertionError | InterruptedException e) {
             throw new JavaWonderlandException(e);
         }
