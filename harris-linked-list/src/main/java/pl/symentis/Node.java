@@ -13,20 +13,45 @@ class Node<T extends Comparable<T>> {
         next = new AtomicMarkableReference<>(nextNode, false);
     }
 
-    public boolean hasKey(T key) {
-        return this.key.equals(key);
+    public boolean hasNext() {
+        return next.getReference() != null;
     }
 
-    public AtomicMarkableReference<Node<T>> getNextNodeMarkableReference() {
-        return next;
+    public Node<T> getNextNode() {
+        return next.getReference();
+    }
+
+    public boolean hasKey(T key) {
+        return this.key.equals(key);
     }
 
     public boolean hasKeyEqualOrGreaterThan(T key) {
         return this.key.compareTo(key) >= 0;
     }
 
+    public boolean hasKeyLessThan(T key) {
+        return this.key.compareTo(key) < 0;
+    }
+
     public T getKey() {
         return key;
+    }
+
+    public boolean isMarked() {
+        return next.isMarked();
+    }
+
+    public boolean tryInsertNewNextNode(Node<T> expectedNextNode, T key) {
+        Node<T> newNode = new Node<>(key, expectedNextNode);
+        return next.compareAndSet(expectedNextNode, newNode, false, false);
+    }
+
+    public boolean tryMarkNextNodeToDeletion(Node<T> expectedNextNode) {
+        return next.attemptMark(expectedNextNode, true);
+    }
+
+    public boolean tryDeleteMarkedNextNodes(Node<T> expectedNextNode, Node<T> newNextNode) {
+        return next.compareAndSet(expectedNextNode, newNextNode, true, false);
     }
 
     @Override
@@ -51,5 +76,13 @@ class Node<T extends Comparable<T>> {
             .map(Integer::toHexString)
             .map(hexString -> "Node@" + hexString)
             .orElse("null");
+    }
+
+    void setNextNode(Node<T> node) {
+        next.set(node, false);
+    }
+
+    void markNextNodeToDeletion() {
+        next.set(next.getReference(), true);
     }
 }

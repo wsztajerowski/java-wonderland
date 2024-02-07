@@ -3,6 +3,8 @@ package pl.symentis;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.ZZI_Result;
 
+import java.util.Arrays;
+
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 
 public class HarrisLinkedListStressTest {
@@ -141,13 +143,15 @@ public class HarrisLinkedListStressTest {
                 .size();
         }
     }
+
     public static HarrisLinkedList<Integer> createIntegerList(int ... keys) {
+        Arrays.sort(keys);
         Node<Integer> newestNode = null;
-        for (int i = keys.length - 1; i >=0 ; i--) {
+        for (int i = keys.length -1; i >=0 ; i--) {
             newestNode = new Node<>(keys[i], newestNode);
         }
         HarrisLinkedList<Integer> list = new HarrisLinkedList<>();
-        list.getHead().set(newestNode, false);
+        list.getHead().setNextNode(newestNode);
         return list;
     }
 }

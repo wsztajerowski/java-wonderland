@@ -21,7 +21,7 @@ public class NodeAssert<T extends Comparable<T>> extends AbstractAssert<NodeAsse
 
     public NodeAssert<T> isTail() {
         isNotNull();
-        Node<T> nextNode = actual.getNextNodeMarkableReference().getReference();
+        Node<T> nextNode = actual.getNextNode();
         if (nextNode != null) {
             failWithMessage("Expected node: \n %s\nto be last in the list, but had next reference to:\n <%s>",actual, nextNode);
         }
@@ -30,7 +30,7 @@ public class NodeAssert<T extends Comparable<T>> extends AbstractAssert<NodeAsse
 
     public NodeAssert<T> hasNextNode() {
         isNotNull();
-        Node<T> nextNode = actual.getNextNodeMarkableReference().getReference();
+        Node<T> nextNode = actual.getNextNode();
         if (nextNode == null) {
             failWithMessage("Expected node: \n <%s>\nto had a reference to another node, but it was the last node in the list",actual);
         }
@@ -39,7 +39,7 @@ public class NodeAssert<T extends Comparable<T>> extends AbstractAssert<NodeAsse
 
     public NodeAssert<T> hasNextNodeWithKey(T key) {
         hasNextNode();
-        Node<T> nextNode = actual.getNextNodeMarkableReference().getReference();
+        Node<T> nextNode = actual.getNextNode();
         checkNodeKey(nextNode, key);
         return this;
     }

@@ -1,86 +1,113 @@
 package pl.symentis;
 
-import java.util.concurrent.atomic.AtomicMarkableReference;
-
 public class HarrisLinkedList<T extends Comparable<T>> {
 
-    private final AtomicMarkableReference<Node<T>> head;
+    private final Node<T> head;
 
     public HarrisLinkedList() {
-        this.head = new AtomicMarkableReference<>(null, false);
+        this.head = new Node<>(null, null);
+    }
+
+    public boolean isEmpty() {
+        return !head.hasNext();
     }
 
     public boolean insert(T key) {
-        boolean isNodeAdded;
         do {
-            AtomicMarkableReference<Node<T>> leftNodeRef = searchPreviousNodeReference(key);
-            Node<T> rightNode = leftNodeRef.getReference();
+            Pair<Node<T>, Node<T>> result = searchPreviousNodeReference(key);
+            Node<T> leftNode = result.left();
+            Node<T> rightNode = result.right();
             if (rightNode != null && rightNode.hasKey(key)) {
                 return false;
             }
-            Node<T> newNode = new Node<>(key, rightNode);
-            isNodeAdded = leftNodeRef.compareAndSet(rightNode, newNode, false, false);
-        } while (!isNodeAdded);
-        return true;
+            if(leftNode.tryInsertNewNextNode(rightNode, key)){
+                return true;
+            }
+        } while (true);
     }
 
     public boolean find(T key) {
-        AtomicMarkableReference<Node<T>> leftNodeRef = searchPreviousNodeReference(key);
-        Node<T> rightNode = leftNodeRef.getReference();
+        Pair<Node<T>, Node<T>> result  = searchPreviousNodeReference(key);
+        Node<T> rightNode = result.right();
         return rightNode != null && rightNode.hasKey(key);
     }
 
     public boolean delete(T key) {
-        boolean isReferenceMarked;
+        Node<T> leftNode;
+        Node<T> rightNode;
+        Node<T> rightNodeNext;
         do {
-            AtomicMarkableReference<Node<T>> leftNodeRef = searchPreviousNodeReference(key);
-            Node<T> rightNode = leftNodeRef.getReference();
+            Pair<Node<T>, Node<T>> result = searchPreviousNodeReference(key);
+            leftNode = result.left();
+            rightNode = result.right();
             if (rightNode == null || !rightNode.hasKey(key)) {
                 return false;
             }
-            isReferenceMarked = leftNodeRef.attemptMark(rightNode, true);
-        } while (!isReferenceMarked);
-        searchPreviousNodeReference(key);
+            rightNodeNext = rightNode.getNextNode();
+            if (rightNodeNext == null || !rightNodeNext.isMarked()) {
+                if(leftNode.tryMarkNextNodeToDeletion(rightNode)){
+                    break;
+                }
+            }
+        } while (true);
+        if (!leftNode.tryDeleteMarkedNextNodes(rightNode, rightNodeNext)){
+            searchPreviousNodeReference(key);
+        }
         return true;
     }
 
-    private AtomicMarkableReference<Node<T>> searchPreviousNodeReference(T key) {
-        AtomicMarkableReference<Node<T>> nodeRef = head;
-        Node<T> nextNode = head.getReference();
+    private Pair<Node<T>, Node<T>> searchPreviousNodeReference(T key) {
+        Node<T> leftNode = head;
+        Node<T> leftNodeNext = null;
+        Node<T> rightNode;
+
+        /* 1: Find left_node and right_node */
         do {
-            if (nodeRef.isMarked()) {
-                AtomicMarkableReference<Node<T>> firstUnmarkedNodeRef = nodeRef;
-                while (firstUnmarkedNodeRef.getReference() != null && firstUnmarkedNodeRef.isMarked()) {
-                    firstUnmarkedNodeRef = firstUnmarkedNodeRef.getReference().getNextNodeMarkableReference();
+            Node<T> t = head;
+            Node<T> tNext = head.getNextNode();
+            do {
+                if (!t.isMarked()){
+                    leftNode = t;
+                    leftNodeNext = tNext;
                 }
-                if (nodeRef.compareAndSet(nextNode, firstUnmarkedNodeRef.getReference(), true, false)) {
-                    nextNode = nodeRef.getReference();
-                } else {
-                    nodeRef = head;
-                    nextNode = head.getReference();
+                t = tNext;
+                if (t == null){
+                    break;
+                }
+                tNext = t.getNextNode();
+            } while (t.isMarked() || t.hasKeyLessThan(key));
+            rightNode = t;
+
+            /* 2: Check nodes are adjacent */
+            if (leftNodeNext == rightNode){
+                if (rightNode != null && rightNode.isMarked()){
                     continue;
+                } else {
+                    return new Pair<>(leftNode, rightNode);
                 }
             }
-            if (nextNode == null || nextNode.hasKeyEqualOrGreaterThan(key)) {
-                return nodeRef;
+
+            /* 3: Remove one or more marked nodes */
+            if (leftNode.tryDeleteMarkedNextNodes(leftNodeNext, rightNode)){
+                if (rightNode == null || !rightNode.isMarked()) {
+                    return new Pair<>(leftNode, rightNode);
+                }
             }
-            nodeRef = nextNode.getNextNodeMarkableReference();
-            nextNode = nodeRef.getReference();
         } while (true);
     }
 
     public int size() {
         int nodeCounter = 0;
-        AtomicMarkableReference<Node<T>> nodeRef = head;
-        while (nodeRef.getReference() != null) {
+        Node<T> node = head;
+        while (node.hasNext()) {
             nodeCounter++;
-            nodeRef = nodeRef.getReference().getNextNodeMarkableReference();
+            node = node.getNextNode();
         }
         return nodeCounter;
     }
 
     /* for test only */
-    AtomicMarkableReference<Node<T>> getHead() {
+    Node<T> getHead() {
         return head;
     }
 }

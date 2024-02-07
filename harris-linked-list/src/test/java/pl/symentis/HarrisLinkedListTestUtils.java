@@ -3,51 +3,37 @@ package pl.symentis;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
-import java.util.concurrent.atomic.AtomicMarkableReference;
 import java.util.function.Consumer;
 
 public class HarrisLinkedListTestUtils {
     public static <T extends Comparable<T>> String toString(HarrisLinkedList<T> list) {
-        StringJoiner joiner = new StringJoiner(", ", HarrisLinkedList.class.getSimpleName() + "[", "]");
-        AtomicMarkableReference<Node<T>> nodeRef = list.getHead();
-        while (nodeRef.getReference() != null){
-            joiner.add("\n  " + nodeRef.getReference().toString());
-            nodeRef = nodeRef.getReference().getNextNodeMarkableReference();
+        StringJoiner joiner = new StringJoiner(", ", list.getClass().getSimpleName() + "[", "]");
+        Node<T> node = list.getHead();
+        while (node != null){
+            joiner.add("\n  " + node);
+            node = node.getNextNode();
         }
         return joiner
             .toString();
     }
 
     public static <T extends Comparable<T>> void iterateOverNodes(HarrisLinkedList<T> list, Consumer<Node<T>> consumer) {
-        Node<T> current = list.getHead().getReference();
+        Node<T> current = list.getHead().getNextNode();
         while (current != null) {
             consumer.accept(current);
-            current = current.getNextNodeMarkableReference().getReference();
-        }
-    }
-
-    public static <T extends Comparable<T>> void iterateOverNodeReferences(HarrisLinkedList<T> list, Consumer<AtomicMarkableReference<Node<T>>> consumer) {
-        AtomicMarkableReference<Node<T>> current = list.getHead();
-        while (current != null) {
-            consumer.accept(current);
-            if(current.getReference() != null) {
-                current = current.getReference().getNextNodeMarkableReference();
-            } else {
-                current =  null;
-            }
+            current = current.getNextNode();
         }
     }
 
     public static <T extends Comparable<T>> void markNodesToDelete(HarrisLinkedList<T> list, T ... keys) {
         List<T> keyList = Arrays.stream(keys).toList();
-        AtomicMarkableReference<Node<T>> current = list.getHead();
-        Node<T> nextNode = current.getReference();
-        while (nextNode != null) {
+        Node<T> node = list.getHead();
+        while (node.hasNext()) {
+            Node<T> nextNode = node.getNextNode();
             if (keyList.contains(nextNode.getKey())){
-                current.set(nextNode, true);
+                node.markNextNodeToDeletion();
             }
-            current = nextNode.getNextNodeMarkableReference();
-            nextNode = current.getReference();
+            node = node.getNextNode();
         }
     }
 }

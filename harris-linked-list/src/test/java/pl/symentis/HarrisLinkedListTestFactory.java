@@ -14,7 +14,7 @@ public class HarrisLinkedListTestFactory {
             newestNode = new Node<>(keys[i], newestNode);
         }
         HarrisLinkedList<Integer> list = new HarrisLinkedList<>();
-        list.getHead().set(newestNode, false);
+        list.getHead().setNextNode(newestNode);
         return list;
     }
 }
