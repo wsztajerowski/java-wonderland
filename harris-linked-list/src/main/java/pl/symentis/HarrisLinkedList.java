@@ -100,7 +100,9 @@ public class HarrisLinkedList<T extends Comparable<T>> {
         int nodeCounter = 0;
         Node<T> node = head;
         while (node.hasNext()) {
-            nodeCounter++;
+            if (!node.isMarked()) {
+                nodeCounter++;
+            }
             node = node.getNextNode();
         }
         return nodeCounter;
