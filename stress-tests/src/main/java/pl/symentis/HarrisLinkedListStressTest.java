@@ -2,8 +2,11 @@ package pl.symentis;
 
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.ZZI_Result;
+import org.openjdk.jcstress.infra.results.ZZZZ_Result;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 
@@ -141,6 +144,49 @@ public class HarrisLinkedListStressTest {
         public void arbiter(ZZI_Result r) {
             r.r3 = harrisList
                 .size();
+        }
+    }
+    @JCStressTest
+    @Outcome(id = "true, true, true, true", expect = ACCEPTABLE,             desc = "All operation succeed and the final list size is equal expected value")
+    @State
+    public static class CaseInsertDeleteFindInRandomOrder {
+        private static final List<Integer> elements = Arrays.asList(10, 20, 30, 40);
+        private static final List<Integer> numbersToInsert = Arrays.asList(5, 15, 25, 35, 45);
+        HarrisLinkedList<Integer> harrisList;
+        Integer deleteArg;
+        Integer findArg;
+        Integer insertArg;
+
+        CaseInsertDeleteFindInRandomOrder(){
+            harrisList = createIntegerList(10,20,30,40);
+            Collections.shuffle(elements);
+            deleteArg = elements.get(0);
+            findArg = elements.get(1);
+            Collections.shuffle(numbersToInsert);
+            insertArg = numbersToInsert.get(0);
+        }
+
+        @Actor
+        public void actor1(ZZZZ_Result r) {
+            r.r1 = harrisList
+                .delete(deleteArg);
+        }
+
+        @Actor
+        public void actor2(ZZZZ_Result r) {
+            r.r2 = harrisList
+                .find(findArg);
+        }
+
+        @Actor
+        public void actor3(ZZZZ_Result r) {
+            r.r3 = harrisList
+                .insert(insertArg);
+        }
+
+        @Arbiter
+        public void arbiter(ZZZZ_Result r) {
+            r.r4 = harrisList.size() == 4;
         }
     }
 
