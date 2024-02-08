@@ -71,7 +71,7 @@ public class HarrisLinkedList<T extends Comparable<T>> {
                     leftNodeNext = tNext;
                 }
                 t = tNext;
-                if (t == null){
+                if (t == null || t.hasKey(key)){
                     break;
                 }
                 tNext = t.getNextNode();
