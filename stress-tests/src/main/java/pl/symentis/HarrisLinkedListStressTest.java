@@ -1,9 +1,10 @@
 package pl.symentis;
 
 import org.openjdk.jcstress.annotations.*;
+import org.openjdk.jcstress.infra.results.IIII_Result;
 import org.openjdk.jcstress.infra.results.ZZI_Result;
-import org.openjdk.jcstress.infra.results.ZZZZ_Result;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -147,46 +148,86 @@ public class HarrisLinkedListStressTest {
         }
     }
     @JCStressTest
-    @Outcome(id = "true, true, true, true", expect = ACCEPTABLE,             desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 20, 5, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 20, 15, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 20, 25, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 20, 35, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 30, 5, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 30, 15, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 30, 25, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "10, 30, 35, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 30, 5, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 30, 15, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 30, 25, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 30, 35, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 10, 5, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 10, 15, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 10, 25, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "20, 10, 35, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 10, 5, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 10, 15, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 10, 25, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 10, 35, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 20, 5, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 20, 15, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 20, 25, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
+    @Outcome(id = "30, 20, 35, 3", expect = ACCEPTABLE, desc = "All operation succeed and the final list size is equal expected value")
     @State
     public static class CaseInsertDeleteFindInRandomOrder {
-        private static final List<Integer> elements = Arrays.asList(10, 20, 30, 40);
-        private static final List<Integer> numbersToInsert = Arrays.asList(5, 15, 25, 35, 45);
+        private static final List<Integer> elements = List.of(10, 20, 30);
+        private static final List<Integer> numbersToInsert = List.of(5, 15, 25, 35);
         HarrisLinkedList<Integer> harrisList;
         Integer deleteArg;
         Integer findArg;
         Integer insertArg;
 
         CaseInsertDeleteFindInRandomOrder(){
-            harrisList = createIntegerList(10,20,30,40);
-            Collections.shuffle(elements);
-            deleteArg = elements.get(0);
-            findArg = elements.get(1);
-            Collections.shuffle(numbersToInsert);
-            insertArg = numbersToInsert.get(0);
+            harrisList = createIntegerList(10,20,30);
+            ArrayList<Integer> localElements = new ArrayList<>(elements);
+            Collections.shuffle(localElements);
+            deleteArg = localElements.get(0);
+            findArg = localElements.get(1);
+            ArrayList<Integer> localNumbersToInsert = new ArrayList<>(numbersToInsert);
+            Collections.shuffle(localNumbersToInsert);
+            insertArg = localNumbersToInsert.get(0);
         }
 
         @Actor
-        public void actor1(ZZZZ_Result r) {
-            r.r1 = harrisList
+        public void actor1(IIII_Result r) {
+            boolean deleted = harrisList
                 .delete(deleteArg);
+            if (deleted) {
+                r.r1 = deleteArg;
+            } else {
+                r.r1 = -deleteArg;
+            }
         }
 
         @Actor
-        public void actor2(ZZZZ_Result r) {
-            r.r2 = harrisList
+        public void actor2(IIII_Result r) {
+            boolean found = harrisList
                 .find(findArg);
+            if (found) {
+                r.r2 = findArg;
+            } else {
+                r.r2 = -findArg;
+            }
         }
 
         @Actor
-        public void actor3(ZZZZ_Result r) {
-            r.r3 = harrisList
+        public void actor3(IIII_Result r) {
+            boolean inserted = harrisList
                 .insert(insertArg);
+            if (inserted) {
+                r.r3 = insertArg;
+            } else {
+                r.r3 = -insertArg;
+            }
         }
 
         @Arbiter
-        public void arbiter(ZZZZ_Result r) {
-            r.r4 = harrisList.size() == 4;
+        public void arbiter(IIII_Result r) {
+            r.r4 = harrisList.size();
         }
     }
 
