@@ -16,6 +16,7 @@ env:
   EC2_INSTANCE_TYPE: c5.2xlarge
   SUBNET_ID: subnet-3914dd42
   SECURITY_GROUP_ID: sg-09ab440252230df2a
+  COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   build:
