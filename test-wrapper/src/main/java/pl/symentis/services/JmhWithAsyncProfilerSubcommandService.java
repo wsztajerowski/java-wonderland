@@ -1,12 +1,12 @@
 package pl.symentis.services;
 
 import org.jetbrains.annotations.NotNull;
-import org.testcontainers.shaded.com.google.common.io.Files;
 import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jmh.BenchmarkMetadata;
 import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.entities.jmh.JmhBenchmarkId;
 import pl.symentis.entities.jmh.JmhResult;
+import pl.symentis.infra.S3Service;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,7 +19,6 @@ import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
 import static pl.symentis.infra.MorphiaService.getMorphiaService;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
-import static pl.symentis.infra.S3Service.getS3Service;
 import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
 
 public class JmhWithAsyncProfilerSubcommandService {
@@ -30,8 +29,10 @@ public class JmhWithAsyncProfilerSubcommandService {
     private final int interval;
     private final String output;
     private final String s3Prefix;
+    private S3Service s3Service;
 
-    JmhWithAsyncProfilerSubcommandService(CommonSharedOptions commonSharedOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int interval, String output) {
+    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, CommonSharedOptions commonSharedOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int interval, String output) {
+        this.s3Service = s3Service;
         this.commonSharedOptions = commonSharedOptions;
         this.jmhBenchmarksSharedOptions = jmhBenchmarksSharedOptions;
         this.asyncPath = asyncPath;
@@ -67,7 +68,7 @@ public class JmhWithAsyncProfilerSubcommandService {
                 paths
                     .forEach(path -> {
                         String s3Key = s3Prefix + "jmh/" + path.toString();
-                        getS3Service()
+                        s3Service
                             .saveFileOnS3(s3Key, path);
                         String flamegraphName = getFilenameWithoutExtension(path);
                         flamegraphs.put(flamegraphName, s3Key);
@@ -93,7 +94,7 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .filter(f -> f.toString().endsWith("log"))
                 .forEach(path -> {
                     String s3Key = s3Prefix + "logs/" + path;
-                    getS3Service()
+                    s3Service
                         .saveFileOnS3(s3Key, path);
                 });
         } catch (IOException e) {
