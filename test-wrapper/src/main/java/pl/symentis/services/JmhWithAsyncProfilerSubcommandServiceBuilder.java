@@ -1,7 +1,10 @@
 package pl.symentis.services;
 
+import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
 import pl.symentis.infra.S3ServiceBuilder;
+
+import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 
 public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     private String asyncPath;
@@ -10,6 +13,7 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     private CommonSharedOptions commonOptions;
     private JmhBenchmarksSharedOptions jmhBenchmarksOptions;
     private S3Service s3Service;
+    private String mongoConnectionString;
 
     private JmhWithAsyncProfilerSubcommandServiceBuilder() {
         s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
@@ -49,7 +53,15 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
         return this;
     }
 
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withMongoConnectionString(String mongoConnectionString) {
+        this.mongoConnectionString = mongoConnectionString;
+        return this;
+    }
+
     public JmhWithAsyncProfilerSubcommandService build() {
-        return new JmhWithAsyncProfilerSubcommandService(s3Service, commonOptions, jmhBenchmarksOptions, asyncPath, interval, output);
+        MorphiaService morphiaService = getMorphiaServiceBuilder()
+            .withConnectionString(mongoConnectionString)
+            .build();
+        return new JmhWithAsyncProfilerSubcommandService(s3Service, morphiaService, commonOptions, jmhBenchmarksOptions, asyncPath, interval, output);
     }
 }

@@ -31,6 +31,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
             .withAsyncPath(asyncPath)
             .withInterval(interval)
             .withOutput(output)
+            .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
             .build()
             .executeCommand();
     }
