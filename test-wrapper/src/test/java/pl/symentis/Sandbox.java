@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.nio.file.Files.list;
-import static pl.symentis.infra.MorphiaService.getMorphiaService;
+import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 
 @Disabled
 class Sandbox {
@@ -117,7 +117,9 @@ class Sandbox {
 
     @Test
     void count_docs_from_mongo() {
-        List<JmhBenchmark> jmhBenchmarks = getMorphiaService()
+        List<JmhBenchmark> jmhBenchmarks = getMorphiaServiceBuilder()
+            .withConnectionString(System.getenv("MONGO_CONNECTION_STRING"))
+            .build()
             .listAll(JmhBenchmark.class);
 
         jmhBenchmarks

@@ -18,6 +18,8 @@ public class JCStressSubcommand implements Runnable {
         getJCStressSubcommandService()
             .withCommonOptions(apiCommonSharedOptions.getValues())
             .withBenchmarkPath(benchmarkPath)
+            .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
+            .withDefaultS3Service()
             .build()
             .executeCommand();
     }

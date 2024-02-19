@@ -6,6 +6,7 @@ import pl.symentis.entities.jmh.BenchmarkMetadata;
 import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.entities.jmh.JmhBenchmarkId;
 import pl.symentis.entities.jmh.JmhResult;
+import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
 
 import java.io.IOException;
@@ -17,7 +18,6 @@ import java.util.stream.Stream;
 import static java.nio.file.Files.list;
 import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
-import static pl.symentis.infra.MorphiaService.getMorphiaService;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
 import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
 
@@ -29,10 +29,12 @@ public class JmhWithAsyncProfilerSubcommandService {
     private final int interval;
     private final String output;
     private final String s3Prefix;
-    private S3Service s3Service;
+    private final S3Service s3Service;
+    private final MorphiaService morphiaService;
 
-    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, CommonSharedOptions commonSharedOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int interval, String output) {
+    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonSharedOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int interval, String output) {
         this.s3Service = s3Service;
+        this.morphiaService = morphiaService;
         this.commonSharedOptions = commonSharedOptions;
         this.jmhBenchmarksSharedOptions = jmhBenchmarksSharedOptions;
         this.asyncPath = asyncPath;
@@ -77,7 +79,7 @@ public class JmhWithAsyncProfilerSubcommandService {
                 throw new JavaWonderlandException(e);
             }
 
-            getMorphiaService()
+            morphiaService
                 .upsert(JmhBenchmark.class)
                 .byFieldValue("benchmarkId", new JmhBenchmarkId(
                     commonSharedOptions.commitSha(),

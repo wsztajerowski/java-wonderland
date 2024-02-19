@@ -19,6 +19,7 @@ public class JmhSubcommand implements Runnable {
         getJmhSubcommandService()
             .withCommonOptions(apiCommonSharedOptions.getValues())
             .withJmhOptions(sharedJmhOptions.getValues())
+            .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
             .build()
             .executeCommand();
     }

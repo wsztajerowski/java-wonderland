@@ -4,9 +4,9 @@ import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.entities.jmh.JmhBenchmarkId;
 import pl.symentis.entities.jmh.JmhResult;
+import pl.symentis.infra.MorphiaService;
 
 import static java.text.MessageFormat.format;
-import static pl.symentis.infra.MorphiaService.getMorphiaService;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
 import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
 
@@ -14,8 +14,10 @@ public class JmhSubcommandService {
 
     private final CommonSharedOptions commonOptions;
     private final JmhBenchmarksSharedOptions jmhBenchmarksOptions;
+    private final MorphiaService morphiaService;
 
-    JmhSubcommandService(CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions) {
+    JmhSubcommandService(MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions) {
+        this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
         this.jmhBenchmarksOptions = jmhBenchmarksOptions;
     }
@@ -43,7 +45,7 @@ public class JmhSubcommandService {
                 jmhResult.benchmark(),
                 jmhResult.mode(),
                 commonOptions.runAttempt());
-            getMorphiaService()
+            morphiaService
                 .upsert(JmhBenchmark.class)
                 .byFieldValue("benchmarkId", benchmarkId)
                 .setValue("jmhResult", jmhResult)

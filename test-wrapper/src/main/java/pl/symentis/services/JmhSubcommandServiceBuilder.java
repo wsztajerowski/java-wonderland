@@ -1,8 +1,13 @@
 package pl.symentis.services;
 
+import pl.symentis.infra.MorphiaService;
+
+import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
+
 public final class JmhSubcommandServiceBuilder {
     private CommonSharedOptions commonOptions;
     private JmhBenchmarksSharedOptions jmhBenchmarksOptions;
+    private String mongoConnectionString;
 
     private JmhSubcommandServiceBuilder() {
     }
@@ -21,7 +26,15 @@ public final class JmhSubcommandServiceBuilder {
         return this;
     }
 
+    public JmhSubcommandServiceBuilder withMongoConnectionString(String mongoConnectionString) {
+        this.mongoConnectionString = mongoConnectionString;
+        return this;
+    }
+
     public JmhSubcommandService build() {
-        return new JmhSubcommandService(commonOptions, jmhBenchmarksOptions);
+        MorphiaService morphiaService = getMorphiaServiceBuilder()
+            .withConnectionString(mongoConnectionString)
+            .build();
+        return new JmhSubcommandService(morphiaService, commonOptions, jmhBenchmarksOptions);
     }
 }

@@ -1,8 +1,5 @@
 package pl.symentis.infra;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
 import dev.morphia.UpdateOptions;
 import dev.morphia.query.filters.Filter;
@@ -12,10 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static dev.morphia.Morphia.createDatastore;
 import static dev.morphia.query.filters.Filters.eq;
 import static dev.morphia.query.updates.UpdateOperators.set;
-import static java.lang.System.getenv;
 import static java.util.Objects.requireNonNull;
 
 public class MorphiaService {
@@ -23,16 +18,6 @@ public class MorphiaService {
 
     MorphiaService(Datastore datastore) {
         this.datastore = datastore;
-    }
-
-    public static MorphiaService getMorphiaService() {
-        MongoClient mongoClient = MongoClients
-            .create(new ConnectionString(getenv("MONGO_CONNECTION_STRING")));
-        Datastore datastore = createDatastore(mongoClient, "test-results");
-        datastore
-            .getMapper()
-            .mapPackage("pl.symentis.entities");
-        return new MorphiaService(datastore);
     }
 
     public <T> void save(T entity) {
