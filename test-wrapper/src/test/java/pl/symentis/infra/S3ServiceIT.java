@@ -23,13 +23,13 @@ class S3ServiceIT extends TestcontainersWithS3BaseIT {
     }
 
     @Test
-    public void test_isLocalstackRunning() {
+    void test_isLocalstackRunning() {
         assertThat(LOCAL_STACK_CONTAINER.isRunning())
             .isTrue();
     }
 
     @Test
-    public void test_uploadObjectSuccess() {
+    void test_uploadObjectSuccess() {
         // given
         Path sampleFilePath = createPathForTestResource("sample.json");
 
