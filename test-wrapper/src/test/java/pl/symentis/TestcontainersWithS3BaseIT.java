@@ -29,6 +29,7 @@ public class TestcontainersWithS3BaseIT {
     @Container
     protected final static LocalStackContainer LOCAL_STACK_CONTAINER =
         new LocalStackContainer(DockerImageName.parse("localstack/localstack:" + LOCAL_STACK_VERSION))
+            .withLabel("java.wonderland.testcontainer", "localstack")
             .withServices(LocalStackContainer.Service.S3)
             .withEnv("DEFAULT_REGION", "eu-north-1");
     protected S3Client awsS3Client;
