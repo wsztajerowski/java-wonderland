@@ -9,23 +9,23 @@ import static dev.morphia.Morphia.createDatastore;
 import static java.util.Objects.requireNonNull;
 
 public class MorphiaServiceBuilder {
-    public static final String DEFAULT_DB_NAME = "test-results";
 
-    private String dbName;
+    private static String dbName  = "test-results";
     private String connectionString;
 
     private MorphiaServiceBuilder(){
-        this.dbName = DEFAULT_DB_NAME;
+    }
+
+    public static String getDbName() {
+        return dbName;
+    }
+
+    public static void setDbName(String dbName) {
+        MorphiaServiceBuilder.dbName = dbName;
     }
 
     public static MorphiaServiceBuilder getMorphiaServiceBuilder(){
         return new MorphiaServiceBuilder();
-    }
-
-    public MorphiaServiceBuilder withDbName(String dbName){
-        requireNonNull(dbName, "Provided database name cannot be null!");
-        this.dbName = dbName;
-        return this;
     }
 
     public MorphiaServiceBuilder withConnectionString(String connectionString){
