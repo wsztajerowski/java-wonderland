@@ -1,5 +1,6 @@
 package pl.symentis.infra;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MongoDBContainer;
@@ -19,15 +20,19 @@ class MorphiaServiceIT {
     protected final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer(DockerImageName.parse("mongo:7.0.5"))
         .withExposedPorts(27017);
     private MorphiaService sut;
-    private MongoDbTestHelpers helper;
+    private static MongoDbTestHelpers helper;
+
+    @BeforeAll
+    static void setupDbName(){
+        MorphiaServiceBuilder.setDbName(TEST_DB_NAME);
+        helper = new MongoDbTestHelpers(MONGO_DB_CONTAINER.getConnectionString(), TEST_DB_NAME);
+    }
 
     @BeforeEach
     void setupSut(){
         sut = getMorphiaServiceBuilder()
             .withConnectionString(MONGO_DB_CONTAINER.getConnectionString())
-            .withDbName(TEST_DB_NAME)
             .build();
-        helper = new MongoDbTestHelpers(MONGO_DB_CONTAINER.getConnectionString(), TEST_DB_NAME);
     }
 
     @Test
@@ -45,11 +50,11 @@ class MorphiaServiceIT {
         sut.save(entity);
 
         // then
-        helper.assertFindResult(byId("benchmarks"), documents ->
+        helper.assertFindResult("test-entities", byId("benchmarks"), documents ->
             assertThat(documents.first())
                 .isNotNull()
                 .containsEntry("_id", "benchmarks")
-                .containsEntry("quantity", 23) );
+                .containsEntry("quantity", 23));
     }
 
 

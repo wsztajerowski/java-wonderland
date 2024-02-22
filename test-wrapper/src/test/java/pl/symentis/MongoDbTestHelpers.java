@@ -25,10 +25,14 @@ public class MongoDbTestHelpers {
         return new BsonDocument("_id", id);
     }
 
-    public void assertFindResult(BsonDocument filter, Consumer<FindIterable<Document>> resultsAssertion) {
+    public static BsonDocument all() {
+        return new BsonDocument();
+    }
+
+    public void assertFindResult(String collectionName, BsonDocument filter, Consumer<FindIterable<Document>> resultsAssertion) {
         try (MongoClient mongoClient = new MongoClient(connectionString)) {
             FindIterable<Document> documents = mongoClient.getDatabase(dbName)
-                .getCollection("test-entities")
+                .getCollection(collectionName)
                 .find(filter);
             resultsAssertion.accept(documents);
         }
