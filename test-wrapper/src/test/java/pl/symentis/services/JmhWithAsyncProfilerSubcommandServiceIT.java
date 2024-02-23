@@ -71,7 +71,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
             .allSatisfy(element -> {
                 assertThat(element.get("Size"))
                     .isNotNull()
-                    .matches(o -> Integer.valueOf(o.toString()) > 100_000);
+                    .matches(o -> Integer.parseInt(o.toString()) > 100_000);
                 assertThat(element.get("Key"))
                     .asString()
                     .containsAnyOf("flame-cpu-forward.html", "flame-cpu-reverse.html");
