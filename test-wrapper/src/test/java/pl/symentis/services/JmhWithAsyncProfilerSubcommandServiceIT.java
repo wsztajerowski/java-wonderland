@@ -2,7 +2,6 @@ package pl.symentis.services;
 
 import dev.morphia.annotations.Entity;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -11,7 +10,6 @@ import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jmh.JmhBenchmark;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.as;
@@ -58,23 +56,22 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
                 .isNotNull()
                 .containsEntry("_t", "JmhBenchmark")
                 .extracting("benchmarkMetadata.flamegraphPaths", as(MAP))
-                .containsEntry("flame-cpu-forward", "gha-outputs/commit-commit-sha/attempt-1/jmh/pl.symentis.fake.Incrementing_Synchronized.incrementUsingSynchronized-Throughput/flame-cpu-forward.html")
+                .containsEntry("flame-cpu-forward", "gha-outputs/commit-commit-sha/attempt-1/jmh-with-async/pl.symentis.fake.Incrementing_Synchronized.incrementUsingSynchronized-Throughput/flame-cpu-forward.html")
         );
 
         // and
         JSONArray objectsInTestBucket = listObjectsInTestBucket();
         assertThatJson(objectsInTestBucket)
+            .inPath("$[*].Key")
             .isArray()
-            .hasSize(2);
-        List<JSONObject> jsonObject = List.of(objectsInTestBucket.getJSONObject(0), objectsInTestBucket.getJSONObject(1));
-        assertThat(jsonObject)
-            .allSatisfy(element -> {
-                assertThat(element.get("Size"))
-                    .isNotNull()
-                    .matches(o -> Integer.parseInt(o.toString()) > 100_000);
-                assertThat(element.get("Key"))
-                    .asString()
-                    .containsAnyOf("flame-cpu-forward.html", "flame-cpu-reverse.html");
-            });
+            .anySatisfy(o -> assertThat(o)
+                .asString()
+                .endsWith("flame-cpu-forward.html"))
+            .anySatisfy(o -> assertThat(o)
+                .asString()
+                .endsWith("flame-cpu-reverse.html"))
+            .anySatisfy(o -> assertThat(o)
+                .asString()
+                .endsWith("output.txt"));
     }
 }
