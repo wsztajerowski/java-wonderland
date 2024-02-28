@@ -30,8 +30,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -90,6 +92,29 @@ class Sandbox {
         pb.redirectErrorStream(true);
         // starting the process
         Process process = pb.start();
+        process.waitFor();
+    }
+
+    @Test
+    void capture_process_output() throws IOException, InterruptedException {
+        List<String> commands = new ArrayList<>();
+        commands.add("echo");
+        commands.add("'Hello world!'");
+
+        // creating the process
+        ProcessBuilder pb = new ProcessBuilder(commands);
+
+        // starting the process
+        Process process = pb.start();
+        Files.copy(
+            process.getErrorStream(),
+            Paths.get("error.txt"),
+            StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(
+            process.getInputStream(),
+            Paths.get("output.txt"),
+            StandardCopyOption.REPLACE_EXISTING);
+
         process.waitFor();
     }
 
