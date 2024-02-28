@@ -64,6 +64,14 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
             .anySatisfy(o -> assertThat(o)
                 .asString()
                 .endsWith("TestWithForbiddenResults.html"));
+
+        // and
+        assertThatJson(objectsInTestBucket)
+            .inPath("$[*].Key")
+            .isArray()
+            .anySatisfy(o -> assertThat(o)
+                .asString()
+                .endsWith("output.txt"));
     }
 
 }
