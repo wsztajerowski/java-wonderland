@@ -7,25 +7,22 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static java.lang.Integer.parseInt;
-import static java.text.MessageFormat.format;
 import static pl.symentis.commands.HtmlParser.getHtmlParser;
-import static pl.symentis.entities.jcstress.JCStressResultBuilder.*;
+import static pl.symentis.entities.jcstress.JCStressResultBuilder.getJCStressResult;
 
 public class JCStressHtmlResultParser {
 
     private final HtmlParser htmlParser;
-    private final String commitSha;
-    private final int runAttempt;
+    private final String s3Prefix;
 
-    JCStressHtmlResultParser(HtmlParser htmlParser, String commitSha, int runAttempt) {
+    JCStressHtmlResultParser(HtmlParser htmlParser, String s3Prefix) {
         this.htmlParser = htmlParser;
-        this.commitSha = commitSha;
-        this.runAttempt = runAttempt;
+        this.s3Prefix = s3Prefix;
     }
 
-    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath, String commitSha, int runAttempt) {
+    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath, String s3Prefix) {
         HtmlParser htmlParser = getHtmlParser(resultFilepath);
-        return new JCStressHtmlResultParser(htmlParser, commitSha, runAttempt);
+        return new JCStressHtmlResultParser(htmlParser, s3Prefix);
     }
 
     public List<String> getTestsWithFailedResults() {
@@ -114,20 +111,17 @@ public class JCStressHtmlResultParser {
             .withOsName(this.getOsName())
             .withOsVersion(this.getOsVersion());
         getTestsWithErrorResults()
-            .forEach(test -> jcStressResultBuilder.addTestWithErrorResults(test, createS3Path(this.commitSha, this.runAttempt, test)));
+            .forEach(test -> jcStressResultBuilder.addTestWithErrorResults(test, createS3Path(test)));
         getTestsWithFailedResults()
-            .forEach(test -> jcStressResultBuilder.addTestWithFailedResults(test, createS3Path(this.commitSha, this.runAttempt, test)));
+            .forEach(test -> jcStressResultBuilder.addTestWithFailedResults(test, createS3Path(test)));
         getTestsWithInterestingResults()
-            .forEach(test -> jcStressResultBuilder.addTestWithInterestingResults(test, createS3Path(this.commitSha, this.runAttempt, test)));
+            .forEach(test -> jcStressResultBuilder.addTestWithInterestingResults(test, createS3Path(test)));
         return jcStressResultBuilder
             .build();
     }
 
-    private String createS3Path(String commitSha, int runAttempt, String testName) {
-        return format("gha-outputs/commit-{0}/attempt-{1}/jcstress/{2}.html",
-            commitSha,
-            runAttempt,
-            testName);
+    private String createS3Path(String testName) {
+        return "%s/%s.html".formatted(this.s3Prefix, testName);
     }
 
 }
