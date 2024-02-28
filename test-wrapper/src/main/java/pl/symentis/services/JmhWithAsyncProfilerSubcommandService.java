@@ -23,7 +23,7 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 
 public class JmhWithAsyncProfilerSubcommandService {
 
-    private final CommonSharedOptions commonSharedOptions;
+    private final CommonSharedOptions commonOptions;
     private final JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions;
     private final String asyncPath;
     private final int interval;
@@ -32,18 +32,20 @@ public class JmhWithAsyncProfilerSubcommandService {
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
 
-    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonSharedOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int interval, String output) {
+    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int interval, String output) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
-        this.commonSharedOptions = commonSharedOptions;
+        this.commonOptions = commonOptions;
         this.jmhBenchmarksSharedOptions = jmhBenchmarksSharedOptions;
         this.asyncPath = asyncPath;
         this.interval = interval;
         this.output = output;
-        s3Prefix = createS3PathPrefix(commonSharedOptions.commitSha(), commonSharedOptions.runAttempt());
+        s3Prefix = createS3PathPrefix(commonOptions.commitSha(), commonOptions.runAttempt());
     }
 
     public void executeCommand() {
+        Path outputPath = Path.of("output.txt");
+        Path errorOutputPath = Path.of( "error_output.txt");
         // Build process
         try {
             int exitCode = benchmarkProcessBuilder(jmhBenchmarksSharedOptions.benchmarkPath())
@@ -52,8 +54,10 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .addArgumentWithValue("-wi", jmhBenchmarksSharedOptions.warmupIterations())
                 .addArgumentWithValue("-rf", "json")
                 .addArgumentWithValue("-prof", createAsyncCommand())
-                .addArgumentIfValueIsNotNull("-jvmArgs", commonSharedOptions.jvmArgs())
-                .addOptionalArgument(commonSharedOptions.testNameRegex())
+                .addArgumentIfValueIsNotNull("-jvmArgs", commonOptions.jvmArgs())
+                .addOptionalArgument(commonOptions.testNameRegex())
+                .withOutputPath(outputPath)
+                .withErrorOutputPath(errorOutputPath)
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0) {
@@ -69,7 +73,7 @@ public class JmhWithAsyncProfilerSubcommandService {
             try (Stream<Path> paths = list(Path.of(flamegraphsDir))) {
                 paths
                     .forEach(path -> {
-                        String s3Key = s3Prefix + "jmh/" + path.toString();
+                        String s3Key = s3Prefix + path.toString();
                         s3Service
                             .saveFileOnS3(s3Key, path);
                         String flamegraphName = getFilenameWithoutExtension(path);
@@ -82,20 +86,25 @@ public class JmhWithAsyncProfilerSubcommandService {
             morphiaService
                 .upsert(JmhBenchmark.class)
                 .byFieldValue("benchmarkId", new JmhBenchmarkId(
-                    commonSharedOptions.commitSha(),
+                    commonOptions.commitSha(),
                     jmhResult.benchmark(),
                     jmhResult.mode(),
-                    commonSharedOptions.runAttempt()))
+                    commonOptions.runAttempt()))
                 .setValue("benchmarkMetadata", new BenchmarkMetadata(flamegraphs))
                 .setValue("jmhWithAsyncResult", jmhResult)
                 .execute();
         }
 
+        s3Service
+            .saveFileOnS3(s3Prefix + "outputs/" + outputPath, outputPath);
+        s3Service
+            .saveFileOnS3(s3Prefix + "outputs/" + errorOutputPath, errorOutputPath);
+
         try (Stream<Path> paths = list(Path.of("."))){
             paths
                 .filter(f -> f.toString().endsWith("log"))
                 .forEach(path -> {
-                    String s3Key = s3Prefix + "logs/" + path;
+                    String s3Key = s3Prefix + "logs/" + path.getFileName();
                     s3Service
                         .saveFileOnS3(s3Key, path);
                 });
@@ -106,7 +115,7 @@ public class JmhWithAsyncProfilerSubcommandService {
 
     @NotNull
     private String createS3PathPrefix(String sha, int runNo) {
-        return format("gha-outputs/commit-{0}/attempt-{1}/", sha, runNo);
+        return "gha-outputs/commit-%s/attempt-%d/jmh-with-async/".formatted(sha, runNo);
     }
 
 
