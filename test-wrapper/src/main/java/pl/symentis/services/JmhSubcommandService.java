@@ -5,6 +5,9 @@ import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.entities.jmh.JmhBenchmarkId;
 import pl.symentis.entities.jmh.JmhResult;
 import pl.symentis.infra.MorphiaService;
+import pl.symentis.infra.S3Service;
+
+import java.nio.file.Path;
 
 import static java.text.MessageFormat.format;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
@@ -14,15 +17,19 @@ public class JmhSubcommandService {
 
     private final CommonSharedOptions commonOptions;
     private final JmhBenchmarksSharedOptions jmhBenchmarksOptions;
+    private final S3Service s3Service;
     private final MorphiaService morphiaService;
 
-    JmhSubcommandService(MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions) {
+    JmhSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions) {
+        this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
         this.jmhBenchmarksOptions = jmhBenchmarksOptions;
     }
 
     public void executeCommand() {
+        Path outputPath = Path.of("output.txt");
+        Path errorOutputPath = Path.of( "error_output.txt");
         try {
             int exitCode = benchmarkProcessBuilder(jmhBenchmarksOptions.benchmarkPath())
                 .addArgumentWithValue("-f", jmhBenchmarksOptions.forks())
@@ -30,6 +37,8 @@ public class JmhSubcommandService {
                 .addArgumentWithValue("-wi", jmhBenchmarksOptions.warmupIterations())
                 .addArgumentWithValue("-rf", "json")
                 .addOptionalArgument(commonOptions.testNameRegex())
+                .withOutputPath(outputPath)
+                .withErrorOutputPath(errorOutputPath)
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0) {
@@ -51,5 +60,12 @@ public class JmhSubcommandService {
                 .setValue("jmhResult", jmhResult)
                 .execute();
         }
+
+
+        String s3Prefix = "gha-outputs/commit-%s/attempt-%d/jmh/outputs/".formatted(commonOptions.commitSha(), commonOptions.runAttempt());
+        s3Service
+            .saveFileOnS3(s3Prefix  + outputPath, outputPath);
+        s3Service
+            .saveFileOnS3(s3Prefix  + errorOutputPath, errorOutputPath);
     }
 }
