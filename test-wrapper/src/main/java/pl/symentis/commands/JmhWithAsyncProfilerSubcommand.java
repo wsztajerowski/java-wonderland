@@ -2,6 +2,7 @@ package pl.symentis.commands;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
 import java.nio.file.Path;
@@ -10,10 +11,12 @@ import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.
 
 @Command(name = "jmh-with-async", description = "Run JHM benchmarks with Async profiler")
 public class JmhWithAsyncProfilerSubcommand implements Runnable {
-    @CommandLine.Mixin
+    @Mixin
+    LoggingMixin loggingMixin;
+    @Mixin
     private ApiJmhBenchmarksSharedOptions sharedJmhOptions;
 
-    @CommandLine.Mixin
+    @Mixin
     private ApiCommonSharedOptions apiCommonSharedOptions;
 
     @Option(names = {"-ap", "--async-path"}, defaultValue = "${ASYNC_PATH:-/home/ec2-user/async-profiler/build/libasyncProfiler.so}", description = "Path to Async profiler (default: ${DEFAULT-VALUE})")

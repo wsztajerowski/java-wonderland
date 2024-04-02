@@ -1,6 +1,7 @@
 package pl.symentis.commands;
 
 import picocli.CommandLine;
+import picocli.CommandLine.Mixin;
 
 import java.nio.file.Path;
 
@@ -8,8 +9,9 @@ import static pl.symentis.services.JCStressSubcommandServiceBuilder.getJCStressS
 
 @CommandLine.Command(name = "jcstress", description = "Run JCStress performance tests")
 public class JCStressSubcommand implements Runnable {
-
-    @CommandLine.Mixin
+    @Mixin
+    LoggingMixin loggingMixin;
+    @Mixin
     private ApiCommonSharedOptions apiCommonSharedOptions;
 
     @CommandLine.Option(names = "--benchmark-path", defaultValue = "${BENCHMARK_PATH:-stress-tests.jar}", description = "Path to JCStress benchmark jar (default: ${DEFAULT-VALUE})")

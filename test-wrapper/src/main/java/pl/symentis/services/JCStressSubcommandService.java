@@ -1,5 +1,7 @@
 package pl.symentis.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jcstress.JCStressResult;
 import pl.symentis.entities.jcstress.JCStressTest;
@@ -15,7 +17,8 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 import static pl.symentis.services.S3PrefixProvider.jcstressS3Prefix;
 
 public class JCStressSubcommandService {
-
+    private final Logger logger = LoggerFactory.getLogger(JmhSubcommandService.class);
+    private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
     private final CommonSharedOptions commonOptions;
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
@@ -34,6 +37,7 @@ public class JCStressSubcommandService {
 
     public void executeCommand() {
         try {
+            logger.info("Running JMH - S3 result path: {}", jcstressResultsPath);
             benchmarkProcessBuilder(benchmarkPath)
                 .addArgumentWithValue("-r", jcstressResultsPath)
                 .addArgumentIfValueIsNotNull("-t", commonOptions.testNameRegex())
@@ -44,16 +48,20 @@ public class JCStressSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
+        logger.info("Parsing JCStress html output");
         Path resultFilepath = jcstressResultsPath.resolve( "index.html");
         Path s3Prefix = jcstressS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
             .parse();
 
+        logger.info("Saving benchmarks into Mongo");
+        JCStressTest stressTestResult = new JCStressTest(
+            new JCStressTestId(commonOptions.commitSha(), commonOptions.runAttempt()),
+            new JCStressTestMetadata(),
+            jcStressResult);
+        logger.debug("JCStress results: {}", stressTestResult);
         morphiaService
-            .save(new JCStressTest(
-                new JCStressTestId(commonOptions.commitSha(), commonOptions.runAttempt()),
-                new JCStressTestMetadata(),
-                jcStressResult));
+            .save(stressTestResult);
 
         jcStressResult
             .getAllUnsuccessfulTest()
@@ -65,6 +73,7 @@ public class JCStressSubcommandService {
                 }
             );
 
+        logger.info("Saving test outputs on S3");
         s3Service
             .saveFileOnS3(s3Prefix.resolve("outputs/output.txt").toString(), outputPath);
     }

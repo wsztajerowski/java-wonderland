@@ -1,5 +1,7 @@
 package pl.symentis.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.symentis.FileUtils;
 import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jmh.JmhBenchmark;
@@ -16,7 +18,7 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 import static pl.symentis.services.S3PrefixProvider.jmhS3Prefix;
 
 public class JmhSubcommandService {
-
+    private final Logger logger = LoggerFactory.getLogger(JmhSubcommandService.class);
     private final CommonSharedOptions commonOptions;
     private final JmhBenchmarksSharedOptions jmhBenchmarksOptions;
     private final S3Service s3Service;
@@ -35,6 +37,7 @@ public class JmhSubcommandService {
 
     public void executeCommand() {
         try {
+            logger.info("Running JMH - S3 result path: {}", jmhResultFilePath);
             FileUtils.ensurePathExists(jmhResultFilePath);
             int exitCode = benchmarkProcessBuilder(jmhBenchmarksOptions.benchmarkPath())
                 .addArgumentWithValue("-f", jmhBenchmarksOptions.forks())
@@ -53,7 +56,9 @@ public class JmhSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
+        logger.info("Processing JMH results - saving benchmarks into Mongo");
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhResultFilePath)) {
+            logger.debug("JMH result: {}", jmhResult);
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
                 commonOptions.commitSha(),
                 jmhResult.benchmark(),
@@ -66,6 +71,8 @@ public class JmhSubcommandService {
                 .execute();
         }
 
+
+        logger.info("Saving test outputs on S3");
         Path s3Prefix = jmhS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         s3Service
             .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), outputPath);
