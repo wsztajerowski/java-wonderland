@@ -17,7 +17,7 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 import static pl.symentis.services.S3PrefixProvider.jcstressS3Prefix;
 
 public class JCStressSubcommandService {
-    private final Logger logger = LoggerFactory.getLogger(JmhSubcommandService.class);
+    private final Logger logger = LoggerFactory.getLogger(JCStressSubcommandService.class);
     private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
     private final CommonSharedOptions commonOptions;
     private final S3Service s3Service;
@@ -37,7 +37,7 @@ public class JCStressSubcommandService {
 
     public void executeCommand() {
         try {
-            logger.info("Running JMH - S3 result path: {}", jcstressResultsPath);
+            logger.info("Running JCStress - S3 result path: {}", jcstressResultsPath);
             benchmarkProcessBuilder(benchmarkPath)
                 .addArgumentWithValue("-r", jcstressResultsPath)
                 .addArgumentIfValueIsNotNull("-t", commonOptions.testNameRegex())
