@@ -1,6 +1,7 @@
 package pl.symentis.services;
 
-import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jmh.BenchmarkMetadata;
 import pl.symentis.entities.jmh.JmhBenchmark;
@@ -24,6 +25,7 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 import static pl.symentis.services.S3PrefixProvider.jmhWithAsyncS3Prefix;
 
 public class JmhWithAsyncProfilerSubcommandService {
+    private final Logger logger = LoggerFactory.getLogger(JmhWithAsyncProfilerSubcommandService.class);
 
     private final CommonSharedOptions commonOptions;
     private final JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions;
@@ -54,6 +56,7 @@ public class JmhWithAsyncProfilerSubcommandService {
     public void executeCommand() {
         // Build process
         try {
+            logger.info("Running JMH with async profiler - S3 result path: {}", s3Prefix);
             ensurePathExists(jmhResultFilePath);
             int exitCode = benchmarkProcessBuilder(jmhBenchmarksSharedOptions.benchmarkPath())
                 .addArgumentWithValue("-f", jmhBenchmarksSharedOptions.forks())
@@ -74,7 +77,9 @@ public class JmhWithAsyncProfilerSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
+        logger.info("Processing JMH results - saving benchmarks into Mongo and flamegraphs on S3");
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhResultFilePath)) {
+            logger.debug("JMH result: {}", jmhResult);
             Map<String, String> flamegraphs = new HashMap<>();
             String benchmarkFullname = jmhResult.benchmark() + getFlamegraphsDirSuffix(jmhResult.mode());
             Path flamegraphsDir = asyncOutputPath.resolve(benchmarkFullname);
@@ -103,9 +108,11 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .execute();
         }
 
+        logger.info("Saving test outputs on S3");
         s3Service
             .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), outputPath);
 
+        logger.info("Saving JMH logs on S3");
         try (Stream<Path> paths = list(asyncOutputPath)){
             paths
                 .filter(f -> f.toString().endsWith("log"))
@@ -120,7 +127,6 @@ public class JmhWithAsyncProfilerSubcommandService {
     }
 
 
-    @NotNull
     private static String getFlamegraphsDirSuffix(String mode) {
         return switch (mode) {
             case "thrpt":

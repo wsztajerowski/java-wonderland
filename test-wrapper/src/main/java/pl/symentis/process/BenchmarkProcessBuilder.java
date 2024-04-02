@@ -1,5 +1,7 @@
 package pl.symentis.process;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.symentis.FileUtils;
 import pl.symentis.JavaWonderlandException;
 
@@ -12,11 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BenchmarkProcessBuilder {
+    private final Logger logger = LoggerFactory.getLogger(BenchmarkProcessBuilder.class);
     List<String> commands = new ArrayList<>();
     Path outputPath;
+    Path errorOutputPath;
 
     private BenchmarkProcessBuilder(){
         outputPath = Paths.get("output.txt");
+        errorOutputPath = Paths.get("error_output.txt");
     }
 
     public static BenchmarkProcessBuilder benchmarkProcessBuilder(Path benchmarkPath) {
@@ -28,6 +33,11 @@ public class BenchmarkProcessBuilder {
 
     public BenchmarkProcessBuilder withOutputPath(Path path){
         this.outputPath = path;
+        return this;
+    }
+
+    public BenchmarkProcessBuilder withErrorOutputPath(Path path){
+        this.errorOutputPath = path;
         return this;
     }
 
@@ -60,6 +70,7 @@ public class BenchmarkProcessBuilder {
     public Process buildAndStartProcess() {
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         try {
+            logger.debug("Running process: {}", processBuilder.command());
             processBuilder.redirectErrorStream(true); // redirect error stream to standard output stream
             FileUtils.ensurePathExists(outputPath);
             Process process = processBuilder.start();

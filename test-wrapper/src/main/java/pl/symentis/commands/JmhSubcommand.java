@@ -7,7 +7,7 @@ import static pl.symentis.services.JmhSubcommandServiceBuilder.getJmhSubcommandS
 
 @Command(name = "jmh", description = "Run JHM benchmarks")
 public class JmhSubcommand implements Runnable {
-
+    @Mixin LoggingMixin loggingMixin;
     @Mixin
     private ApiJmhBenchmarksSharedOptions sharedJmhOptions;
 

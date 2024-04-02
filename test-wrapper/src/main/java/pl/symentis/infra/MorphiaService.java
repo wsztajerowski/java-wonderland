@@ -4,6 +4,8 @@ import dev.morphia.Datastore;
 import dev.morphia.UpdateOptions;
 import dev.morphia.query.filters.Filter;
 import dev.morphia.query.updates.UpdateOperator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +39,7 @@ public class MorphiaService {
     }
 
     public class MorphiaUpsertService<T> {
+        private final Logger logger = LoggerFactory.getLogger(MorphiaUpsertService.class);
         private final Class<T> entity;
         private Filter filter;
 
@@ -59,6 +62,7 @@ public class MorphiaService {
 
         public void execute(){
             requireNonNull(filter, "Please set filter (e.g. by using byFieldValue method) before executing this method!");
+            logger.debug("Updating document: {}", filter);
             UpdateOperator[] updateOperators = updates.entrySet()
                 .stream()
                 .map(entry -> set(entry.getKey(), entry.getValue()))
