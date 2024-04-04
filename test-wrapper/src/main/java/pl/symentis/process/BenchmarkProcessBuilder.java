@@ -13,11 +13,9 @@ import java.util.List;
 public class BenchmarkProcessBuilder {
     List<String> commands = new ArrayList<>();
     Path outputPath;
-    Path errorOutputPath;
 
     private BenchmarkProcessBuilder(){
         outputPath = Paths.get("output.txt");
-        errorOutputPath = Paths.get("error_output.txt");
     }
 
     public static BenchmarkProcessBuilder benchmarkProcessBuilder(String benchmarkPath) {
@@ -29,11 +27,6 @@ public class BenchmarkProcessBuilder {
 
     public BenchmarkProcessBuilder withOutputPath(Path path){
         this.outputPath = path;
-        return this;
-    }
-
-    public BenchmarkProcessBuilder withErrorOutputPath(Path path){
-        this.errorOutputPath = path;
         return this;
     }
 
@@ -66,14 +59,11 @@ public class BenchmarkProcessBuilder {
     public Process buildAndStartProcess() {
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         try {
+            processBuilder.redirectErrorStream(true); // redirect error stream to standart output stream
             Process process = processBuilder.start();
             Files.copy(
                 process.getInputStream(),
                 outputPath,
-                StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(
-                process.getErrorStream(),
-                errorOutputPath,
                 StandardCopyOption.REPLACE_EXISTING);
             return process;
         } catch (IOException e) {

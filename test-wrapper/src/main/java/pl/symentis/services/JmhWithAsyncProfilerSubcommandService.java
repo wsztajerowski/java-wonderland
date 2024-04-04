@@ -45,7 +45,6 @@ public class JmhWithAsyncProfilerSubcommandService {
 
     public void executeCommand() {
         Path outputPath = Path.of("output.txt");
-        Path errorOutputPath = Path.of( "error_output.txt");
         // Build process
         try {
             int exitCode = benchmarkProcessBuilder(jmhBenchmarksSharedOptions.benchmarkPath())
@@ -57,7 +56,6 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .addArgumentIfValueIsNotNull("-jvmArgs", commonOptions.jvmArgs())
                 .addOptionalArgument(commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
-                .withErrorOutputPath(errorOutputPath)
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0) {
@@ -97,8 +95,6 @@ public class JmhWithAsyncProfilerSubcommandService {
 
         s3Service
             .saveFileOnS3(s3Prefix + "outputs/" + outputPath, outputPath);
-        s3Service
-            .saveFileOnS3(s3Prefix + "outputs/" + errorOutputPath, errorOutputPath);
 
         try (Stream<Path> paths = list(Path.of("."))){
             paths
