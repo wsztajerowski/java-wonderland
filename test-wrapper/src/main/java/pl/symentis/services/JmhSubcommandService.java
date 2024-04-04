@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import static java.text.MessageFormat.format;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
 import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
+import static pl.symentis.services.S3PrefixProvider.jmhS3Prefix;
 
 public class JmhSubcommandService {
 
@@ -59,9 +60,8 @@ public class JmhSubcommandService {
                 .execute();
         }
 
-
-        String s3Prefix = "gha-outputs/commit-%s/attempt-%d/jmh/outputs/".formatted(commonOptions.commitSha(), commonOptions.runAttempt());
+        Path s3Prefix = jmhS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         s3Service
-            .saveFileOnS3(s3Prefix  + outputPath, outputPath);
+            .saveFileOnS3(s3Prefix.resolve("outputs").resolve(outputPath).toString(), outputPath);
     }
 }

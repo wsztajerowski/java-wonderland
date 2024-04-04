@@ -13,14 +13,14 @@ import static pl.symentis.entities.jcstress.JCStressResultBuilder.getJCStressRes
 public class JCStressHtmlResultParser {
 
     private final HtmlParser htmlParser;
-    private final String s3Prefix;
+    private final Path s3Prefix;
 
-    JCStressHtmlResultParser(HtmlParser htmlParser, String s3Prefix) {
+    JCStressHtmlResultParser(HtmlParser htmlParser, Path s3Prefix) {
         this.htmlParser = htmlParser;
         this.s3Prefix = s3Prefix;
     }
 
-    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath, String s3Prefix) {
+    public static JCStressHtmlResultParser getJCStressHtmlResultParser(Path resultFilepath, Path s3Prefix) {
         HtmlParser htmlParser = getHtmlParser(resultFilepath);
         return new JCStressHtmlResultParser(htmlParser, s3Prefix);
     }
@@ -121,7 +121,8 @@ public class JCStressHtmlResultParser {
     }
 
     private String createS3Path(String testName) {
-        return "%s/%s.html".formatted(this.s3Prefix, testName);
+        String testOutputFile = testName + ".html";
+        return s3Prefix.resolve(testOutputFile).toString();
     }
 
 }

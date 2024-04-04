@@ -20,6 +20,7 @@ import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
 import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
+import static pl.symentis.services.S3PrefixProvider.jmhWithAsyncS3Prefix;
 
 public class JmhWithAsyncProfilerSubcommandService {
 
@@ -28,7 +29,7 @@ public class JmhWithAsyncProfilerSubcommandService {
     private final String asyncPath;
     private final int interval;
     private final String output;
-    private final String s3Prefix;
+    private final Path s3Prefix;
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
 
@@ -40,7 +41,7 @@ public class JmhWithAsyncProfilerSubcommandService {
         this.asyncPath = asyncPath;
         this.interval = interval;
         this.output = output;
-        s3Prefix = createS3PathPrefix(commonOptions.commitSha(), commonOptions.runAttempt());
+        s3Prefix = jmhWithAsyncS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
     }
 
     public void executeCommand() {
@@ -71,7 +72,7 @@ public class JmhWithAsyncProfilerSubcommandService {
             try (Stream<Path> paths = list(Path.of(flamegraphsDir))) {
                 paths
                     .forEach(path -> {
-                        String s3Key = s3Prefix + path.toString();
+                        String s3Key = s3Prefix.resolve(path).toString();
                         s3Service
                             .saveFileOnS3(s3Key, path);
                         String flamegraphName = getFilenameWithoutExtension(path);
@@ -94,24 +95,19 @@ public class JmhWithAsyncProfilerSubcommandService {
         }
 
         s3Service
-            .saveFileOnS3(s3Prefix + "outputs/" + outputPath, outputPath);
+            .saveFileOnS3(s3Prefix.resolve("outputs").resolve(outputPath).toString(), outputPath);
 
         try (Stream<Path> paths = list(Path.of("."))){
             paths
                 .filter(f -> f.toString().endsWith("log"))
                 .forEach(path -> {
-                    String s3Key = s3Prefix + "logs/" + path.getFileName();
+                    String s3Key = s3Prefix.resolve("logs").resolve(path.getFileName()).toString();
                     s3Service
                         .saveFileOnS3(s3Key, path);
                 });
         } catch (IOException e) {
             throw new JavaWonderlandException(e);
         }
-    }
-
-    @NotNull
-    private String createS3PathPrefix(String sha, int runNo) {
-        return "gha-outputs/commit-%s/attempt-%d/jmh-with-async/".formatted(sha, runNo);
     }
 
 
