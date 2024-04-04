@@ -29,7 +29,6 @@ public class JmhSubcommandService {
 
     public void executeCommand() {
         Path outputPath = Path.of("output.txt");
-        Path errorOutputPath = Path.of( "error_output.txt");
         try {
             int exitCode = benchmarkProcessBuilder(jmhBenchmarksOptions.benchmarkPath())
                 .addArgumentWithValue("-f", jmhBenchmarksOptions.forks())
@@ -38,7 +37,6 @@ public class JmhSubcommandService {
                 .addArgumentWithValue("-rf", "json")
                 .addOptionalArgument(commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
-                .withErrorOutputPath(errorOutputPath)
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0) {
@@ -65,7 +63,5 @@ public class JmhSubcommandService {
         String s3Prefix = "gha-outputs/commit-%s/attempt-%d/jmh/outputs/".formatted(commonOptions.commitSha(), commonOptions.runAttempt());
         s3Service
             .saveFileOnS3(s3Prefix  + outputPath, outputPath);
-        s3Service
-            .saveFileOnS3(s3Prefix  + errorOutputPath, errorOutputPath);
     }
 }

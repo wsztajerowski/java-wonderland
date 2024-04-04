@@ -30,13 +30,11 @@ public class JCStressSubcommandService {
 
     public void executeCommand() {
         Path outputPath = Path.of("output.txt");
-        Path errorOutputPath = Path.of( "error_output.txt");
         try {
             benchmarkProcessBuilder(benchmarkPath)
                 .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
                 .addOptionalArgument(commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
-                .withErrorOutputPath(errorOutputPath)
                 .buildAndStartProcess()
                 .waitFor();
         } catch (AssertionError | InterruptedException e) {
@@ -63,7 +61,5 @@ public class JCStressSubcommandService {
 
         s3Service
             .saveFileOnS3(s3Prefix + "/outputs/" + outputPath, outputPath);
-        s3Service
-            .saveFileOnS3(s3Prefix + "/outputs/" + errorOutputPath, errorOutputPath);
     }
 }
