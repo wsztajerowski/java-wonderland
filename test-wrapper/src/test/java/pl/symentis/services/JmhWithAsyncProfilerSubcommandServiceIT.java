@@ -39,7 +39,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)
                 .build())
-            .withCommonOptions(new CommonSharedOptions("commit-sha", 1, "", "incrementUsingSynchronized"))
+            .withCommonOptions(new CommonSharedOptions("abcdef12", 1, "", "incrementUsingSynchronized"))
             .withJmhOptions(new JmhBenchmarksSharedOptions(0, 1, 1, jhhTestBenchmark))
             .withAsyncPath(System.getenv("ASYNC_PATH"))
             .withOutput("flamegraph")
@@ -56,7 +56,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
                 .isNotNull()
                 .containsEntry("_t", "JmhBenchmark")
                 .extracting("benchmarkMetadata.flamegraphPaths", as(MAP))
-                .containsEntry("flame-cpu-forward", "gha-outputs/commit-commit-sha/attempt-1/jmh-with-async/pl.symentis.fake.Incrementing_Synchronized.incrementUsingSynchronized-Throughput/flame-cpu-forward.html")
+                .containsEntry("flame-cpu-forward", "gha-outputs/commit-abcdef12/attempt-1/jmh-with-async/pl.symentis.fake.Incrementing_Synchronized.incrementUsingSynchronized-Throughput/flame-cpu-forward.html")
         );
 
         // and
@@ -72,6 +72,6 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
                 .endsWith("flame-cpu-reverse.html"))
             .anySatisfy(o -> assertThat(o)
                 .asString()
-                .endsWith("output.txt"));
+                .isEqualTo("gha-outputs/commit-abcdef12/attempt-1/jmh-with-async/outputs/output.txt"));
     }
 }

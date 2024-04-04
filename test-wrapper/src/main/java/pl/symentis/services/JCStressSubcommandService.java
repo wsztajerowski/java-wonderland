@@ -12,6 +12,7 @@ import java.nio.file.Path;
 
 import static pl.symentis.commands.JCStressHtmlResultParser.getJCStressHtmlResultParser;
 import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
+import static pl.symentis.services.S3PrefixProvider.jcstressS3Prefix;
 
 public class JCStressSubcommandService {
 
@@ -42,7 +43,7 @@ public class JCStressSubcommandService {
         }
 
         Path resultFilepath = Path.of(JCSTRESS_RESULTS_DIR, "index.html");
-        String s3Prefix = "gha-outputs/commit-%s/attempt-%d/jcstress".formatted(commonOptions.commitSha(), commonOptions.runAttempt());
+        Path s3Prefix = jcstressS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
             .parse();
 
@@ -60,6 +61,6 @@ public class JCStressSubcommandService {
             );
 
         s3Service
-            .saveFileOnS3(s3Prefix + "/outputs/" + outputPath, outputPath);
+            .saveFileOnS3(s3Prefix.resolve("outputs").resolve(outputPath).toString(), outputPath);
     }
 }
