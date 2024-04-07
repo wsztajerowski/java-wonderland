@@ -4,6 +4,7 @@ import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
 import pl.symentis.infra.S3ServiceBuilder;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -13,7 +14,7 @@ public final class JmhSubcommandServiceBuilder {
     private S3Service s3Service;
     private CommonSharedOptions commonOptions;
     private JmhBenchmarksSharedOptions jmhBenchmarksOptions;
-    private String mongoConnectionString;
+    private URI mongoConnectionString;
     private Path outputPath;
     private Path resultsPath;
 
@@ -37,7 +38,7 @@ public final class JmhSubcommandServiceBuilder {
         return this;
     }
 
-    public JmhSubcommandServiceBuilder withMongoConnectionString(String mongoConnectionString) {
+    public JmhSubcommandServiceBuilder withMongoConnectionString(URI mongoConnectionString) {
         this.mongoConnectionString = mongoConnectionString;
         return this;
     }
