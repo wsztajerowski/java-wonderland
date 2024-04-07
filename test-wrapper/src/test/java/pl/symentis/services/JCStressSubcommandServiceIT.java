@@ -8,6 +8,8 @@ import pl.symentis.MongoDbTestHelpers;
 import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jcstress.JCStressTest;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -27,8 +29,10 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
     }
 
     @Test
-    void successful_scenario(){
+    void successful_scenario() throws IOException {
         // given
+        Path result = Files.createTempDirectory("jcstress-results");
+        Path output = Files.createTempFile("outputs", "jcstress.txt");
         String stressTestJarPath = Path.of("target", "fake-stress-tests.jar").toAbsolutePath().toString();
         JCStressSubcommandService sut = JCStressSubcommandServiceBuilder.getJCStressSubcommandService()
             .withMongoConnectionString(getConnectionString())
@@ -38,6 +42,8 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
                 .build())
             .withCommonOptions(new CommonSharedOptions("abcdef12", 1, "", "IntegerIncrementing"))
             .withBenchmarkPath(stressTestJarPath)
+            .withResultsPath(result)
+            .withOutputPath(output)
             .build();
 
         // when

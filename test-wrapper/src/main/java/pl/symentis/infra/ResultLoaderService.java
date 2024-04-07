@@ -11,10 +11,10 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Type;
+import java.nio.file.Path;
 import java.util.List;
 
 public class ResultLoaderService {
-    public static final String JMH_RESULT_FILENAME = "jmh-result.json";
     private final Gson gson;
 
     ResultLoaderService(Gson gson) {
@@ -29,12 +29,12 @@ public class ResultLoaderService {
         return new ResultLoaderService(gson);
     }
 
-    public List<JmhResult> loadJmhResults() {
+    public List<JmhResult> loadJmhResults(Path jmhResultFilePath) {
         try {
             Type listType = new TypeToken<List<JmhResult>>() {
             }.getType();
             return gson.fromJson(
-                new BufferedReader(new FileReader(JMH_RESULT_FILENAME)),
+                new BufferedReader(new FileReader(jmhResultFilePath.toFile())),
                 listType);
         } catch (FileNotFoundException e) {
             throw new JavaWonderlandException(e);

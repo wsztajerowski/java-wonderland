@@ -4,19 +4,28 @@ import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
 import pl.symentis.infra.S3ServiceBuilder;
 
+import java.nio.file.Path;
+import java.util.Objects;
+
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 
 public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     private String asyncPath;
-    private int interval;
-    private String output;
+    private int asyncInterval;
+    private String asyncOutputType;
     private CommonSharedOptions commonOptions;
     private JmhBenchmarksSharedOptions jmhBenchmarksOptions;
     private S3Service s3Service;
     private String mongoConnectionString;
+    private Path outputPath;
+    private Path resultsPath;
+    private Path asyncOutputPath;
 
     private JmhWithAsyncProfilerSubcommandServiceBuilder() {
         s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
+        asyncOutputPath = Path.of("async-results");
+        outputPath = Path.of("output.txt");
+        resultsPath = Path.of(JmhBenchmarksSharedOptions.JMH_RESULT_FILENAME);
     }
 
     public static JmhWithAsyncProfilerSubcommandServiceBuilder getJmhWithAsyncProfilerSubcommandService() {
@@ -38,13 +47,18 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
         return this;
     }
 
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withInterval(int interval) {
-        this.interval = interval;
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withAsyncInterval(int interval) {
+        this.asyncInterval = interval;
         return this;
     }
 
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withOutput(String output) {
-        this.output = output;
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withAsyncOutputType(String outputType) {
+        this.asyncOutputType = outputType;
+        return this;
+    }
+
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withAsyncOutputPath(Path asyncOutputPath) {
+        this.asyncOutputPath = asyncOutputPath;
         return this;
     }
 
@@ -58,10 +72,32 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
         return this;
     }
 
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withOutputPath(Path outputPath) {
+        Objects.requireNonNull(outputPath, "Provide non-null path as JMH output file!");
+        this.outputPath = outputPath;
+        return this;
+    }
+
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withResultsPath(Path resultsPath) {
+        Objects.requireNonNull(resultsPath, "Provide non-null path as JMH results file!");
+        this.resultsPath = resultsPath.toAbsolutePath();
+        return this;
+    }
+
     public JmhWithAsyncProfilerSubcommandService build() {
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
-        return new JmhWithAsyncProfilerSubcommandService(s3Service, morphiaService, commonOptions, jmhBenchmarksOptions, asyncPath, interval, output);
+        return new JmhWithAsyncProfilerSubcommandService(
+            s3Service,
+            morphiaService,
+            commonOptions,
+            jmhBenchmarksOptions,
+            asyncPath,
+            asyncInterval,
+            asyncOutputType,
+            asyncOutputPath,
+            outputPath,
+            resultsPath);
     }
 }
