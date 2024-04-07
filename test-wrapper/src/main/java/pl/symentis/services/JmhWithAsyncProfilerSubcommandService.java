@@ -25,8 +25,7 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 import static pl.symentis.services.S3PrefixProvider.jmhWithAsyncS3Prefix;
 
 public class JmhWithAsyncProfilerSubcommandService {
-    private final Logger logger = LoggerFactory.getLogger(JmhWithAsyncProfilerSubcommandService.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(JmhWithAsyncProfilerSubcommandService.class);
     private final CommonSharedOptions commonOptions;
     private final JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions;
     private final S3Service s3Service;
