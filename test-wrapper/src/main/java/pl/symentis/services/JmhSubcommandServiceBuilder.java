@@ -21,7 +21,6 @@ public final class JmhSubcommandServiceBuilder {
         s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
         outputPath = Path.of("output.txt");
         resultsPath = Path.of(JmhBenchmarksSharedOptions.JMH_RESULT_FILENAME);
-        s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
     }
 
     public static JmhSubcommandServiceBuilder getJmhSubcommandService() {
