@@ -17,8 +17,7 @@ import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilde
 import static pl.symentis.services.S3PrefixProvider.jcstressS3Prefix;
 
 public class JCStressSubcommandService {
-    private final Logger logger = LoggerFactory.getLogger(JCStressSubcommandService.class);
-    private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
+    private static final Logger logger = LoggerFactory.getLogger(JCStressSubcommandService.class);
     private final CommonSharedOptions commonOptions;
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
@@ -54,7 +53,7 @@ public class JCStressSubcommandService {
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
             .parse();
 
-        logger.info("Saving benchmarks into Mongo");
+        logger.info("Saving benchmarks into DB");
         JCStressTest stressTestResult = new JCStressTest(
             new JCStressTestId(commonOptions.commitSha(), commonOptions.runAttempt()),
             new JCStressTestMetadata(),
