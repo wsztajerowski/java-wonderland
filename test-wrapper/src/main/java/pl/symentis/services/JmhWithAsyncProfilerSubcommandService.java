@@ -76,7 +76,7 @@ public class JmhWithAsyncProfilerSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        logger.info("Processing JMH results - saving benchmarks into Mongo and flamegraphs on S3");
+        logger.info("Processing JMH results - saving benchmarks into DB and flamegraphs on S3");
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhResultFilePath)) {
             logger.debug("JMH result: {}", jmhResult);
             Map<String, String> flamegraphs = new HashMap<>();

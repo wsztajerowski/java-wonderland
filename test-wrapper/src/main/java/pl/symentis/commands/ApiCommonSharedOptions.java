@@ -5,13 +5,15 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import pl.symentis.services.CommonSharedOptions;
 
+import java.net.URI;
+
 @Command
 public class ApiCommonSharedOptions {
 
     @Option(names = {"--mongo-connection-string", "-m"},
         defaultValue = "${MONGO_CONNECTION_STRING}",
         description = "MongoDB connection string - you could provide it as a option value or put in MONGO_CONNECTION_STRING env variable. For details see: https://www.mongodb.com/docs/manual/reference/connection-string/")
-    String mongoConnectionString;
+    URI mongoConnectionString;
 
     @Option(names = "--commit-sha", defaultValue = "${COMMIT_SHA}", description = "Commit SHA - you could provide it as a option value or put in COMMIT_SHA env variable. Provided value will be truncated to first 8 chars")
     String commitSha;
@@ -32,7 +34,7 @@ public class ApiCommonSharedOptions {
         return new CommonSharedOptions(commitSha, runAttempt, jvmArgs, testNameRegex);
     }
 
-    public String getMongoConnectionString() {
+    public URI getMongoConnectionString() {
         return mongoConnectionString;
     }
 }

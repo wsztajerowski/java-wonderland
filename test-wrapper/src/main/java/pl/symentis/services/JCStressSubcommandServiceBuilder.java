@@ -4,6 +4,7 @@ import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
 import pl.symentis.infra.S3ServiceBuilder;
 
+import java.net.URI;
 import java.nio.file.Path;
 
 import static java.util.Objects.requireNonNull;
@@ -13,7 +14,7 @@ public final class JCStressSubcommandServiceBuilder {
     private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
     private CommonSharedOptions commonOptions;
     private S3Service s3Service;
-    private String mongoConnectionString;
+    private URI mongoConnectionString;
     private Path benchmarkPath;
     private Path outputPath;
     private Path resultsPath;
@@ -57,7 +58,7 @@ public final class JCStressSubcommandServiceBuilder {
         return this;
     }
 
-    public JCStressSubcommandServiceBuilder withMongoConnectionString(String mongoConnectionString) {
+    public JCStressSubcommandServiceBuilder withMongoConnectionString(URI mongoConnectionString) {
         this.mongoConnectionString = mongoConnectionString;
         return this;
     }
