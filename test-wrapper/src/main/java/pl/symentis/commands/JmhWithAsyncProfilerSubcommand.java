@@ -25,7 +25,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
     @Option(names = {"-aot", "--async-output-type"}, description = "Output format(s). Supported: [text, collapsed, flamegraph, tree, jfr] (default: ${DEFAULT-VALUE})")
     String asyncOutputType = "flamegraph";
 
-    @Option(names = {"-aop", "--async-output-path"}, description = "Profiler output path")
+    @Option(names = {"-aop", "--async-output-path"}, defaultValue = "./async-output", description = "Profiler output path")
     Path asyncOutputPath;
 
     @Override
