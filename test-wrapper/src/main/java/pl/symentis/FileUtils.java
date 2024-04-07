@@ -1,5 +1,7 @@
 package pl.symentis;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileUtils {
@@ -11,5 +13,16 @@ public class FileUtils {
             return filename.substring(0, filename.lastIndexOf("."));
         }
         return filename;
+    }
+
+    public static void ensurePathExists(Path path){
+        Path parent = path.getParent();
+        if(parent != null && Files.notExists(parent)) {
+            try {
+                Files.createDirectories(path);
+            } catch (IOException e) {
+                throw new JavaWonderlandException(e);
+            }
+        }
     }
 }

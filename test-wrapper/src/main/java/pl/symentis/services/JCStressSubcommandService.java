@@ -16,25 +16,27 @@ import static pl.symentis.services.S3PrefixProvider.jcstressS3Prefix;
 
 public class JCStressSubcommandService {
 
-    private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
     private final CommonSharedOptions commonOptions;
-    private final String benchmarkPath;
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
+    private final Path benchmarkPath;
+    private final Path jcstressResultsPath;
+    private final Path outputPath;
 
-    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, String benchmarkPath) {
+    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, Path benchmarkPath, Path outputPath, Path resultsDir) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
         this.benchmarkPath = benchmarkPath;
+        this.outputPath = outputPath;
+        this.jcstressResultsPath = resultsDir;
     }
 
     public void executeCommand() {
-        Path outputPath = Path.of("output.txt");
         try {
             benchmarkProcessBuilder(benchmarkPath)
-                .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
-                .addOptionalArgument(commonOptions.testNameRegex())
+                .addArgumentWithValue("-r", jcstressResultsPath)
+                .addArgumentIfValueIsNotNull("-t", commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
                 .buildAndStartProcess()
                 .waitFor();
@@ -42,7 +44,7 @@ public class JCStressSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        Path resultFilepath = Path.of(JCSTRESS_RESULTS_DIR, "index.html");
+        Path resultFilepath = jcstressResultsPath.resolve( "index.html");
         Path s3Prefix = jcstressS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
             .parse();
@@ -56,11 +58,14 @@ public class JCStressSubcommandService {
         jcStressResult
             .getAllUnsuccessfulTest()
             .forEach((testName, s3Key) ->
-                s3Service
-                    .saveFileOnS3(s3Key, Path.of(JCSTRESS_RESULTS_DIR, testName + ".html"))
+                {
+                    String testOutputFilename = testName + ".html";
+                    s3Service
+                        .saveFileOnS3(s3Key, jcstressResultsPath.resolve(testOutputFilename));
+                }
             );
 
         s3Service
-            .saveFileOnS3(s3Prefix.resolve("outputs").resolve(outputPath).toString(), outputPath);
+            .saveFileOnS3(s3Prefix.resolve("outputs/output.txt").toString(), outputPath);
     }
 }

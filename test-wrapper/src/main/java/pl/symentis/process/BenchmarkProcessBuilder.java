@@ -1,5 +1,6 @@
 package pl.symentis.process;
 
+import pl.symentis.FileUtils;
 import pl.symentis.JavaWonderlandException;
 
 import java.io.IOException;
@@ -18,11 +19,11 @@ public class BenchmarkProcessBuilder {
         outputPath = Paths.get("output.txt");
     }
 
-    public static BenchmarkProcessBuilder benchmarkProcessBuilder(String benchmarkPath) {
+    public static BenchmarkProcessBuilder benchmarkProcessBuilder(Path benchmarkPath) {
         return new BenchmarkProcessBuilder()
             .addArgument("java")
             .addArgument("-jar")
-            .addArgument(benchmarkPath);
+            .addArgument(benchmarkPath.toString());
     }
 
     public BenchmarkProcessBuilder withOutputPath(Path path){
@@ -59,7 +60,8 @@ public class BenchmarkProcessBuilder {
     public Process buildAndStartProcess() {
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         try {
-            processBuilder.redirectErrorStream(true); // redirect error stream to standart output stream
+            processBuilder.redirectErrorStream(true); // redirect error stream to standard output stream
+            FileUtils.ensurePathExists(outputPath);
             Process process = processBuilder.start();
             Files.copy(
                 process.getInputStream(),

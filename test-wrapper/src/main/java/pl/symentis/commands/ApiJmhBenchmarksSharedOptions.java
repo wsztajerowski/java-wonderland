@@ -3,6 +3,8 @@ package pl.symentis.commands;
 import picocli.CommandLine.*;
 import pl.symentis.services.JmhBenchmarksSharedOptions;
 
+import java.nio.file.Path;
+
 @Command
 public class ApiJmhBenchmarksSharedOptions {
 
@@ -16,7 +18,7 @@ public class ApiJmhBenchmarksSharedOptions {
     int iterations = 5;
 
     @Option(names = "--benchmark-path", defaultValue = "${BENCHMARK_PATH:-jmh-benchmarks.jar}", description = "Path to benchmark jar (default: ${DEFAULT-VALUE})")
-    String benchmarkPath;
+    Path benchmarkPath;
 
     public JmhBenchmarksSharedOptions getValues(){
         return new JmhBenchmarksSharedOptions(warmupIterations, forks, iterations, benchmarkPath);
