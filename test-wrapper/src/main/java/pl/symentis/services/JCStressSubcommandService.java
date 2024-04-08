@@ -38,6 +38,13 @@ public class JCStressSubcommandService {
         try {
             logger.info("Running JCStress - S3 result path: {}", jcstressResultsPath);
             benchmarkProcessBuilder(benchmarkPath)
+                .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
+                .addArgumentWithValue("-f", 1)
+//                .addArgumentWithValue("-fsm", 1)
+                .addArgumentWithValue("-m", "stress")
+                .addArgumentWithValue("-iters", 1)
+                .addArgumentWithValue("-sc", false)
+                .addOptionalArgument(commonOptions.testNameRegex())
                 .addArgumentWithValue("-r", jcstressResultsPath)
                 .addArgumentIfValueIsNotNull("-t", commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
