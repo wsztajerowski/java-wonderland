@@ -7,7 +7,6 @@ import pl.symentis.infra.S3ServiceBuilder;
 import java.net.URI;
 import java.nio.file.Path;
 
-import static java.util.Objects.requireNonNull;
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 
 public final class JCStressSubcommandServiceBuilder {
@@ -20,6 +19,7 @@ public final class JCStressSubcommandServiceBuilder {
     private Path resultsPath;
 
     private JCStressSubcommandServiceBuilder() {
+        this.s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
         outputPath = Path.of("output.txt");
         resultsPath = Path.of(JCSTRESS_RESULTS_DIR);
     }
@@ -53,18 +53,12 @@ public final class JCStressSubcommandServiceBuilder {
         return this;
     }
 
-    public JCStressSubcommandServiceBuilder withDefaultS3Service(){
-        this.s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
-        return this;
-    }
-
     public JCStressSubcommandServiceBuilder withMongoConnectionString(URI mongoConnectionString) {
         this.mongoConnectionString = mongoConnectionString;
         return this;
     }
 
     public JCStressSubcommandService build() {
-        requireNonNull(s3Service, "Please provide S3 service!");
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();

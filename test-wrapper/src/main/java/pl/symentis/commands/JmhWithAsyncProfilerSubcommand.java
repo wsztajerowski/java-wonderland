@@ -43,6 +43,4 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
             .build()
             .executeCommand();
     }
-
-
 }
