@@ -64,7 +64,7 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .addArgumentWithValue("-rf", "json")
                 .addArgumentIfValueIsNotNull("-rff", jmhResultFilePath)
                 .addArgumentWithValue("-prof", createAsyncCommand())
-                .addArgumentIfValueIsNotNull("-jvmArgs", commonOptions.jvmArgs())
+                .addArgumentIfValueIsNotNull("-jvmArgs", jmhBenchmarksSharedOptions.jvmArgs())
                 .addOptionalArgument(commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
                 .buildAndStartProcess()

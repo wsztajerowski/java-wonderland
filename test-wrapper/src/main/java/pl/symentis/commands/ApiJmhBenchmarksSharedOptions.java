@@ -17,10 +17,13 @@ public class ApiJmhBenchmarksSharedOptions {
     @Option(names = "-i", description = "Number of measurement iterations to do (default: ${DEFAULT-VALUE})")
     int iterations = 5;
 
+    @Option(names = "-jvmArgs", description = "JVM args to pass to benchmark")
+    String jvmArgs;
+
     @Option(names = "--benchmark-path", defaultValue = "${BENCHMARK_PATH:-jmh-benchmarks.jar}", description = "Path to benchmark jar (default: ${DEFAULT-VALUE})")
     Path benchmarkPath;
 
     public JmhBenchmarksSharedOptions getValues(){
-        return new JmhBenchmarksSharedOptions(warmupIterations, forks, iterations, benchmarkPath);
+        return new JmhBenchmarksSharedOptions(warmupIterations, forks, iterations, jvmArgs, benchmarkPath);
     }
 }
