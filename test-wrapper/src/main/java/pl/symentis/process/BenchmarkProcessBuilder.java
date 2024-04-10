@@ -66,11 +66,8 @@ public class BenchmarkProcessBuilder {
             logger.debug("Running process: {}", processBuilder.command());
             processBuilder.redirectErrorStream(true); // redirect error stream to standard output stream
             FileUtils.ensurePathExists(outputPath);
+            processBuilder.redirectOutput(outputPath.toFile());
             Process process = processBuilder.start();
-            Files.copy(
-                process.getInputStream(),
-                outputPath,
-                StandardCopyOption.REPLACE_EXISTING);
             return process;
         } catch (IOException e) {
             throw new JavaWonderlandException(e);
