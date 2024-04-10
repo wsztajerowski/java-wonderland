@@ -21,8 +21,6 @@ public class ApiCommonSharedOptions {
     @Option(names = "--run-attempt", defaultValue = "${GITHUB_RUN_ATTEMPT}", description = "Run attempt no - you could provide it as a option value or put in GITHUB_RUN_ATTEMPT env variable")
     int runAttempt;
 
-    @Option(names = "--jvm-args", description = "JVM args to pass to benchmark")
-    String jvmArgs;
 
     @Parameters(index = "0", description = "Test name regex", arity = "0..1")
     String testNameRegex;
@@ -31,7 +29,7 @@ public class ApiCommonSharedOptions {
         if (commitSha != null && commitSha.length() > 8) {
             commitSha = commitSha.substring(0,8);
         }
-        return new CommonSharedOptions(commitSha, runAttempt, jvmArgs, testNameRegex);
+        return new CommonSharedOptions(commitSha, runAttempt, testNameRegex);
     }
 
     public URI getMongoConnectionString() {
