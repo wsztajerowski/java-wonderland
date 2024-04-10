@@ -274,7 +274,7 @@ jobs:
       - name: Run JCStress tests
         env:
           MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
-        run: java -jar test-wrapper.jar jcstress
+        run: java -jar test-wrapper.jar jcstress --no-split-compilation-modes
 
   stop-runner-3:
     name: Stop EC2 runner 3
