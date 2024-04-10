@@ -25,11 +25,15 @@ public class JCStressSubcommandService {
     private final Path jcstressResultsPath;
     private final Path outputPath;
 
-    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, Path benchmarkPath, Path outputPath, Path resultsDir) {
+    private final JCStressOptions jcStressOptions;
+
+
+    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, Path benchmarkPath, Path outputPath, Path resultsDir, JCStressOptions jcStressOptions) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
         this.benchmarkPath = benchmarkPath;
+        this.jcStressOptions = jcStressOptions;
         this.outputPath = outputPath;
         this.jcstressResultsPath = resultsDir;
     }
@@ -38,14 +42,18 @@ public class JCStressSubcommandService {
         try {
             logger.info("Running JCStress - S3 result path: {}", jcstressResultsPath);
             benchmarkProcessBuilder(benchmarkPath)
-                .addArgumentWithValue("-r", JCSTRESS_RESULTS_DIR)
-                .addArgumentWithValue("-f", 1)
-//                .addArgumentWithValue("-fsm", 1)
-                .addArgumentWithValue("-m", "stress")
-                .addArgumentWithValue("-iters", 1)
-                .addArgumentWithValue("-sc", false)
-                .addOptionalArgument(commonOptions.testNameRegex())
                 .addArgumentWithValue("-r", jcstressResultsPath)
+                .addArgumentIfValueIsNotNull("-c", jcStressOptions.cpuNumber())
+                .addArgumentIfValueIsNotNull("-f", jcStressOptions.forks())
+                .addArgumentIfValueIsNotNull("-fsm", jcStressOptions.forkMultiplier())
+                .addArgumentIfValueIsNotNull("-hs", jcStressOptions.heapSize())
+                .addArgumentIfValueIsNotNull("-jvmArgs", jcStressOptions.jvmArgs())
+                .addArgumentIfValueIsNotNull("-jvmArgsPrepend", jcStressOptions.jvmArgsPrepend())
+                .addArgumentIfValueIsNotNull("-pth", jcStressOptions.preTouchHeap())
+                .addArgumentIfValueIsNotNull("-sc", jcStressOptions.splitCompilationModes())
+                .addArgumentIfValueIsNotNull("-spinStyle", jcStressOptions.spinStyle())
+                .addArgumentIfValueIsNotNull("-strideCount", jcStressOptions.strideCount())
+                .addArgumentIfValueIsNotNull("-strideSize", jcStressOptions.strideSize())
                 .addArgumentIfValueIsNotNull("-t", commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
                 .buildAndStartProcess()
