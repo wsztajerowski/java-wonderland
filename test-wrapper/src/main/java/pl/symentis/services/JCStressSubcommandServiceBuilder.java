@@ -17,6 +17,7 @@ public final class JCStressSubcommandServiceBuilder {
     private Path benchmarkPath;
     private Path outputPath;
     private Path resultsPath;
+    private JCStressOptions jcStressOptions;
 
     private JCStressSubcommandServiceBuilder() {
         this.s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
@@ -58,10 +59,15 @@ public final class JCStressSubcommandServiceBuilder {
         return this;
     }
 
+    public JCStressSubcommandServiceBuilder withJCStressOptions(JCStressOptions jcStressOptions) {
+        this.jcStressOptions = jcStressOptions;
+        return this;
+    }
+
     public JCStressSubcommandService build() {
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
-        return new JCStressSubcommandService(s3Service, morphiaService, commonOptions, benchmarkPath, outputPath, resultsPath);
+        return new JCStressSubcommandService(s3Service, morphiaService, commonOptions, benchmarkPath, outputPath, resultsPath, jcStressOptions);
     }
 }

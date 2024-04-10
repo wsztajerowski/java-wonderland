@@ -1,13 +1,14 @@
 package pl.symentis.commands;
 
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 
 import java.nio.file.Path;
 
 import static pl.symentis.services.JCStressSubcommandServiceBuilder.getJCStressSubcommandService;
 
-@CommandLine.Command(name = "jcstress", description = "Run JCStress performance tests")
+@Command(name = "jcstress", description = "Run JCStress performance tests")
 public class JCStressSubcommand implements Runnable {
     @Mixin
     LoggingMixin loggingMixin;
@@ -21,6 +22,7 @@ public class JCStressSubcommand implements Runnable {
     public void run() {
         getJCStressSubcommandService()
             .withCommonOptions(apiCommonSharedOptions.getValues())
+            .withJCStressOptions(apiJCStressOptions.getValues())
             .withBenchmarkPath(benchmarkPath)
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
             .build()
