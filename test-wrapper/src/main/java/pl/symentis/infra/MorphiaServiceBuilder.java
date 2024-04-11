@@ -10,18 +10,9 @@ import static java.util.Objects.requireNonNull;
 
 public class MorphiaServiceBuilder {
 
-    private static String dbName  = "test-results";
     private String connectionString;
 
     private MorphiaServiceBuilder(){
-    }
-
-    public static String getDbName() {
-        return dbName;
-    }
-
-    public static void setDbName(String dbName) {
-        MorphiaServiceBuilder.dbName = dbName;
     }
 
     public static MorphiaServiceBuilder getMorphiaServiceBuilder(){
@@ -35,10 +26,13 @@ public class MorphiaServiceBuilder {
     }
 
     public MorphiaService build() {
-        requireNonNull(connectionString, "Please provide connection string!");
+        requireNonNull(connectionString, "Please provide non-null connection string in form: mongodb://server:port/database_name");
+        ConnectionString typedConnectionString = new ConnectionString(connectionString);
+        String database = typedConnectionString.getDatabase();
+        requireNonNull(database, "Connection string has to contain database name! Please provide connection string in form: mongodb://server:port/database_name");
         MongoClient mongoClient = MongoClients
-            .create(new ConnectionString(connectionString));
-        Datastore datastore = createDatastore(mongoClient, dbName);
+            .create(typedConnectionString);
+        Datastore datastore = createDatastore(mongoClient, database);
         datastore
             .getMapper()
             .mapPackage("pl.symentis.entities");

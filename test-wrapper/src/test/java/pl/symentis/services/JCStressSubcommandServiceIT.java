@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import pl.symentis.MongoDbTestHelpers;
 import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jcstress.JCStressTest;
-import pl.symentis.infra.MorphiaServiceBuilder;
 
 import java.nio.file.Path;
 
@@ -24,7 +23,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
 
     @BeforeAll
     static void setupHelper(){
-        helper = new MongoDbTestHelpers(MONGO_DB_CONTAINER.getConnectionString(), MorphiaServiceBuilder.getDbName());
+        helper = new MongoDbTestHelpers(getConnectionString());
     }
 
     @Test
@@ -32,7 +31,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         // given
         String stressTestJarPath = Path.of("target", "fake-stress-tests.jar").toAbsolutePath().toString();
         JCStressSubcommandService sut = JCStressSubcommandServiceBuilder.getJCStressSubcommandService()
-            .withMongoConnectionString(MONGO_DB_CONTAINER.getConnectionString())
+            .withMongoConnectionString(getConnectionString())
             .withS3Service(getS3ServiceBuilder()
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)

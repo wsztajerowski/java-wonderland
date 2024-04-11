@@ -6,12 +6,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
-import pl.symentis.infra.MorphiaServiceBuilder;
 
 public class TestcontainersWithS3AndMongoBaseIT extends TestcontainersWithS3BaseIT {
     protected static final String TEST_DB_NAME = "integration-tests";
+
+    private static String connectionString;
     @Container
-    protected final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer(DockerImageName.parse("mongo:7.0.5"))
+    private final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer(DockerImageName.parse("mongo:7.0.5"))
         .withEnv("MONGO_INITDB_DATABASE", TEST_DB_NAME)
         .withExposedPorts(27017);
 
@@ -20,8 +21,8 @@ public class TestcontainersWithS3AndMongoBaseIT extends TestcontainersWithS3Base
     }
 
     @BeforeAll
-    static void setTestDbName(){
-        MorphiaServiceBuilder.setDbName(TEST_DB_NAME);
+    static void setConnectionString(){
+        connectionString = MONGO_DB_CONTAINER.getConnectionString() + "/" + TEST_DB_NAME;
     }
 
     @AfterEach
@@ -30,5 +31,9 @@ public class TestcontainersWithS3AndMongoBaseIT extends TestcontainersWithS3Base
             mongoClient
                 .dropDatabase(TEST_DB_NAME);
         }
+    }
+
+    public static String getConnectionString() {
+        return connectionString;
     }
 }

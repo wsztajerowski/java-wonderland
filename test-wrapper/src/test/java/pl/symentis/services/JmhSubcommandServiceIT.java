@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import pl.symentis.MongoDbTestHelpers;
 import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jmh.JmhBenchmark;
-import pl.symentis.infra.MorphiaServiceBuilder;
 
 import java.nio.file.Path;
 
@@ -22,7 +21,7 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
 
     @BeforeAll
     static void setupHelper(){
-        helper = new MongoDbTestHelpers(MONGO_DB_CONTAINER.getConnectionString(), MorphiaServiceBuilder.getDbName());
+        helper = new MongoDbTestHelpers(getConnectionString());
     }
 
     @Test
@@ -30,7 +29,7 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         // given
         String jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath().toString();
         JmhSubcommandService sut = getJmhSubcommandService()
-            .withMongoConnectionString(MONGO_DB_CONTAINER.getConnectionString())
+            .withMongoConnectionString(getConnectionString())
             .withCommonOptions(new CommonSharedOptions("commit-sha", 1, "", "incrementUsingSynchronized"))
             .withJmhOptions(new JmhBenchmarksSharedOptions(0, 1, 1, jhhTestBenchmark))
             .build();
