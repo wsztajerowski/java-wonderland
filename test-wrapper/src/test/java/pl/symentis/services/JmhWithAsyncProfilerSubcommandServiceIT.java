@@ -9,7 +9,6 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import pl.symentis.MongoDbTestHelpers;
 import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jmh.JmhBenchmark;
-import pl.symentis.infra.MorphiaServiceBuilder;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -29,7 +28,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
 
     @BeforeAll
     static void setupHelper(){
-        helper = new MongoDbTestHelpers(MONGO_DB_CONTAINER.getConnectionString(), MorphiaServiceBuilder.getDbName());
+        helper = new MongoDbTestHelpers(getConnectionString());
     }
 
     @Test
@@ -37,7 +36,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
         // given
         String jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath().toString();
         JmhWithAsyncProfilerSubcommandService sut = getJmhWithAsyncProfilerSubcommandService()
-            .withMongoConnectionString(MONGO_DB_CONTAINER.getConnectionString())
+            .withMongoConnectionString(getConnectionString())
             .withS3Service(getS3ServiceBuilder()
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)

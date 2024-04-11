@@ -16,6 +16,7 @@ import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 @Testcontainers
 class MorphiaServiceIT {
     private static final String TEST_DB_NAME = "morphia-service-tests";
+    private static String connectionString;
     @Container
     protected final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer(DockerImageName.parse("mongo:7.0.5"))
         .withExposedPorts(27017);
@@ -23,15 +24,15 @@ class MorphiaServiceIT {
     private static MongoDbTestHelpers helper;
 
     @BeforeAll
-    static void setupDbName(){
-        MorphiaServiceBuilder.setDbName(TEST_DB_NAME);
-        helper = new MongoDbTestHelpers(MONGO_DB_CONTAINER.getConnectionString(), TEST_DB_NAME);
+    static void setupConnectionStringAndDbHelper(){
+        connectionString = MONGO_DB_CONTAINER.getConnectionString() + "/" + TEST_DB_NAME;
+        helper = new MongoDbTestHelpers(connectionString);
     }
 
     @BeforeEach
     void setupSut(){
         sut = getMorphiaServiceBuilder()
-            .withConnectionString(MONGO_DB_CONTAINER.getConnectionString())
+            .withConnectionString(connectionString)
             .build();
     }
 
