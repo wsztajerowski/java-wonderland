@@ -9,6 +9,8 @@ import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jcstress.JCStressTest;
 import pl.symentis.infra.MorphiaServiceBuilder;
 
+import java.nio.file.Path;
+
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +30,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
     @Test
     void successful_scenario(){
         // given
-        String stressTestJarPath = createPathForTestResource("fake-stress-tests.jar").toAbsolutePath().toString();
+        String stressTestJarPath = Path.of("target", "fake-stress-tests.jar").toAbsolutePath().toString();
         JCStressSubcommandService sut = JCStressSubcommandServiceBuilder.getJCStressSubcommandService()
             .withMongoConnectionString(MONGO_DB_CONTAINER.getConnectionString())
             .withS3Service(getS3ServiceBuilder()

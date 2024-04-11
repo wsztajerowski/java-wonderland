@@ -24,6 +24,8 @@
         <maven-shade-plugin.version>3.5.1</maven-shade-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <!-- dependency versions -->
+        <jmh.version>1.36</jmh.version>
+        <jcstress.version>0.16</jcstress.version>
         <junit-jupiter.version>5.9.0</junit-jupiter.version>
         <assertj.version>3.23.1</assertj.version>
         <aws.java.sdk.version>2.20.100</aws.java.sdk.version>
@@ -176,6 +178,8 @@
         <module>jmh-benchmarks</module>
         <module>stress-tests</module>
         <module>test-wrapper</module>
+        <module>fake-jmh-benchmarks</module>
+        <module>fake-stress-tests</module>
         <module>lamport-buffer</module>
     </modules>
 </project>

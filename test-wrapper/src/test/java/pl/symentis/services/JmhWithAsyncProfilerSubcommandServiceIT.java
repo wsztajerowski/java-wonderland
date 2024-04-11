@@ -11,6 +11,7 @@ import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.infra.MorphiaServiceBuilder;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -34,7 +35,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
     @Test
     void successful_scenario(){
         // given
-        String jhhTestBenchmark = createPathForTestResource("fake-jmh-benchmarks.jar").toAbsolutePath().toString();
+        String jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath().toString();
         JmhWithAsyncProfilerSubcommandService sut = getJmhWithAsyncProfilerSubcommandService()
             .withMongoConnectionString(MONGO_DB_CONTAINER.getConnectionString())
             .withS3Service(getS3ServiceBuilder()

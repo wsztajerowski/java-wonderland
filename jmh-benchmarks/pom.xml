@@ -37,10 +37,6 @@
         </dependency>
     </dependencies>
 
-    <properties>
-        <jmh.version>1.36</jmh.version>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
