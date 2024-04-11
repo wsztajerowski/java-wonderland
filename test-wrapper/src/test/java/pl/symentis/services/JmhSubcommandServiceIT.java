@@ -8,6 +8,8 @@ import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jmh.JmhBenchmark;
 import pl.symentis.infra.MorphiaServiceBuilder;
 
+import java.nio.file.Path;
+
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
@@ -26,7 +28,7 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
     @Test
     void successful_scenario(){
         // given
-        String jhhTestBenchmark = createPathForTestResource("fake-jmh-benchmarks.jar").toAbsolutePath().toString();
+        String jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath().toString();
         JmhSubcommandService sut = getJmhSubcommandService()
             .withMongoConnectionString(MONGO_DB_CONTAINER.getConnectionString())
             .withCommonOptions(new CommonSharedOptions("commit-sha", 1, "", "incrementUsingSynchronized"))

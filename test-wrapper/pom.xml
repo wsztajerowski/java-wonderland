@@ -75,6 +75,18 @@
             <version>3.2.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>pl.symentis</groupId>
+            <artifactId>fake-stress-tests</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>pl.symentis</groupId>
+            <artifactId>fake-jmh-benchmarks</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -83,6 +95,53 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-fake-stress-tests</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>fake-stress-tests</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <classifier>shaded</classifier>
+                                    <destFileName>fake-stress-tests.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-fake-jmh-benchmarks</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>fake-jmh-benchmarks</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <classifier>shaded</classifier>
+                                    <destFileName>fake-jmh-benchmarks.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
