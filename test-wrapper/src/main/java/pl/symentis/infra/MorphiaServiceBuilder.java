@@ -5,12 +5,14 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
 
+import java.net.URI;
+
 import static dev.morphia.Morphia.createDatastore;
 import static java.util.Objects.requireNonNull;
 
 public class MorphiaServiceBuilder {
 
-    private String connectionString;
+    private URI connectionString;
 
     private MorphiaServiceBuilder(){
     }
@@ -19,7 +21,7 @@ public class MorphiaServiceBuilder {
         return new MorphiaServiceBuilder();
     }
 
-    public MorphiaServiceBuilder withConnectionString(String connectionString){
+    public MorphiaServiceBuilder withConnectionString(URI connectionString){
         requireNonNull(connectionString, "Provided connection string cannot be null!");
         this.connectionString = connectionString;
         return this;
@@ -27,7 +29,7 @@ public class MorphiaServiceBuilder {
 
     public MorphiaService build() {
         requireNonNull(connectionString, "Please provide non-null connection string in form: mongodb://server:port/database_name");
-        ConnectionString typedConnectionString = new ConnectionString(connectionString);
+        ConnectionString typedConnectionString = new ConnectionString(connectionString.toString());
         String database = typedConnectionString.getDatabase();
         requireNonNull(database, "Connection string has to contain database name! Please provide connection string in form: mongodb://server:port/database_name");
         MongoClient mongoClient = MongoClients
