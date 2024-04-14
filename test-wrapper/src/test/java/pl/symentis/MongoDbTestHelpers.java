@@ -6,12 +6,13 @@ import com.mongodb.client.FindIterable;
 import org.bson.*;
 import org.bson.types.ObjectId;
 
+import java.net.URI;
 import java.util.function.Consumer;
 
 public class MongoDbTestHelpers {
-    private final String connectionString;
+    private final URI connectionString;
 
-    public MongoDbTestHelpers(String connectionString) {
+    public MongoDbTestHelpers(URI connectionString) {
         this.connectionString = connectionString;
     }
 
@@ -29,7 +30,7 @@ public class MongoDbTestHelpers {
     }
 
     public void assertFindResult(String collectionName, BsonDocument filter, Consumer<FindIterable<Document>> resultsAssertion) {
-        ConnectionString connection = new ConnectionString(connectionString);
+        ConnectionString connection = new ConnectionString(connectionString.toString());
         try (MongoClient mongoClient = new MongoClient(connection)) {
             FindIterable<Document> documents = mongoClient.getDatabase(connection.getDatabase())
                 .getCollection(collectionName)

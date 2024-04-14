@@ -7,10 +7,12 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
+import java.net.URI;
+
 public class TestcontainersWithS3AndMongoBaseIT extends TestcontainersWithS3BaseIT {
     protected static final String TEST_DB_NAME = "integration-tests";
 
-    private static String connectionString;
+    private static URI connectionString;
     @Container
     private final static MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer(DockerImageName.parse("mongo:7.0.5"))
         .withEnv("MONGO_INITDB_DATABASE", TEST_DB_NAME)
@@ -22,7 +24,7 @@ public class TestcontainersWithS3AndMongoBaseIT extends TestcontainersWithS3Base
 
     @BeforeAll
     static void setConnectionString(){
-        connectionString = MONGO_DB_CONTAINER.getConnectionString() + "/" + TEST_DB_NAME;
+        connectionString = URI.create(MONGO_DB_CONTAINER.getConnectionString()).resolve(TEST_DB_NAME);
     }
 
     @AfterEach
@@ -33,7 +35,7 @@ public class TestcontainersWithS3AndMongoBaseIT extends TestcontainersWithS3Base
         }
     }
 
-    public static String getConnectionString() {
+    public static URI getConnectionString() {
         return connectionString;
     }
 }
