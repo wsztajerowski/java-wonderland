@@ -34,7 +34,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
     @Test
     void successful_scenario() throws IOException {
         // given
-        String jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath().toString();
+        Path jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
         Path result = Files.createTempFile("results", "jmh.json");
         Path output = Files.createTempFile("outputs", "jmh.txt");
         Path asyncOutput = Files.createTempDirectory("async-outputs");
