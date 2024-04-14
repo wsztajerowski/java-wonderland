@@ -33,7 +33,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         // given
         Path result = Files.createTempDirectory("jcstress-results");
         Path output = Files.createTempFile("outputs", "jcstress.txt");
-        String stressTestJarPath = Path.of("target", "fake-stress-tests.jar").toAbsolutePath().toString();
+        Path stressTestJarPath = Path.of("target", "fake-stress-tests.jar").toAbsolutePath();
         JCStressSubcommandService sut = JCStressSubcommandServiceBuilder.getJCStressSubcommandService()
             .withMongoConnectionString(getConnectionString())
             .withS3Service(getS3ServiceBuilder()

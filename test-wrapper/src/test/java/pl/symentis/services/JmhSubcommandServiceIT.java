@@ -34,7 +34,7 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         // given
         Path result = Files.createTempFile("results", "jmh.json");
         Path output = Files.createTempFile("outputs", "jmh.txt");
-        String jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath().toString();
+        Path jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
         JmhSubcommandService sut = getJmhSubcommandService()
             .withMongoConnectionString(getConnectionString())
             .withCommonOptions(new CommonSharedOptions("abcdef12", 1, "", "incrementUsingSynchronized"))
