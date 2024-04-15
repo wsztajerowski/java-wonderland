@@ -12,8 +12,12 @@ import static pl.symentis.services.JCStressSubcommandServiceBuilder.getJCStressS
 public class JCStressSubcommand implements Runnable {
     @Mixin
     LoggingMixin loggingMixin;
+
     @Mixin
     private ApiCommonSharedOptions apiCommonSharedOptions;
+
+    @Mixin
+    private ApiJCStressOptions apiJCStressOptions;
 
     @CommandLine.Option(names = "--benchmark-path", defaultValue = "${BENCHMARK_PATH:-stress-tests.jar}", description = "Path to JCStress benchmark jar (default: ${DEFAULT-VALUE})")
     Path benchmarkPath;

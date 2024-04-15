@@ -36,8 +36,9 @@ public class JmhSubcommandService {
     }
 
     public void executeCommand() {
+        Path s3Prefix = jmhS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         try {
-            logger.info("Running JMH - S3 result path: {}", jmhResultFilePath);
+            logger.info("Running JMH - S3 result path: {}", s3Prefix);
             FileUtils.ensurePathExists(jmhResultFilePath);
             int exitCode = benchmarkProcessBuilder(jmhBenchmarksOptions.benchmarkPath())
                 .addArgumentWithValue("-f", jmhBenchmarksOptions.forks())
@@ -56,7 +57,7 @@ public class JmhSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        logger.info("Processing JMH results - saving benchmarks into Mongo");
+        logger.info("Processing JMH results - saving benchmarks into DB");
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhResultFilePath)) {
             logger.debug("JMH result: {}", jmhResult);
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
@@ -73,7 +74,6 @@ public class JmhSubcommandService {
 
 
         logger.info("Saving test outputs on S3");
-        Path s3Prefix = jmhS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         s3Service
             .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), outputPath);
     }

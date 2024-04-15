@@ -31,7 +31,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
     @Test
     void successful_scenario() throws IOException {
         // given
-        Path result = Files.createTempDirectory("jcstress-results");
+        Path resultPath = Files.createTempDirectory("jcstress-results");
         Path output = Files.createTempFile("outputs", "jcstress.txt");
         Path stressTestJarPath = Path.of("target", "fake-stress-tests.jar").toAbsolutePath();
         JCStressSubcommandService sut = JCStressSubcommandServiceBuilder.getJCStressSubcommandService()
@@ -40,9 +40,9 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)
                 .build())
-            .withCommonOptions(new CommonSharedOptions("abcdef12", 1, "", "IntegerIncrementing"))
+            .withCommonOptions(new CommonSharedOptions("abcdef12", 1,  "IntegerIncrementing"))
+            .withJCStressOptions(new JCStressOptions(8, 1, 1, 10, null, null, null, resultPath, false, true, 20, 50))
             .withBenchmarkPath(stressTestJarPath)
-            .withResultsPath(result)
             .withOutputPath(output)
             .build();
 

@@ -22,27 +22,26 @@ public class JCStressSubcommandService {
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
     private final Path benchmarkPath;
-    private final Path jcstressResultsPath;
     private final Path outputPath;
 
     private final JCStressOptions jcStressOptions;
 
-
-    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, Path benchmarkPath, Path outputPath, Path resultsDir, JCStressOptions jcStressOptions) {
+    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, Path benchmarkPath, Path outputPath, JCStressOptions jcStressOptions) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
         this.benchmarkPath = benchmarkPath;
         this.jcStressOptions = jcStressOptions;
         this.outputPath = outputPath;
-        this.jcstressResultsPath = resultsDir;
     }
 
     public void executeCommand() {
+        Path reportPath = jcStressOptions.reportPath();
+        Path s3Prefix = jcstressS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
         try {
-            logger.info("Running JCStress - S3 result path: {}", jcstressResultsPath);
+            logger.info("Running JCStress - S3 result path: {}", s3Prefix);
             benchmarkProcessBuilder(benchmarkPath)
-                .addArgumentWithValue("-r", jcstressResultsPath)
+                .addArgumentWithValue("-r", reportPath)
                 .addArgumentIfValueIsNotNull("-c", jcStressOptions.cpuNumber())
                 .addArgumentIfValueIsNotNull("-f", jcStressOptions.forks())
                 .addArgumentIfValueIsNotNull("-fsm", jcStressOptions.forkMultiplier())
@@ -63,8 +62,7 @@ public class JCStressSubcommandService {
         }
 
         logger.info("Parsing JCStress html output");
-        Path resultFilepath = jcstressResultsPath.resolve( "index.html");
-        Path s3Prefix = jcstressS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
+        Path resultFilepath = reportPath.resolve( "index.html");
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
             .parse();
 
@@ -83,7 +81,7 @@ public class JCStressSubcommandService {
                 {
                     String testOutputFilename = testName + ".html";
                     s3Service
-                        .saveFileOnS3(s3Key, jcstressResultsPath.resolve(testOutputFilename));
+                        .saveFileOnS3(s3Key, reportPath.resolve(testOutputFilename));
                 }
             );
 
