@@ -4,6 +4,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import pl.symentis.services.JCStressOptions;
 
+import java.nio.file.Path;
+
 @Command
 public class ApiJCStressOptions {
 
@@ -22,7 +24,7 @@ public class ApiJCStressOptions {
     @Option(names = "-spinStyle", description = "Busy loop wait style. HARD = hard busy loop; THREAD_YIELD = use Thread.yield(); THREAD_SPIN_WAIT = use Thread.onSpinWait(); LOCKSUPPORT_PARK_NANOS = use LockSupport.parkNanos().")
     String spinStyle;
     @Option(names = {"-r", "--report-path"}, defaultValue = "jcstress-results", description = "Target destination to put the report into.")
-    String reportPath;
+    Path reportPath;
     @Option(names = {"-sc", "--split-compilation-modes"}, negatable = true, description = "Use split per-actor compilation mode, if available.")
     Boolean splitCompilationModes;
     @Option(names = {"-pth", "--pre-touch-heap"}, negatable = true, description = "Pre-touch Java heap, if possible.")

@@ -10,19 +10,16 @@ import java.nio.file.Path;
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 
 public final class JCStressSubcommandServiceBuilder {
-    private static final String JCSTRESS_RESULTS_DIR = "jcstress-results";
     private CommonSharedOptions commonOptions;
     private S3Service s3Service;
     private URI mongoConnectionString;
     private Path benchmarkPath;
     private Path outputPath;
-    private Path resultsPath;
     private JCStressOptions jcStressOptions;
 
     private JCStressSubcommandServiceBuilder() {
         this.s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
         outputPath = Path.of("output.txt");
-        resultsPath = Path.of(JCSTRESS_RESULTS_DIR);
     }
 
     public static JCStressSubcommandServiceBuilder getJCStressSubcommandService() {
@@ -36,11 +33,6 @@ public final class JCStressSubcommandServiceBuilder {
 
     public JCStressSubcommandServiceBuilder withOutputPath(Path outputPath) {
         this.outputPath = outputPath;
-        return this;
-    }
-
-    public JCStressSubcommandServiceBuilder withResultsPath(Path resultsPath) {
-        this.resultsPath = resultsPath;
         return this;
     }
 
@@ -68,6 +60,6 @@ public final class JCStressSubcommandServiceBuilder {
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
-        return new JCStressSubcommandService(s3Service, morphiaService, commonOptions, benchmarkPath, outputPath, resultsPath, jcStressOptions);
+        return new JCStressSubcommandService(s3Service, morphiaService, commonOptions, benchmarkPath, outputPath, jcStressOptions);
     }
 }

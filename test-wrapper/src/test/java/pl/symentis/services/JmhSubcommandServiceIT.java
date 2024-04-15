@@ -37,8 +37,8 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         Path jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
         JmhSubcommandService sut = getJmhSubcommandService()
             .withMongoConnectionString(getConnectionString())
-            .withCommonOptions(new CommonSharedOptions("abcdef12", 1, "", "incrementUsingSynchronized"))
-            .withJmhOptions(new JmhBenchmarksSharedOptions(0, 1, 1, jhhTestBenchmark))
+            .withCommonOptions(new CommonSharedOptions("abcdef12", 1,  "incrementUsingSynchronized"))
+            .withJmhOptions(new JmhBenchmarksSharedOptions(0, 1, 1,"", jhhTestBenchmark))
             .withS3Service(getS3ServiceBuilder()
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)
