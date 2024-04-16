@@ -76,7 +76,7 @@ public class JmhWithAsyncProfilerSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        logger.info("Processing JMH results - saving benchmarks into DB and flamegraphs on S3");
+        logger.info("Processing JMH results: {}", jmhResultFilePath);
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhResultFilePath)) {
             logger.debug("JMH result: {}", jmhResult);
             Map<String, String> flamegraphs = new HashMap<>();
@@ -86,6 +86,7 @@ public class JmhWithAsyncProfilerSubcommandService {
                 paths
                     .forEach(path -> {
                         String s3Key = s3Prefix.resolve(benchmarkFullname).resolve(path.getFileName()).toString();
+                        logger.info("Saving flamegraph: {}", s3Key);
                         s3Service
                             .saveFileOnS3(s3Key, path);
                         String flamegraphName = getFilenameWithoutExtension(path);
@@ -95,13 +96,15 @@ public class JmhWithAsyncProfilerSubcommandService {
                 throw new JavaWonderlandException(e);
             }
 
+            JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
+                commonOptions.commitSha(),
+                jmhResult.benchmark(),
+                jmhResult.mode(),
+                commonOptions.runAttempt());
+            logger.info("Saving results in DB with ID: {}", benchmarkId);
             morphiaService
                 .upsert(JmhBenchmark.class)
-                .byFieldValue("benchmarkId", new JmhBenchmarkId(
-                    commonOptions.commitSha(),
-                    jmhResult.benchmark(),
-                    jmhResult.mode(),
-                    commonOptions.runAttempt()))
+                .byFieldValue("benchmarkId", benchmarkId)
                 .setValue("benchmarkMetadata", new BenchmarkMetadata(flamegraphs))
                 .setValue("jmhWithAsyncResult", jmhResult)
                 .execute();

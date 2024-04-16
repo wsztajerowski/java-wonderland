@@ -57,7 +57,7 @@ public class JmhSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        logger.info("Processing JMH results - saving benchmarks into DB");
+        logger.info("Processing JMH results: {}", jmhResultFilePath);
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhResultFilePath)) {
             logger.debug("JMH result: {}", jmhResult);
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
@@ -65,6 +65,7 @@ public class JmhSubcommandService {
                 jmhResult.benchmark(),
                 jmhResult.mode(),
                 commonOptions.runAttempt());
+            logger.info("Saving results in DB with ID: {}", benchmarkId);
             morphiaService
                 .upsert(JmhBenchmark.class)
                 .byFieldValue("benchmarkId", benchmarkId)
