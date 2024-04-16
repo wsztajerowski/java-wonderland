@@ -61,14 +61,15 @@ public class JCStressSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        logger.info("Parsing JCStress html output");
         Path resultFilepath = reportPath.resolve( "index.html");
+        logger.info("Parsing JCStress html output: {}", resultFilepath);
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
             .parse();
 
-        logger.info("Saving benchmarks into DB");
+        JCStressTestId jcStressTestId = new JCStressTestId(commonOptions.commitSha(), commonOptions.runAttempt());
+        logger.info("Saving benchmarks into DB with id: {}", jcStressTestId);
         JCStressTest stressTestResult = new JCStressTest(
-            new JCStressTestId(commonOptions.commitSha(), commonOptions.runAttempt()),
+            jcStressTestId,
             new JCStressTestMetadata(),
             jcStressResult);
         logger.debug("JCStress results: {}", stressTestResult);
