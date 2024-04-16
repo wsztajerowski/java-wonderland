@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static pl.symentis.MongoDbTestHelpers.all;
 import static pl.symentis.infra.S3ServiceBuilder.getS3ServiceBuilder;
+import static pl.symentis.services.JCStressOptionsBuilder.jcStressOptionsBuilder;
 
 class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
 
@@ -31,9 +32,13 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
     @Test
     void successful_scenario() throws IOException {
         // given
-        Path resultPath = Files.createTempDirectory("jcstress-results");
-        Path output = Files.createTempFile("outputs", "jcstress.txt");
-        Path stressTestJarPath = Path.of("target", "fake-stress-tests.jar").toAbsolutePath();
+        Path tempDirectory = Files.createTempDirectory("jcstress");
+        JCStressOptions jcStressOptions =
+            jcStressOptionsBuilder()
+                .withForks(1)
+                .withReportPath(tempDirectory.resolve("results"))
+                .withSplitCompilationModes(false)
+                .build();
         JCStressSubcommandService sut = JCStressSubcommandServiceBuilder.getJCStressSubcommandService()
             .withMongoConnectionString(getConnectionString())
             .withS3Service(getS3ServiceBuilder()
@@ -41,9 +46,9 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
                 .withBucketName(TEST_BUCKET_NAME)
                 .build())
             .withCommonOptions(new CommonSharedOptions("abcdef12", 1,  "IntegerIncrementing"))
-            .withJCStressOptions(new JCStressOptions(8, 1, 1, 10, null, null, null, resultPath, false, true, 20, 50))
-            .withBenchmarkPath(stressTestJarPath)
-            .withOutputPath(output)
+            .withJCStressOptions(jcStressOptions)
+            .withBenchmarkPath(Path.of("target", "fake-stress-tests.jar").toAbsolutePath())
+            .withOutputPath(tempDirectory.resolve("jcstress.txt"))
             .build();
 
         // when
