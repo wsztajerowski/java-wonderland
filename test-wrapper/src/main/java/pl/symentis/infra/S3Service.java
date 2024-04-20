@@ -29,8 +29,10 @@ public class S3Service {
         return s3Client
             .serviceClientConfiguration()
             .endpointOverride()
-            .map(URI::toString)
-            .orElse("https://.s3.%s.amazonaws.com".formatted(s3Client.serviceClientConfiguration().region()));
+            .map(endpoint ->
+                "https://%s.%s".formatted(bucketName, endpoint.getAuthority()))
+            .orElse("https://%s.console.aws.amazon.com/s3/buckets/%s"
+                .formatted(s3Client.serviceClientConfiguration().region(), bucketName));
     }
 
     public String getBucketName() {
