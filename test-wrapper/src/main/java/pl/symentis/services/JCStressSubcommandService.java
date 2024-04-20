@@ -63,6 +63,10 @@ public class JCStressSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
+        logger.info("Saving test outputs on S3");
+        s3Service
+            .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), jcStressOptions.processOutput());
+
         Path resultFilepath = reportPath.resolve( "index.html");
         logger.info("Parsing JCStress html output: {}", resultFilepath);
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
@@ -74,6 +78,7 @@ public class JCStressSubcommandService {
             jcStressTestId,
             new JCStressTestMetadata(),
             jcStressResult);
+
         logger.debug("JCStress results: {}", stressTestResult);
         morphiaService
             .save(stressTestResult);
@@ -87,9 +92,5 @@ public class JCStressSubcommandService {
                         .saveFileOnS3(s3Key, reportPath.resolve(testOutputFilename));
                 }
             );
-
-        logger.info("Saving test outputs on S3");
-        s3Service
-            .saveFileOnS3(s3Prefix.resolve("outputs/output.txt").toString(), jcStressOptions.processOutput());
     }
 }

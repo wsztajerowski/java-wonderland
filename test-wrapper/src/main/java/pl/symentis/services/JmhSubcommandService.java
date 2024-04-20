@@ -43,6 +43,11 @@ public class JmhSubcommandService {
             int exitCode = prepopulatedJmhBenchmarkProcessBuilder(jmhOptions)
                 .buildAndStartProcess()
                 .waitFor();
+
+            logger.info("Saving benchmark process output on S3");
+            s3Service
+                .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), jmhOptions.outputOptions().processOutput());
+
             if (exitCode != 0) {
                 throw new JavaWonderlandException(format("Benchmark process exit with non-zero code: {0}", exitCode));
             }
@@ -67,8 +72,5 @@ public class JmhSubcommandService {
         }
 
 
-        logger.info("Saving benchmark process output on S3");
-        s3Service
-            .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), jmhOptions.outputOptions().processOutput());
     }
 }
