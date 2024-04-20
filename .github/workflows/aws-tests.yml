@@ -194,7 +194,7 @@ jobs:
       - name: Run JMH benchmarks
         env:
           MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
-        run: java -jar test-wrapper.jar jmh-with-async -f 1 --jvm-args "-XX:+UnlockDiagnosticVMOptions -Xlog:class+load=info -XX:+LogCompilation" --async-path /home/ec2-user/async-profiler-2.9-linux-x64/build/libasyncProfiler.so
+        run: java -jar test-wrapper.jar jmh-with-async -f 1 -jvmArgs "-XX:+UnlockDiagnosticVMOptions -Xlog:class+load=info -XX:+LogCompilation" --async-path /home/ec2-user/async-profiler-2.9-linux-x64/build/libasyncProfiler.so
   stop-runner-2:
     name: Stop EC2 runner 2
     needs:
