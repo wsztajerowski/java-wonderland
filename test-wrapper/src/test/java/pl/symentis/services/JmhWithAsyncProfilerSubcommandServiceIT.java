@@ -86,7 +86,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
             assertThat(documents.first())
                 .isNotNull()
                 .containsEntry("_t", "JmhBenchmark")
-                .extracting("benchmarkMetadata.flamegraphPaths", as(MAP))
+                .extracting("benchmarkMetadata.profilerOutputPaths", as(MAP))
                 .containsEntry("flame-cpu-forward", "gha-outputs/commit-abcdef12/attempt-1/jmh-with-async/pl.symentis.fake.Incrementing_Synchronized.incrementUsingSynchronized-Throughput/flame-cpu-forward.html")
         );
 

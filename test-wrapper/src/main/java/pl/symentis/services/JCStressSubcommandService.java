@@ -38,8 +38,7 @@ public class JCStressSubcommandService {
     public void executeCommand() {
         Path reportPath = jcStressOptions.reportPath();
         Path s3Prefix = jcstressS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
-        logger.info("Running JCStress - S3 endpoint: {}", s3Service.getEndpoint());
-        logger.info("S3 bucket: {}", s3Service.getBucketName());
+        logger.info("Running JCStress - S3 bucket: {}", s3Service.getEndpoint());
         logger.info("Path to results within bucket: {}", s3Prefix);
         try {
             benchmarkProcessBuilder(benchmarkPath)

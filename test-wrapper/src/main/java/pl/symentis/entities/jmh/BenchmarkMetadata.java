@@ -10,9 +10,9 @@ import java.util.Map;
 @Entity
 public record BenchmarkMetadata(
     LocalDateTime createdAt,
-    Map<String, String> flamegraphPaths) {
+    Map<String, String> profilerOutputPaths) {
 
-    public BenchmarkMetadata(Map<String, String> flamegraphPaths) {
-        this(OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime(), flamegraphPaths);
+    public BenchmarkMetadata(Map<String, String> profilerOutputPaths) {
+        this(OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime(), profilerOutputPaths);
     }
 }

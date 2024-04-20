@@ -47,8 +47,7 @@ public class JmhWithAsyncProfilerSubcommandService {
 
     public void executeCommand() {
         // Build process
-        logger.info("Running JMH with async profiler - S3 endpoint: {}", s3Service.getEndpoint());
-        logger.info("S3 bucket: {}", s3Service.getBucketName());
+        logger.info("Running JMH with async profiler - S3 bucket: {}", s3Service.getEndpoint());
         logger.info("Path to results within bucket: {}", s3Prefix);
         try {
             ensurePathExists(jmhOptions.outputOptions().machineReadableOutput());
@@ -72,18 +71,18 @@ public class JmhWithAsyncProfilerSubcommandService {
         logger.info("Processing JMH results: {}", jmhOptions.outputOptions().machineReadableOutput());
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhOptions.outputOptions().machineReadableOutput())) {
             logger.debug("JMH result: {}", jmhResult);
-            Map<String, String> flamegraphs = new HashMap<>();
-            String benchmarkFullname = jmhResult.benchmark() + getFlamegraphsDirSuffix(jmhResult.mode());
-            Path flamegraphsDir = asyncProfilerOptions.asyncOutputPath().resolve(benchmarkFullname);
-            try (Stream<Path> paths = list(flamegraphsDir)) {
+            Map<String, String> profilerOutputs = new HashMap<>();
+            String benchmarkFullname = jmhResult.benchmark() + getProfilerOutputDirSuffix(jmhResult.mode());
+            Path profilerOutputDir = asyncProfilerOptions.asyncOutputPath().resolve(benchmarkFullname);
+            try (Stream<Path> paths = list(profilerOutputDir)) {
                 paths
                     .forEach(path -> {
                         String s3Key = s3Prefix.resolve(benchmarkFullname).resolve(path.getFileName()).toString();
-                        logger.info("Saving flamegraph: {}", s3Key);
+                        logger.info("Saving profiler output: {}", s3Key);
                         s3Service
                             .saveFileOnS3(s3Key, path);
-                        String flamegraphName = getFilenameWithoutExtension(path);
-                        flamegraphs.put(flamegraphName, s3Key);
+                        String profilerOutput = getFilenameWithoutExtension(path);
+                        profilerOutputs.put(profilerOutput, s3Key);
                     });
             } catch (IOException e) {
                 throw new JavaWonderlandException(e);
@@ -98,7 +97,7 @@ public class JmhWithAsyncProfilerSubcommandService {
             morphiaService
                 .upsert(JmhBenchmark.class)
                 .byFieldValue("benchmarkId", benchmarkId)
-                .setValue("benchmarkMetadata", new BenchmarkMetadata(flamegraphs))
+                .setValue("benchmarkMetadata", new BenchmarkMetadata(profilerOutputs))
                 .setValue("jmhWithAsyncResult", jmhResult)
                 .execute();
         }
@@ -118,7 +117,7 @@ public class JmhWithAsyncProfilerSubcommandService {
     }
 
 
-    private static String getFlamegraphsDirSuffix(String mode) {
+    private static String getProfilerOutputDirSuffix(String mode) {
         return switch (mode) {
             case "thrpt":
                 yield "-Throughput";

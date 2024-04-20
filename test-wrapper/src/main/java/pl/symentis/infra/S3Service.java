@@ -4,7 +4,6 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.net.URI;
 import java.nio.file.Path;
 
 public class S3Service {

@@ -35,8 +35,7 @@ public class JmhSubcommandService {
 
     public void executeCommand() {
         Path s3Prefix = jmhS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
-        logger.info("Running JMH benchmarks - S3 endpoint: {}", s3Service.getEndpoint());
-        logger.info("S3 bucket: {}", s3Service.getBucketName());
+        logger.info("Running JMH - S3 bucket: {}", s3Service.getEndpoint());
         logger.info("Path to results within bucket: {}", s3Prefix);
         try {
             ensurePathExists(jmhOptions.outputOptions().machineReadableOutput());
