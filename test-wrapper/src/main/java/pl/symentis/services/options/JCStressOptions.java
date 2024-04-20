@@ -1,4 +1,4 @@
-package pl.symentis.services;
+package pl.symentis.services.options;
 
 import java.nio.file.Path;
 
@@ -14,5 +14,7 @@ public record JCStressOptions(
     Boolean splitCompilationModes,
     Boolean preTouchHeap,
     Integer strideCount,
-    Integer strideSize) {
+    Integer strideSize,
+    String testNameRegex,
+    Path processOutput) {
 }

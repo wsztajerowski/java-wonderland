@@ -3,6 +3,8 @@ package pl.symentis.services;
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
 import pl.symentis.infra.S3ServiceBuilder;
+import pl.symentis.services.options.CommonSharedOptions;
+import pl.symentis.services.options.JCStressOptions;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -14,25 +16,22 @@ public final class JCStressSubcommandServiceBuilder {
     private S3Service s3Service;
     private URI mongoConnectionString;
     private Path benchmarkPath;
-    private Path outputPath;
     private JCStressOptions jcStressOptions;
 
     private JCStressSubcommandServiceBuilder() {
-        this.s3Service = S3ServiceBuilder.getDefaultS3ServiceBuilder().build();
-        outputPath = Path.of("output.txt");
     }
 
-    public static JCStressSubcommandServiceBuilder getJCStressSubcommandService() {
+    public static JCStressSubcommandServiceBuilder serviceBuilder() {
         return new JCStressSubcommandServiceBuilder();
+    }
+
+    public static JCStressSubcommandServiceBuilder serviceBuilderWithDefaultS3Service() {
+        return new JCStressSubcommandServiceBuilder()
+            .withS3Service(S3ServiceBuilder.getDefaultS3ServiceBuilder().build());
     }
 
     public JCStressSubcommandServiceBuilder withBenchmarkPath(Path benchmarkPath) {
         this.benchmarkPath = benchmarkPath;
-        return this;
-    }
-
-    public JCStressSubcommandServiceBuilder withOutputPath(Path outputPath) {
-        this.outputPath = outputPath;
         return this;
     }
 
@@ -60,6 +59,6 @@ public final class JCStressSubcommandServiceBuilder {
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
-        return new JCStressSubcommandService(s3Service, morphiaService, commonOptions, benchmarkPath, outputPath, jcStressOptions);
+        return new JCStressSubcommandService(s3Service, morphiaService, commonOptions, benchmarkPath, jcStressOptions);
     }
 }

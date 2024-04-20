@@ -2,8 +2,7 @@ package pl.symentis.commands;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-import pl.symentis.services.CommonSharedOptions;
+import pl.symentis.services.options.CommonSharedOptions;
 
 import java.net.URI;
 
@@ -21,15 +20,11 @@ public class ApiCommonSharedOptions {
     @Option(names = "--run-attempt", defaultValue = "${GITHUB_RUN_ATTEMPT}", description = "Run attempt no - you could provide it as a option value or put in GITHUB_RUN_ATTEMPT env variable")
     int runAttempt;
 
-
-    @Parameters(index = "0", description = "Test name regex", arity = "0..1")
-    String testNameRegex;
-
     public CommonSharedOptions getValues(){
         if (commitSha != null && commitSha.length() > 8) {
             commitSha = commitSha.substring(0,8);
         }
-        return new CommonSharedOptions(commitSha, runAttempt, testNameRegex);
+        return new CommonSharedOptions(commitSha, runAttempt);
     }
 
     public URI getMongoConnectionString() {

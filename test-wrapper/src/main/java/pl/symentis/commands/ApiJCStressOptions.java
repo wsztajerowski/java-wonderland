@@ -1,8 +1,9 @@
 package pl.symentis.commands;
 
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import pl.symentis.services.JCStressOptions;
+import pl.symentis.services.options.JCStressOptions;
 
 import java.nio.file.Path;
 
@@ -33,6 +34,10 @@ public class ApiJCStressOptions {
     Integer strideCount;
     @Option(names = "-strideSize", description = "Internal stride size. Larger value decreases the synchronization overhead, but also reduces the number of collisions.")
     Integer strideSize;
+    @Option(names = {"--process-output"}, defaultValue = "jcstress-output.txt", description = "Write tests process output to a given file. (default: ${DEFAULT-VALUE})")
+    Path processOutput;
+    @CommandLine.Parameters(index = "0", description = "Test name regex", arity = "0..1")
+    String testNameRegex;
 
     public JCStressOptions getValues(){
         return new JCStressOptions(cpuNumber,
@@ -46,7 +51,9 @@ public class ApiJCStressOptions {
             splitCompilationModes,
             preTouchHeap,
             strideCount,
-            strideSize);
+            strideSize,
+            testNameRegex,
+            processOutput);
     }
 
 }

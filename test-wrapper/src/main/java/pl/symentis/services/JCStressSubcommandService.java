@@ -9,6 +9,8 @@ import pl.symentis.entities.jcstress.JCStressTestId;
 import pl.symentis.entities.jcstress.JCStressTestMetadata;
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
+import pl.symentis.services.options.CommonSharedOptions;
+import pl.symentis.services.options.JCStressOptions;
 
 import java.nio.file.Path;
 
@@ -22,17 +24,15 @@ public class JCStressSubcommandService {
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
     private final Path benchmarkPath;
-    private final Path outputPath;
 
     private final JCStressOptions jcStressOptions;
 
-    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, Path benchmarkPath, Path outputPath, JCStressOptions jcStressOptions) {
+    JCStressSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, Path benchmarkPath, JCStressOptions jcStressOptions) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
         this.benchmarkPath = benchmarkPath;
         this.jcStressOptions = jcStressOptions;
-        this.outputPath = outputPath;
     }
 
     public void executeCommand() {
@@ -55,8 +55,8 @@ public class JCStressSubcommandService {
                 .addArgumentIfValueIsNotNull("-spinStyle", jcStressOptions.spinStyle())
                 .addArgumentIfValueIsNotNull("-strideCount", jcStressOptions.strideCount())
                 .addArgumentIfValueIsNotNull("-strideSize", jcStressOptions.strideSize())
-                .addArgumentIfValueIsNotNull("-t", commonOptions.testNameRegex())
-                .withOutputPath(outputPath)
+                .addArgumentIfValueIsNotNull("-t", jcStressOptions.testNameRegex())
+                .withOutputPath(jcStressOptions.processOutput())
                 .buildAndStartProcess()
                 .waitFor();
         } catch (AssertionError | InterruptedException e) {
@@ -90,6 +90,6 @@ public class JCStressSubcommandService {
 
         logger.info("Saving test outputs on S3");
         s3Service
-            .saveFileOnS3(s3Prefix.resolve("outputs/output.txt").toString(), outputPath);
+            .saveFileOnS3(s3Prefix.resolve("outputs/output.txt").toString(), jcStressOptions.processOutput());
     }
 }

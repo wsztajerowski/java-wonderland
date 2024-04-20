@@ -40,6 +40,7 @@ public class TestcontainersWithS3BaseIT {
         awsS3Client = S3Client
             .builder()
             .endpointOverride(LOCAL_STACK_CONTAINER.getEndpoint())
+            .region(Region.of(LOCAL_STACK_CONTAINER.getRegion()))
             .credentialsProvider(
                 StaticCredentialsProvider.create(
                     AwsBasicCredentials.create(LOCAL_STACK_CONTAINER.getAccessKey(), LOCAL_STACK_CONTAINER.getSecretKey())

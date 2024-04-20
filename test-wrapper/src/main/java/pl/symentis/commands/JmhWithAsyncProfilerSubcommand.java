@@ -3,10 +3,11 @@ package pl.symentis.commands;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
+import pl.symentis.services.options.AsyncProfilerOptions;
 
 import java.nio.file.Path;
 
-import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.getJmhWithAsyncProfilerSubcommandService;
+import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.serviceBuilderWithDefaultS3Service;
 
 @Command(name = "jmh-with-async", description = "Run JHM benchmarks with Async profiler")
 public class JmhWithAsyncProfilerSubcommand implements Runnable {
@@ -32,13 +33,15 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
 
     @Override
     public void run() {
-        getJmhWithAsyncProfilerSubcommandService()
+        serviceBuilderWithDefaultS3Service()
             .withCommonOptions(apiCommonSharedOptions.getValues())
-            .withJmhOptions(apiJmhOptions.getValues())
-            .withAsyncPath(asyncPath)
-            .withAsyncInterval(asyncInterval)
-            .withAsyncOutputType(asyncOutputType)
-            .withAsyncOutputPath(asyncOutputPath)
+            .withJmhOptions(apiJmhOptions.getJmhOptions())
+            .withAsyncProfilerOptions(AsyncProfilerOptions.asyncProfilerOptionsBuilder()
+                .withAsyncPath(asyncPath)
+                .withAsyncInterval(asyncInterval)
+                .withAsyncOutputType(asyncOutputType)
+                .withAsyncOutputPath(asyncOutputPath)
+                .build())
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
             .build()
             .executeCommand();
