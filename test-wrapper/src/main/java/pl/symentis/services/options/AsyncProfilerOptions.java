@@ -3,7 +3,7 @@ package pl.symentis.services.options;
 import java.nio.file.Path;
 
 public record AsyncProfilerOptions(
-    String asyncPath,
+    Path asyncPath,
     int asyncInterval,
     String asyncOutputType,
     Path asyncOutputPath) {
@@ -13,7 +13,7 @@ public record AsyncProfilerOptions(
     }
 
     public static final class AsyncProfilerOptionsBuilder {
-        private String asyncPath;
+        private Path asyncPath;
         private int asyncInterval;
         private String asyncOutputType;
         private Path asyncOutputPath;
@@ -21,7 +21,7 @@ public record AsyncProfilerOptions(
         private AsyncProfilerOptionsBuilder() {
         }
 
-        public AsyncProfilerOptionsBuilder withAsyncPath(String asyncPath) {
+        public AsyncProfilerOptionsBuilder withAsyncPath(Path asyncPath) {
             this.asyncPath = asyncPath;
             return this;
         }
