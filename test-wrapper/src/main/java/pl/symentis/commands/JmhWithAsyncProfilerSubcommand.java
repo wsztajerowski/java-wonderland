@@ -13,7 +13,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
     @Mixin
     LoggingMixin loggingMixin;
     @Mixin
-    private ApiJmhBenchmarksSharedOptions sharedJmhOptions;
+    private ApiJmhOptions apiJmhOptions;
 
     @Mixin
     private ApiCommonSharedOptions apiCommonSharedOptions;
@@ -34,7 +34,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
     public void run() {
         getJmhWithAsyncProfilerSubcommandService()
             .withCommonOptions(apiCommonSharedOptions.getValues())
-            .withJmhOptions(sharedJmhOptions.getValues())
+            .withJmhOptions(apiJmhOptions.getValues())
             .withAsyncPath(asyncPath)
             .withAsyncInterval(asyncInterval)
             .withAsyncOutputType(asyncOutputType)

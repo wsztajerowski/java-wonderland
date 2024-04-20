@@ -4,6 +4,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.net.URI;
 import java.nio.file.Path;
 
 public class S3Service {
@@ -22,5 +23,17 @@ public class S3Service {
             .build();
 
         s3Client.putObject(putOb, RequestBody.fromFile(pathToFile));
+    }
+
+    public String getEndpoint(){
+        return s3Client
+            .serviceClientConfiguration()
+            .endpointOverride()
+            .map(URI::toString)
+            .orElse("https://.s3.%s.amazonaws.com".formatted(s3Client.serviceClientConfiguration().region()));
+    }
+
+    public String getBucketName() {
+        return bucketName;
     }
 }

@@ -21,13 +21,13 @@ import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.ensurePathExists;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
-import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
+import static pl.symentis.process.JmhBenchmarkProcessBuilderFactory.prepopulatedJmhBenchmarkProcessBuilder;
 import static pl.symentis.services.S3PrefixProvider.jmhWithAsyncS3Prefix;
 
 public class JmhWithAsyncProfilerSubcommandService {
     private static final Logger logger = LoggerFactory.getLogger(JmhWithAsyncProfilerSubcommandService.class);
     private final CommonSharedOptions commonOptions;
-    private final JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions;
+    private final JmhBenchmarksSharedOptions jmhBenchmarksOptions;
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
     private final String asyncPath;
@@ -36,35 +36,29 @@ public class JmhWithAsyncProfilerSubcommandService {
     private final Path asyncOutputPath;
     private final Path s3Prefix;
     private final Path outputPath;
-    private final Path jmhResultFilePath;
 
-    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksSharedOptions, String asyncPath, int asyncInterval, String asyncOutputType, Path asyncOutputPath, Path outputPath, Path jmhResultFilePath) {
+    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions, String asyncPath, int asyncInterval, String asyncOutputType, Path asyncOutputPath, Path outputPath) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
-        this.jmhBenchmarksSharedOptions = jmhBenchmarksSharedOptions;
+        this.jmhBenchmarksOptions = jmhBenchmarksOptions;
         this.asyncPath = asyncPath;
         this.asyncInterval = asyncInterval;
         this.asyncOutputType = asyncOutputType;
         this.asyncOutputPath = asyncOutputPath;
         this.outputPath = outputPath;
-        this.jmhResultFilePath = jmhResultFilePath;
         this.s3Prefix = jmhWithAsyncS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
     }
 
     public void executeCommand() {
         // Build process
+        logger.info("Running JMH with async profiler - S3 endpoint: {}", s3Service.getEndpoint());
+        logger.info("S3 bucket: {}", s3Service.getBucketName());
+        logger.info("Path to results within bucket: {}", s3Prefix);
         try {
-            logger.info("Running JMH with async profiler - S3 result path: {}", s3Prefix);
-            ensurePathExists(jmhResultFilePath);
-            int exitCode = benchmarkProcessBuilder(jmhBenchmarksSharedOptions.benchmarkPath())
-                .addArgumentWithValue("-f", jmhBenchmarksSharedOptions.forks())
-                .addArgumentWithValue("-i", jmhBenchmarksSharedOptions.iterations())
-                .addArgumentWithValue("-wi", jmhBenchmarksSharedOptions.warmupIterations())
-                .addArgumentWithValue("-rf", "json")
-                .addArgumentIfValueIsNotNull("-rff", jmhResultFilePath)
+            ensurePathExists(jmhBenchmarksOptions.machineReadableOutput());
+            int exitCode = prepopulatedJmhBenchmarkProcessBuilder(jmhBenchmarksOptions)
                 .addArgumentWithValue("-prof", createAsyncCommand())
-                .addArgumentIfValueIsNotNull("-jvmArgs", jmhBenchmarksSharedOptions.jvmArgs())
                 .addOptionalArgument(commonOptions.testNameRegex())
                 .withOutputPath(outputPath)
                 .buildAndStartProcess()
@@ -76,8 +70,9 @@ public class JmhWithAsyncProfilerSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        logger.info("Processing JMH results: {}", jmhResultFilePath);
-        for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhResultFilePath)) {
+//        logger.info("S3 url: {}", s3Service.);
+        logger.info("Processing JMH results: {}", jmhBenchmarksOptions.machineReadableOutput());
+        for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhBenchmarksOptions.machineReadableOutput())) {
             logger.debug("JMH result: {}", jmhResult);
             Map<String, String> flamegraphs = new HashMap<>();
             String benchmarkFullname = jmhResult.benchmark() + getFlamegraphsDirSuffix(jmhResult.mode());
@@ -133,6 +128,12 @@ public class JmhWithAsyncProfilerSubcommandService {
         return switch (mode) {
             case "thrpt":
                 yield "-Throughput";
+            case "avgt":
+                yield "-AverageTime";
+            case "sample":
+                yield "-SampleTime";
+            case "ss":
+                yield "-SingleShotTime";
             default:
                 throw new IllegalArgumentException("Unknown benchmark mode: " + mode);
         };

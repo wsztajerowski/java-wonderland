@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static pl.symentis.MongoDbTestHelpers.all;
 import static pl.symentis.infra.S3ServiceBuilder.getS3ServiceBuilder;
+import static pl.symentis.services.JmhBenchmarksSharedOptionsBuilder.jmhBenchmarksSharedOptionsBuilder;
 import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.getJmhWithAsyncProfilerSubcommandService;
 
 @EnabledIfEnvironmentVariable(named = "ASYNC_PATH", matches = ".*")
@@ -34,7 +35,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
     @Test
     void successful_scenario() throws IOException {
         // given
-        Path jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
+        Path jmhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
         Path result = Files.createTempFile("results", "jmh.json");
         Path output = Files.createTempFile("outputs", "jmh.txt");
         Path asyncOutput = Files.createTempDirectory("async-outputs");
@@ -45,12 +46,17 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
                 .withBucketName(TEST_BUCKET_NAME)
                 .build())
             .withCommonOptions(new CommonSharedOptions("abcdef12", 1,  "incrementUsingSynchronized"))
-            .withJmhOptions(new JmhBenchmarksSharedOptions(0, 1, 1,"", jhhTestBenchmark))
+            .withJmhOptions(jmhBenchmarksSharedOptionsBuilder()
+                .withBenchmarkPath(jmhTestBenchmark)
+                .withWarmupIterations(0)
+                .withForks(1)
+                .withIterations(1)
+                .withMachineReadableOutput(result)
+                .build())
             .withAsyncPath(System.getenv("ASYNC_PATH"))
             .withAsyncOutputType("flamegraph")
             .withAsyncOutputPath(asyncOutput)
             .withAsyncInterval(9990)
-            .withResultsPath(result)
             .withOutputPath(output)
             .build();
 

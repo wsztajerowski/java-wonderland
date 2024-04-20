@@ -9,7 +9,7 @@ import static pl.symentis.services.JmhSubcommandServiceBuilder.getJmhSubcommandS
 public class JmhSubcommand implements Runnable {
     @Mixin LoggingMixin loggingMixin;
     @Mixin
-    private ApiJmhBenchmarksSharedOptions sharedJmhOptions;
+    private ApiJmhOptions apiJmhOptions;
 
     @Mixin
     private ApiCommonSharedOptions apiCommonSharedOptions;
@@ -18,7 +18,7 @@ public class JmhSubcommand implements Runnable {
     public void run() {
         getJmhSubcommandService()
             .withCommonOptions(apiCommonSharedOptions.getValues())
-            .withJmhOptions(sharedJmhOptions.getValues())
+            .withJmhOptions(apiJmhOptions.getValues())
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
             .build()
             .executeCommand();
