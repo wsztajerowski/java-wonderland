@@ -9,6 +9,9 @@ import pl.symentis.entities.jmh.JmhBenchmarkId;
 import pl.symentis.entities.jmh.JmhResult;
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
+import pl.symentis.services.options.AsyncProfilerOptions;
+import pl.symentis.services.options.CommonSharedOptions;
+import pl.symentis.services.options.JmhOptions;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -27,26 +30,18 @@ import static pl.symentis.services.S3PrefixProvider.jmhWithAsyncS3Prefix;
 public class JmhWithAsyncProfilerSubcommandService {
     private static final Logger logger = LoggerFactory.getLogger(JmhWithAsyncProfilerSubcommandService.class);
     private final CommonSharedOptions commonOptions;
-    private final JmhBenchmarksSharedOptions jmhBenchmarksOptions;
+    private final JmhOptions jmhOptions;
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
-    private final String asyncPath;
-    private final int asyncInterval;
-    private final String asyncOutputType;
-    private final Path asyncOutputPath;
+    private final AsyncProfilerOptions asyncProfilerOptions;
     private final Path s3Prefix;
-    private final Path outputPath;
 
-    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions, String asyncPath, int asyncInterval, String asyncOutputType, Path asyncOutputPath, Path outputPath) {
+    JmhWithAsyncProfilerSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhOptions jmhOptions, AsyncProfilerOptions asyncProfilerOptions) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
-        this.jmhBenchmarksOptions = jmhBenchmarksOptions;
-        this.asyncPath = asyncPath;
-        this.asyncInterval = asyncInterval;
-        this.asyncOutputType = asyncOutputType;
-        this.asyncOutputPath = asyncOutputPath;
-        this.outputPath = outputPath;
+        this.jmhOptions = jmhOptions;
+        this.asyncProfilerOptions = asyncProfilerOptions;
         this.s3Prefix = jmhWithAsyncS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
     }
 
@@ -56,11 +51,9 @@ public class JmhWithAsyncProfilerSubcommandService {
         logger.info("S3 bucket: {}", s3Service.getBucketName());
         logger.info("Path to results within bucket: {}", s3Prefix);
         try {
-            ensurePathExists(jmhBenchmarksOptions.machineReadableOutput());
-            int exitCode = prepopulatedJmhBenchmarkProcessBuilder(jmhBenchmarksOptions)
+            ensurePathExists(jmhOptions.outputOptions().machineReadableOutput());
+            int exitCode = prepopulatedJmhBenchmarkProcessBuilder(jmhOptions)
                 .addArgumentWithValue("-prof", createAsyncCommand())
-                .addOptionalArgument(commonOptions.testNameRegex())
-                .withOutputPath(outputPath)
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0) {
@@ -71,12 +64,12 @@ public class JmhWithAsyncProfilerSubcommandService {
         }
 
 //        logger.info("S3 url: {}", s3Service.);
-        logger.info("Processing JMH results: {}", jmhBenchmarksOptions.machineReadableOutput());
-        for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhBenchmarksOptions.machineReadableOutput())) {
+        logger.info("Processing JMH results: {}", jmhOptions.outputOptions().machineReadableOutput());
+        for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhOptions.outputOptions().machineReadableOutput())) {
             logger.debug("JMH result: {}", jmhResult);
             Map<String, String> flamegraphs = new HashMap<>();
             String benchmarkFullname = jmhResult.benchmark() + getFlamegraphsDirSuffix(jmhResult.mode());
-            Path flamegraphsDir = asyncOutputPath.resolve(benchmarkFullname);
+            Path flamegraphsDir = asyncProfilerOptions.asyncOutputPath().resolve(benchmarkFullname);
             try (Stream<Path> paths = list(flamegraphsDir)) {
                 paths
                     .forEach(path -> {
@@ -107,10 +100,10 @@ public class JmhWithAsyncProfilerSubcommandService {
 
         logger.info("Saving test outputs on S3");
         s3Service
-            .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), outputPath);
+            .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), jmhOptions.outputOptions().processOutput());
 
         logger.info("Saving JMH logs on S3");
-        try (Stream<Path> paths = list(asyncOutputPath)){
+        try (Stream<Path> paths = list(asyncProfilerOptions.asyncOutputPath())){
             paths
                 .filter(f -> f.toString().endsWith("log"))
                 .forEach(path -> {
@@ -140,6 +133,10 @@ public class JmhWithAsyncProfilerSubcommandService {
     }
 
     private String createAsyncCommand() {
-        return "async:libPath=%s;output=%s;dir=%s;interval=%d".formatted(asyncPath, asyncOutputType, asyncOutputPath.toAbsolutePath(), asyncInterval);
+        return "async:libPath=%s;output=%s;dir=%s;interval=%d".formatted(
+            asyncProfilerOptions.asyncPath(),
+            asyncProfilerOptions.asyncOutputType(),
+            asyncProfilerOptions.asyncOutputPath().toAbsolutePath(),
+            asyncProfilerOptions.asyncInterval());
     }
 }

@@ -3,27 +3,29 @@ package pl.symentis.services;
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
 import pl.symentis.infra.S3ServiceBuilder;
+import pl.symentis.services.options.CommonSharedOptions;
+import pl.symentis.services.options.JmhOptions;
 
 import java.net.URI;
-import java.nio.file.Path;
-import java.util.Objects;
 
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 
 public final class JmhSubcommandServiceBuilder {
     private S3Service s3Service;
     private CommonSharedOptions commonOptions;
-    private JmhBenchmarksSharedOptions jmhBenchmarksOptions;
+    private JmhOptions jmhOptions;
     private URI mongoConnectionString;
-    private Path outputPath;
 
     private JmhSubcommandServiceBuilder() {
-        s3Service = S3ServiceBuilder.getDefaultS3ServiceBuilder().build();
-        outputPath = Path.of("output.txt");
     }
 
-    public static JmhSubcommandServiceBuilder getJmhSubcommandService() {
+    public static JmhSubcommandServiceBuilder serviceBuilder() {
         return new JmhSubcommandServiceBuilder();
+    }
+
+    public static JmhSubcommandServiceBuilder serviceBuilderWithDefaultS3Service() {
+        return new JmhSubcommandServiceBuilder()
+            .withS3Service(S3ServiceBuilder.getDefaultS3ServiceBuilder().build());
     }
 
     public JmhSubcommandServiceBuilder withCommonOptions(CommonSharedOptions commonOptions) {
@@ -31,8 +33,8 @@ public final class JmhSubcommandServiceBuilder {
         return this;
     }
 
-    public JmhSubcommandServiceBuilder withJmhOptions(JmhBenchmarksSharedOptions sharedOptions) {
-        this.jmhBenchmarksOptions = sharedOptions;
+    public JmhSubcommandServiceBuilder withJmhOptions(JmhOptions jmhOptions) {
+        this.jmhOptions = jmhOptions;
         return this;
     }
 
@@ -46,16 +48,10 @@ public final class JmhSubcommandServiceBuilder {
         return this;
     }
 
-    public JmhSubcommandServiceBuilder withOutputPath(Path outputPath) {
-        Objects.requireNonNull(outputPath, "Provide non-null path as JMH output file!");
-        this.outputPath = outputPath;
-        return this;
-    }
-
     public JmhSubcommandService build() {
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
-        return new JmhSubcommandService(s3Service, morphiaService, commonOptions, jmhBenchmarksOptions, outputPath);
+        return new JmhSubcommandService(s3Service, morphiaService, commonOptions, jmhOptions);
     }
 }

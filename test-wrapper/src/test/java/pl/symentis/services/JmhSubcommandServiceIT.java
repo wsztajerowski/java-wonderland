@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import pl.symentis.MongoDbTestHelpers;
 import pl.symentis.TestcontainersWithS3AndMongoBaseIT;
 import pl.symentis.entities.jmh.JmhBenchmark;
+import pl.symentis.services.options.CommonSharedOptions;
+import pl.symentis.services.options.JmhOptions;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,8 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static pl.symentis.MongoDbTestHelpers.all;
 import static pl.symentis.infra.S3ServiceBuilder.getS3ServiceBuilder;
-import static pl.symentis.services.JmhBenchmarksSharedOptionsBuilder.jmhBenchmarksSharedOptionsBuilder;
-import static pl.symentis.services.JmhSubcommandServiceBuilder.getJmhSubcommandService;
+import static pl.symentis.services.JmhSubcommandServiceBuilder.serviceBuilder;
+import static pl.symentis.services.options.JmhBenchmarkOptions.jmhBenchmarkOptionsBuilder;
+import static pl.symentis.services.options.JmhIterationOptions.jmhIterationOptionsBuilder;
+import static pl.symentis.services.options.JmhJvmOptions.jmhJvmOptionsBuilder;
+import static pl.symentis.services.options.JmhOutputOptions.jmhOutputOptionsBuilder;
+import static pl.symentis.services.options.JmhWarmupOptions.jmhWarmupOptionsBuilder;
 
 class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
 
@@ -36,21 +42,29 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         Path result = Files.createTempFile("results", "jmh.json");
         Path output = Files.createTempFile("outputs", "jmh.txt");
         Path jmhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
-        JmhSubcommandService sut = getJmhSubcommandService()
+        JmhSubcommandService sut = serviceBuilder()
             .withMongoConnectionString(getConnectionString())
-            .withCommonOptions(new CommonSharedOptions("abcdef12", 1,  "incrementUsingSynchronized"))
-            .withJmhOptions(jmhBenchmarksSharedOptionsBuilder()
-                .withBenchmarkPath(jmhTestBenchmark)
-                .withWarmupIterations(0)
-                .withForks(1)
-                .withIterations(1)
-                .withMachineReadableOutput(result)
-                .build())
+            .withCommonOptions(new CommonSharedOptions("abcdef12", 1))
+            .withJmhOptions( new JmhOptions(
+                jmhBenchmarkOptionsBuilder()
+                    .withBenchmarkPath(jmhTestBenchmark)
+                    .withForks(1)
+                    .build(),
+                jmhOutputOptionsBuilder()
+                    .withMachineReadableOutput(result)
+                    .withProcessOutput(output)
+                    .build(),
+                jmhWarmupOptionsBuilder()
+                    .withWarmupIterations(0)
+                    .build(),
+                jmhIterationOptionsBuilder()
+                    .withIterations(1)
+                    .build(),
+                jmhJvmOptionsBuilder().build()))
             .withS3Service(getS3ServiceBuilder()
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)
                 .build())
-            .withOutputPath(output)
             .build();
 
         // when

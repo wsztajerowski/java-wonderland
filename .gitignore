@@ -28,3 +28,4 @@ buildNumber.properties
 *.pem
 *.html
 **/jmh-result.json
+/volume/

@@ -8,6 +8,8 @@ import pl.symentis.entities.jmh.JmhBenchmarkId;
 import pl.symentis.entities.jmh.JmhResult;
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
+import pl.symentis.services.options.CommonSharedOptions;
+import pl.symentis.services.options.JmhOptions;
 
 import java.nio.file.Path;
 
@@ -20,17 +22,15 @@ import static pl.symentis.services.S3PrefixProvider.jmhS3Prefix;
 public class JmhSubcommandService {
     private static final Logger logger = LoggerFactory.getLogger(JmhSubcommandService.class);
     private final CommonSharedOptions commonOptions;
-    private final JmhBenchmarksSharedOptions jmhBenchmarksOptions;
+    private final JmhOptions jmhOptions;
     private final S3Service s3Service;
     private final MorphiaService morphiaService;
-    private final Path outputPath;
 
-    JmhSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhBenchmarksSharedOptions jmhBenchmarksOptions, Path outputPath) {
+    JmhSubcommandService(S3Service s3Service, MorphiaService morphiaService, CommonSharedOptions commonOptions, JmhOptions jmhOptions) {
         this.s3Service = s3Service;
         this.morphiaService = morphiaService;
         this.commonOptions = commonOptions;
-        this.jmhBenchmarksOptions = jmhBenchmarksOptions;
-        this.outputPath = outputPath;
+        this.jmhOptions = jmhOptions;
     }
 
     public void executeCommand() {
@@ -39,10 +39,8 @@ public class JmhSubcommandService {
         logger.info("S3 bucket: {}", s3Service.getBucketName());
         logger.info("Path to results within bucket: {}", s3Prefix);
         try {
-            ensurePathExists(jmhBenchmarksOptions.machineReadableOutput());
-            int exitCode = prepopulatedJmhBenchmarkProcessBuilder(jmhBenchmarksOptions)
-                .addOptionalArgument(commonOptions.testNameRegex())
-                .withOutputPath(outputPath)
+            ensurePathExists(jmhOptions.outputOptions().machineReadableOutput());
+            int exitCode = prepopulatedJmhBenchmarkProcessBuilder(jmhOptions)
                 .buildAndStartProcess()
                 .waitFor();
             if (exitCode != 0) {
@@ -52,8 +50,8 @@ public class JmhSubcommandService {
             throw new JavaWonderlandException(e);
         }
 
-        logger.info("Processing JMH results: {}", jmhBenchmarksOptions.machineReadableOutput());
-        for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhBenchmarksOptions.machineReadableOutput())) {
+        logger.info("Processing JMH results: {}", jmhOptions.outputOptions().machineReadableOutput());
+        for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhOptions.outputOptions().machineReadableOutput())) {
             logger.debug("JMH result: {}", jmhResult);
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
                 commonOptions.commitSha(),
@@ -69,8 +67,8 @@ public class JmhSubcommandService {
         }
 
 
-        logger.info("Saving test outputs on S3");
+        logger.info("Saving benchmark process output on S3");
         s3Service
-            .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), outputPath);
+            .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), jmhOptions.outputOptions().processOutput());
     }
 }

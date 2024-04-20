@@ -1,4 +1,4 @@
-package pl.symentis.services;
+package pl.symentis.services.options;
 
 import java.nio.file.Path;
 
@@ -15,6 +15,8 @@ public final class JCStressOptionsBuilder {
     private Boolean preTouchHeap;
     private Integer strideCount;
     private Integer strideSize;
+    private String testNameRegex;
+    private Path processOutput;
 
     private JCStressOptionsBuilder() {
     }
@@ -83,7 +85,17 @@ public final class JCStressOptionsBuilder {
         return this;
     }
 
+    public JCStressOptionsBuilder withTestNameRegex(String testNameRegex) {
+        this.testNameRegex = testNameRegex;
+        return this;
+    }
+
+    public JCStressOptionsBuilder withProcessOutput(Path processOutput) {
+        this.processOutput = processOutput;
+        return this;
+    }
+
     public JCStressOptions build() {
-        return new JCStressOptions(cpuNumber, forks, forkMultiplier, heapSize, jvmArgs, jvmArgsPrepend, spinStyle, reportPath, splitCompilationModes, preTouchHeap, strideCount, strideSize);
+        return new JCStressOptions(cpuNumber, forks, forkMultiplier, heapSize, jvmArgs, jvmArgsPrepend, spinStyle, reportPath, splitCompilationModes, preTouchHeap, strideCount, strideSize, testNameRegex, processOutput);
     }
 }
