@@ -18,7 +18,7 @@ public final class JCStressSubcommandServiceBuilder {
     private JCStressOptions jcStressOptions;
 
     private JCStressSubcommandServiceBuilder() {
-        this.s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
+        this.s3Service = S3ServiceBuilder.getDefaultS3ServiceBuilder().build();
         outputPath = Path.of("output.txt");
     }
 

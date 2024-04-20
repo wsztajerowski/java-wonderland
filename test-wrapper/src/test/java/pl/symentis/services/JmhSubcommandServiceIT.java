@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static pl.symentis.MongoDbTestHelpers.all;
 import static pl.symentis.infra.S3ServiceBuilder.getS3ServiceBuilder;
+import static pl.symentis.services.JmhBenchmarksSharedOptionsBuilder.jmhBenchmarksSharedOptionsBuilder;
 import static pl.symentis.services.JmhSubcommandServiceBuilder.getJmhSubcommandService;
 
 class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
@@ -34,16 +35,21 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         // given
         Path result = Files.createTempFile("results", "jmh.json");
         Path output = Files.createTempFile("outputs", "jmh.txt");
-        Path jhhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
+        Path jmhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
         JmhSubcommandService sut = getJmhSubcommandService()
             .withMongoConnectionString(getConnectionString())
             .withCommonOptions(new CommonSharedOptions("abcdef12", 1,  "incrementUsingSynchronized"))
-            .withJmhOptions(new JmhBenchmarksSharedOptions(0, 1, 1,"", jhhTestBenchmark))
+            .withJmhOptions(jmhBenchmarksSharedOptionsBuilder()
+                .withBenchmarkPath(jmhTestBenchmark)
+                .withWarmupIterations(0)
+                .withForks(1)
+                .withIterations(1)
+                .withMachineReadableOutput(result)
+                .build())
             .withS3Service(getS3ServiceBuilder()
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)
                 .build())
-            .withResultsPath(result)
             .withOutputPath(output)
             .build();
 

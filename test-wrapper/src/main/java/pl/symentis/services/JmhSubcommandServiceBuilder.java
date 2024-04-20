@@ -16,12 +16,10 @@ public final class JmhSubcommandServiceBuilder {
     private JmhBenchmarksSharedOptions jmhBenchmarksOptions;
     private URI mongoConnectionString;
     private Path outputPath;
-    private Path resultsPath;
 
     private JmhSubcommandServiceBuilder() {
-        s3Service = S3ServiceBuilder.getS3ServiceBuilder().build();
+        s3Service = S3ServiceBuilder.getDefaultS3ServiceBuilder().build();
         outputPath = Path.of("output.txt");
-        resultsPath = Path.of(JmhBenchmarksSharedOptions.JMH_RESULT_FILENAME);
     }
 
     public static JmhSubcommandServiceBuilder getJmhSubcommandService() {
@@ -54,16 +52,10 @@ public final class JmhSubcommandServiceBuilder {
         return this;
     }
 
-    public JmhSubcommandServiceBuilder withResultsPath(Path resultsPath) {
-        Objects.requireNonNull(resultsPath, "Provide non-null path as JMH results file!");
-        this.resultsPath = resultsPath.toAbsolutePath();
-        return this;
-    }
-
     public JmhSubcommandService build() {
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
-        return new JmhSubcommandService(s3Service, morphiaService, commonOptions, jmhBenchmarksOptions, outputPath, resultsPath);
+        return new JmhSubcommandService(s3Service, morphiaService, commonOptions, jmhBenchmarksOptions, outputPath);
     }
 }
