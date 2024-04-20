@@ -5,22 +5,38 @@ import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 import pl.symentis.services.options.AsyncProfilerOptions;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static picocli.CommandLine.Model.CommandSpec;
+import static picocli.CommandLine.ParameterException;
+import static picocli.CommandLine.Spec;
 import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.serviceBuilderWithDefaultS3Service;
 
 @Command(name = "jmh-with-async", description = "Run JHM benchmarks with Async profiler")
 public class JmhWithAsyncProfilerSubcommand implements Runnable {
+    @Spec
+    CommandSpec spec;
+
     @Mixin
     LoggingMixin loggingMixin;
+
     @Mixin
     private ApiJmhOptions apiJmhOptions;
 
     @Mixin
     private ApiCommonSharedOptions apiCommonSharedOptions;
 
+    private Path asyncPath;
+
     @Option(names = {"-ap", "--async-path"}, defaultValue = "${ASYNC_PATH:-/home/ec2-user/async-profiler/build/libasyncProfiler.so}", description = "Path to Async profiler (default: ${DEFAULT-VALUE})")
-    String asyncPath;
+    public void setAsyncPath(Path path) {
+        if(!Files.exists(path)){
+            throw new ParameterException(spec.commandLine(),
+                "Invalid path to async profiler: %s".formatted(path));
+        }
+        this.asyncPath = path;
+    }
 
     @Option(names = {"-ai", "--async-interval"}, description = "Profiling interval (default: ${DEFAULT-VALUE})")
     int asyncInterval = 9990;

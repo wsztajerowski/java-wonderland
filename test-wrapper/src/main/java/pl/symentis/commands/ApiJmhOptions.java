@@ -6,25 +6,84 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import pl.symentis.services.options.*;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static picocli.CommandLine.Model.CommandSpec;
+import static picocli.CommandLine.ParameterException;
+import static picocli.CommandLine.Spec;
 
 @Command
 public class ApiJmhOptions {
 
-    @ArgGroup(validate = false, heading = "Benchmark options%n")
-    BenchmarkSection benchmarkSection;
+    @Spec
+    static CommandSpec spec;
 
-    @ArgGroup(validate = false, heading = "Output options%n")
-    OutputSection outputSection;
+    Path benchmarkPath;
+
+    @Option(names = "--benchmark-path", defaultValue = "jmh-benchmarks.jar", description = "Path to benchmark jar (default: ${DEFAULT-VALUE})")
+    public void setBenchmarkPath(Path path) {
+        if(!Files.exists(path)){
+            throw new ParameterException(spec.commandLine(),
+                "Invalid benchmark path: %s".formatted(path));
+        }
+        this.benchmarkPath = path;
+    }
+
+    @Option(names = {"-o", "--human-readable-output"}, description = "Redirect human-readable output to a given file.")
+    Path humanReadableOutput;
+
+    @Option(names = {"-rff", "--machine-readable-output"}, defaultValue = "jmh-results.json", description = "Write machine-readable results to a given json file. (default: ${DEFAULT-VALUE})")
+    Path machineReadableOutput;
+
+    @Option(names = {"--process-output"}, defaultValue = "jmh-output.txt", description = "Write benchmark process output to a given file. (default: ${DEFAULT-VALUE})")
+    Path processOutput;
+
+    @ArgGroup(validate = false, heading = "Benchmark options%n")
+    BenchmarkSection benchmarkSection = new BenchmarkSection();
 
     @ArgGroup(validate = false, heading = "Warmup options%n")
-    WarmupSection warmupSection;
+    WarmupSection warmupSection = new WarmupSection();
 
     @ArgGroup(validate = false, heading = "Iteration options%n")
-    IterationSection iterationSection;
+    IterationSection iterationSection = new IterationSection();
 
     @ArgGroup(validate = false, heading = "JVM options%n")
-    JvmSection jvmSection;
+    JvmSection jvmSection = new JvmSection();
+
+    static class BenchmarkSection {
+
+        @Option(names = {"-bs", "--batch-size"}, description = "Batch size: number of benchmark method calls per operation. Some benchmark modes may ignore this setting, please check this separately. (default: 1)")
+        Integer batchSize;
+
+        @Option(names = {"-t", "--threads"}, description = "Number of worker threads to run with. 'max' means the maximum number of hardware threads available on the machine, figured out by JMH itself. (default: 1)")
+        Integer threads;
+
+        @Option(names = {"-bm", "--benchmark-mode"}, description = "Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]. (default: Throughput)")
+        String benchmarkMode;
+
+        @Option(names = {"-foe", "--fail-fast"}, negatable = true, description = "Should JMH fail immediately if any benchmark had experienced an unrecoverable error? This helps to make quick sanity tests for benchmark suites, as well as make the automated runs with checking error codes. (default: false)")
+        Boolean failAfterUnrecoverableError;
+
+        /* CHANGE FROM JMH OPTION NAME - "bvm" instead of "v" */
+        @Option(names = {"-bvm", "--benchmark-verbosity-mode"}, description = "Verbosity mode. Available modes are: [SILENT, NORMAL, EXTRA]. (default: NORMAL)")
+        String verbosityMode;
+
+        @Option(names = {"-f", "--forks"}, description = "How many times to fork a single benchmark. Use 0 to disable forking altogether. Warning: disabling forking may have detrimental impact on benchmark and infrastructure reliability, you might want to use different warmup mode instead. (default: 5)")
+        Integer forks;
+
+        @Option(names = {"-tg", "--thread-groups"}, description = "Override thread group distribution for asymmetric benchmarks. This option expects a comma-separated list of thread counts within the group. See @Group/@GroupThreads Javadoc for more information.")
+        String threadGroups;
+
+        @Option(names = {"-tu", "--time-unit"}, description = "Override time unit in benchmark results. Available time units are: [m, s, ms, us, ns]. (default: SECONDS)")
+        String timeUnit;
+
+        @Option(names = {"-e", "--exclude-benchmark-regex"}, description = "Benchmarks to exclude from the run.")
+        String excludeBenchmarkRegex;
+
+        @Parameters(index = "0", description = "Test name regex", arity = "0..1")
+        String testNameRegex;
+    }
 
     static class WarmupSection {
         @Option(names = {"-wi", "--warmup-iterations"}, description = "Number of warmup iterations to do. Warmup iterations are not counted towards the benchmark score. (default: 0 for SingleShotTime, and 5 for all other modes)")
@@ -66,42 +125,6 @@ public class ApiJmhOptions {
         Boolean forceGCBetweenIterations;
     }
 
-    static class BenchmarkSection {
-        @Option(names = "--benchmark-path", defaultValue = "${BENCHMARK_PATH:-jmh-benchmarks.jar}", description = "Path to benchmark jar (default: ${DEFAULT-VALUE})")
-        Path benchmarkPath;
-
-        @Option(names = {"-bs", "--batch-size"}, description = "Batch size: number of benchmark method calls per operation. Some benchmark modes may ignore this setting, please check this separately. (default: 1)")
-        Integer batchSize;
-
-        @Option(names = {"-t", "--threads"}, description = "Number of worker threads to run with. 'max' means the maximum number of hardware threads available on the machine, figured out by JMH itself. (default: 1)")
-        Integer threads;
-
-        @Option(names = {"-bm", "--benchmark-mode"}, description = "Benchmark mode. Available modes are: [Throughput/thrpt, AverageTime/avgt, SampleTime/sample, SingleShotTime/ss, All/all]. (default: Throughput)")
-        String benchmarkMode;
-
-        @Option(names = {"-foe", "--fail-fast"}, negatable = true, description = "Should JMH fail immediately if any benchmark had experienced an unrecoverable error? This helps to make quick sanity tests for benchmark suites, as well as make the automated runs with checking error codes. (default: false)")
-        Boolean failAfterUnrecoverableError;
-
-        /* CHANGE FROM JMH OPTION NAME - "bvm" instead of "v" */
-        @Option(names = {"-bvm", "--benchmark-verbosity-mode"}, description = "Verbosity mode. Available modes are: [SILENT, NORMAL, EXTRA]. (default: NORMAL)")
-        String verbosityMode;
-
-        @Option(names = {"-f", "--forks"}, description = "How many times to fork a single benchmark. Use 0 to disable forking altogether. Warning: disabling forking may have detrimental impact on benchmark and infrastructure reliability, you might want to use different warmup mode instead. (default: 5)")
-        Integer forks;
-
-        @Option(names = {"-tg", "--thread-groups"}, description = "Override thread group distribution for asymmetric benchmarks. This option expects a comma-separated list of thread counts within the group. See @Group/@GroupThreads Javadoc for more information.")
-        String threadGroups;
-
-        @Option(names = {"-tu", "--time-unit"}, description = "Override time unit in benchmark results. Available time units are: [m, s, ms, us, ns]. (default: SECONDS)")
-        String timeUnit;
-
-        @Option(names = {"-e", "--exclude-benchmark-regex"}, description = "Benchmarks to exclude from the run.")
-        String excludeBenchmarkRegex;
-
-        @Parameters(index = "0", description = "Test name regex", arity = "0..1")
-        String testNameRegex;
-    }
-
     static class JvmSection {
         @Option(names = "-jvm", description = "Use given JVM for runs. This option only affects forked runs.")
         String jvm;
@@ -114,17 +137,6 @@ public class ApiJmhOptions {
 
         @Option(names = "-jvmArgsPrepend", description = "Same as jvmArgs, but prepend these options before the already given JVM arg.")
         String jvmArgsPrepend;
-    }
-
-    static class OutputSection {
-        @Option(names = {"-o", "--human-readable-output"}, description = "Redirect human-readable output to a given file.")
-        Path humanReadableOutput;
-
-        @Option(names = {"-rff", "--machine-readable-output"}, defaultValue = "jmh-results.json", description = "Write machine-readable results to a given json file. (default: ${DEFAULT-VALUE})")
-        Path machineReadableOutput;
-
-        @Option(names = {"--process-output"}, defaultValue = "jmh-output.txt", description = "Write benchmark process output to a given file. (default: ${DEFAULT-VALUE})")
-        Path processOutput;
     }
 
     public JmhJvmOptions getJmhJvmOptions() {
@@ -149,9 +161,9 @@ public class ApiJmhOptions {
 
     public JmhOutputOptions getJmhOutputOptions() {
         return JmhOutputOptions.jmhOutputOptionsBuilder()
-            .withHumanReadableOutput(outputSection.humanReadableOutput)
-            .withMachineReadableOutput(outputSection.machineReadableOutput)
-            .withProcessOutput(outputSection.processOutput)
+            .withHumanReadableOutput(humanReadableOutput)
+            .withMachineReadableOutput(machineReadableOutput)
+            .withProcessOutput(processOutput)
             .build();
     }
 
@@ -170,7 +182,7 @@ public class ApiJmhOptions {
         return JmhBenchmarkOptions.jmhBenchmarkOptionsBuilder()
             .withBatchSize(benchmarkSection.batchSize)
             .withBenchmarkMode(benchmarkSection.benchmarkMode)
-            .withBenchmarkPath(benchmarkSection.benchmarkPath)
+            .withBenchmarkPath(benchmarkPath)
             .withExcludeBenchmarkRegex(benchmarkSection.excludeBenchmarkRegex)
             .withForks(benchmarkSection.forks)
             .withFailAfterUnrecoverableError(benchmarkSection.failAfterUnrecoverableError)

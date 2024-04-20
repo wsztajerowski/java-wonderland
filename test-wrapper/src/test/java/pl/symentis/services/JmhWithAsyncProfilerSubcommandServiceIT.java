@@ -70,7 +70,7 @@ class JmhWithAsyncProfilerSubcommandServiceIT  extends TestcontainersWithS3AndMo
                     .build(),
                 jmhJvmOptionsBuilder().build()))
             .withAsyncProfilerOptions(AsyncProfilerOptions.asyncProfilerOptionsBuilder()
-                .withAsyncPath(System.getenv("ASYNC_PATH"))
+                .withAsyncPath(Path.of(System.getenv("ASYNC_PATH")))
                 .withAsyncOutputType("flamegraph")
                 .withAsyncOutputPath(asyncOutput)
                 .withAsyncInterval(9990)
