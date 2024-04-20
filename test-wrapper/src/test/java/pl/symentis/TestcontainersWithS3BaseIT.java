@@ -31,7 +31,7 @@ public class TestcontainersWithS3BaseIT {
         new LocalStackContainer(DockerImageName.parse("localstack/localstack:" + LOCAL_STACK_VERSION))
             .withLabel("java.wonderland.testcontainer", "localstack")
             .withServices(LocalStackContainer.Service.S3)
-            .withEnv("DEFAULT_REGION", "eu-north-1");
+            .withEnv("DEFAULT_REGION", "eu-central-1");
     protected S3Client awsS3Client;
 
     @BeforeEach
@@ -46,7 +46,6 @@ public class TestcontainersWithS3BaseIT {
                     AwsBasicCredentials.create(LOCAL_STACK_CONTAINER.getAccessKey(), LOCAL_STACK_CONTAINER.getSecretKey())
                 )
             )
-            .region(Region.of(LOCAL_STACK_CONTAINER.getRegion()))
             .build();
     }
 
