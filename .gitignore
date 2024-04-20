@@ -29,3 +29,4 @@ buildNumber.properties
 *.html
 **/jmh-result.json
 /volume/
+**/jcstress-results-*.bin.gz
