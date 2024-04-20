@@ -85,7 +85,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
             .isArray()
             .anySatisfy(o -> assertThat(o)
                 .asString()
-                .isEqualTo("gha-outputs/commit-abcdef12/attempt-1/jcstress/outputs/output.txt"));
+                .isEqualTo("gha-outputs/commit-abcdef12/attempt-1/jcstress/output.txt"));
     }
 
 }

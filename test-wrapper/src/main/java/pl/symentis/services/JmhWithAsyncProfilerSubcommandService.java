@@ -56,6 +56,11 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .addArgumentWithValue("-prof", createAsyncCommand())
                 .buildAndStartProcess()
                 .waitFor();
+
+            logger.info("Saving benchmark process output on S3");
+            s3Service
+                .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), jmhOptions.outputOptions().processOutput());
+
             if (exitCode != 0) {
                 throw new JavaWonderlandException(format("Benchmark process exit with non-zero code: {0}", exitCode));
             }
@@ -97,10 +102,6 @@ public class JmhWithAsyncProfilerSubcommandService {
                 .setValue("jmhWithAsyncResult", jmhResult)
                 .execute();
         }
-
-        logger.info("Saving test outputs on S3");
-        s3Service
-            .saveFileOnS3(s3Prefix.resolve("output.txt").toString(), jmhOptions.outputOptions().processOutput());
 
         logger.info("Saving JMH logs on S3");
         try (Stream<Path> paths = list(asyncProfilerOptions.asyncOutputPath())){
