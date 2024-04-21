@@ -30,13 +30,10 @@ public class ApiJmhOptions {
         this.benchmarkPath = path;
     }
 
-    @Option(names = {"-o", "--human-readable-output"}, description = "Redirect human-readable output to a given file.")
-    Path humanReadableOutput;
-
     @Option(names = {"-rff", "--machine-readable-output"}, defaultValue = "jmh-results.json", description = "Write machine-readable results to a given json file. (default: ${DEFAULT-VALUE})")
     Path machineReadableOutput;
 
-    @Option(names = {"--process-output"}, defaultValue = "jmh-output.txt", description = "Write benchmark process output to a given file. (default: ${DEFAULT-VALUE})")
+    @Option(names = {"-o", "--process-output"}, defaultValue = "jmh-output.txt", description = "Write benchmark process output to a given file. (default: ${DEFAULT-VALUE})")
     Path processOutput;
 
     @ArgGroup(validate = false, heading = "Benchmark options%n")
@@ -161,7 +158,6 @@ public class ApiJmhOptions {
 
     public JmhOutputOptions getJmhOutputOptions() {
         return JmhOutputOptions.jmhOutputOptionsBuilder()
-            .withHumanReadableOutput(humanReadableOutput)
             .withMachineReadableOutput(machineReadableOutput)
             .withProcessOutput(processOutput)
             .build();

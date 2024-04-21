@@ -33,7 +33,6 @@ public class JmhBenchmarkProcessBuilderFactory {
             .addArgumentIfValueIsNotNull("-jvmArgs",        options.jvmOptions().jvmArgs())
             .addArgumentIfValueIsNotNull("-jvmArgsAppend",  options.jvmOptions().jvmArgsAppend())
             .addArgumentIfValueIsNotNull("-jvmArgsPrepend", options.jvmOptions().jvmArgsPrepend())
-            .addArgumentIfValueIsNotNull("-o",              options.outputOptions().humanReadableOutput())
             .addArgumentIfValueIsNotNull("-rff",            options.outputOptions().machineReadableOutput())
             .withOutputPath(options.outputOptions().processOutput())
             .addOptionalArgument(options.benchmarkOptions().testNameRegex());
