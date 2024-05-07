@@ -2,6 +2,8 @@ package pl.symentis.services.options;
 
 import java.nio.file.Path;
 
+import static java.util.Objects.requireNonNull;
+
 public record AsyncProfilerOptions(
     Path asyncPath,
     int asyncInterval,
@@ -42,6 +44,8 @@ public record AsyncProfilerOptions(
         }
 
         public AsyncProfilerOptions build() {
+            requireNonNull(asyncPath, "asyncPath cannot be null");
+            requireNonNull(asyncOutputPath, "asyncOutputPath cannot be null");
             return new AsyncProfilerOptions(asyncPath, asyncInterval, asyncOutputType, asyncOutputPath);
         }
     }
