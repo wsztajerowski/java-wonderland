@@ -2,6 +2,8 @@ package pl.symentis.services.options;
 
 import java.nio.file.Path;
 
+import static java.util.Objects.requireNonNull;
+
 public final class JCStressOptionsBuilder {
     private Integer cpuNumber;
     private Integer forks;
@@ -96,6 +98,22 @@ public final class JCStressOptionsBuilder {
     }
 
     public JCStressOptions build() {
-        return new JCStressOptions(cpuNumber, forks, forkMultiplier, heapSize, jvmArgs, jvmArgsPrepend, spinStyle, reportPath, splitCompilationModes, preTouchHeap, strideCount, strideSize, testNameRegex, processOutput);
+        requireNonNull(processOutput, "processOutput is null");
+        return new JCStressOptions(
+            cpuNumber,
+            forks,
+            forkMultiplier,
+            heapSize,
+            jvmArgs,
+            jvmArgsPrepend,
+            spinStyle,
+            reportPath,
+            splitCompilationModes,
+            preTouchHeap,
+            strideCount,
+            strideSize,
+            testNameRegex,
+            processOutput
+        );
     }
 }
