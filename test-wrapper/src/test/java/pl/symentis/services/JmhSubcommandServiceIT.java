@@ -44,7 +44,7 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
         Path jmhTestBenchmark = Path.of("target", "fake-jmh-benchmarks.jar").toAbsolutePath();
         JmhSubcommandService sut = serviceBuilder()
             .withMongoConnectionString(getConnectionString())
-            .withCommonOptions(new CommonSharedOptions("abcdef12", 1))
+            .withCommonOptions(new CommonSharedOptions("test-1", "req-1"))
             .withJmhOptions( new JmhOptions(
                 jmhBenchmarkOptionsBuilder()
                     .withBenchmarkPath(jmhTestBenchmark)
@@ -87,7 +87,7 @@ class JmhSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
             .isArray()
             .anySatisfy(o -> assertThat(o)
                 .asString()
-                .isEqualTo("gha-outputs/commit-abcdef12/attempt-1/jmh/output.txt"));
+                .isEqualTo("test-1/jmh/output.txt"));
     }
 
 

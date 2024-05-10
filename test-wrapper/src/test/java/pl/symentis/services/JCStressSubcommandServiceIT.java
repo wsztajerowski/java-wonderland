@@ -49,7 +49,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
                 .withS3Client(awsS3Client)
                 .withBucketName(TEST_BUCKET_NAME)
                 .build())
-            .withCommonOptions(new CommonSharedOptions("abcdef12", 1))
+            .withCommonOptions(new CommonSharedOptions("test-1", "req-1"))
             .withJCStressOptions(jcStressOptions)
             .withBenchmarkPath(Path.of("target", "fake-stress-tests.jar").toAbsolutePath())
             .build();
@@ -85,7 +85,7 @@ class JCStressSubcommandServiceIT extends TestcontainersWithS3AndMongoBaseIT {
             .isArray()
             .anySatisfy(o -> assertThat(o)
                 .asString()
-                .isEqualTo("gha-outputs/commit-abcdef12/attempt-1/jcstress/output.txt"));
+                .isEqualTo("test-1/jcstress/output.txt"));
     }
 
 }

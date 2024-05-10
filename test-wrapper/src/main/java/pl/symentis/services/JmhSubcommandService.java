@@ -17,7 +17,6 @@ import static java.text.MessageFormat.format;
 import static pl.symentis.FileUtils.ensurePathExists;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
 import static pl.symentis.process.JmhBenchmarkProcessBuilderFactory.prepopulatedJmhBenchmarkProcessBuilder;
-import static pl.symentis.services.S3PrefixProvider.jmhS3Prefix;
 
 public class JmhSubcommandService {
     private static final Logger logger = LoggerFactory.getLogger(JmhSubcommandService.class);
@@ -34,7 +33,7 @@ public class JmhSubcommandService {
     }
 
     public void executeCommand() {
-        Path s3Prefix = jmhS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
+        Path s3Prefix = Path.of(commonOptions.s3ResultPrefix(), "jmh");
         logger.info("Running JMH - S3 bucket: {}", s3Service.getEndpoint());
         logger.info("Path to results within bucket: {}", s3Prefix);
         try {
@@ -58,10 +57,9 @@ public class JmhSubcommandService {
         for (JmhResult jmhResult : getResultLoaderService().loadJmhResults(jmhOptions.outputOptions().machineReadableOutput())) {
             logger.debug("JMH result: {}", jmhResult);
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
-                commonOptions.commitSha(),
+                commonOptions.requestId(),
                 jmhResult.benchmark(),
-                jmhResult.mode(),
-                commonOptions.runAttempt());
+                jmhResult.mode());
             logger.info("Saving results in DB with ID: {}", benchmarkId);
             morphiaService
                 .upsert(JmhBenchmark.class)

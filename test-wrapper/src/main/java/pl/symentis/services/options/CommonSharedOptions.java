@@ -1,3 +1,4 @@
 package pl.symentis.services.options;
 
-public record CommonSharedOptions(String commitSha, int runAttempt) {}
+public record CommonSharedOptions(String s3ResultPrefix, String requestId) {
+}
