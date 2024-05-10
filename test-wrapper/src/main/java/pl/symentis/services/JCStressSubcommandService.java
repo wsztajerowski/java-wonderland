@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import pl.symentis.JavaWonderlandException;
 import pl.symentis.entities.jcstress.JCStressResult;
 import pl.symentis.entities.jcstress.JCStressTest;
-import pl.symentis.entities.jcstress.JCStressTestId;
 import pl.symentis.entities.jcstress.JCStressTestMetadata;
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
@@ -16,7 +15,6 @@ import java.nio.file.Path;
 
 import static pl.symentis.commands.JCStressHtmlResultParser.getJCStressHtmlResultParser;
 import static pl.symentis.process.BenchmarkProcessBuilder.benchmarkProcessBuilder;
-import static pl.symentis.services.S3PrefixProvider.jcstressS3Prefix;
 
 public class JCStressSubcommandService {
     private static final Logger logger = LoggerFactory.getLogger(JCStressSubcommandService.class);
@@ -37,7 +35,7 @@ public class JCStressSubcommandService {
 
     public void executeCommand() {
         Path reportPath = jcStressOptions.reportPath();
-        Path s3Prefix = jcstressS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
+        Path s3Prefix = Path.of(commonOptions.s3ResultPrefix(), "jcstress");
         logger.info("Running JCStress - S3 bucket: {}", s3Service.getEndpoint());
         logger.info("Path to results within bucket: {}", s3Prefix);
         try {
@@ -71,10 +69,9 @@ public class JCStressSubcommandService {
         JCStressResult jcStressResult = getJCStressHtmlResultParser(resultFilepath, s3Prefix)
             .parse();
 
-        JCStressTestId jcStressTestId = new JCStressTestId(commonOptions.commitSha(), commonOptions.runAttempt());
-        logger.info("Saving benchmarks into DB with id: {}", jcStressTestId);
+        logger.info("Saving benchmarks into DB with id: {}", commonOptions.requestId());
         JCStressTest stressTestResult = new JCStressTest(
-            jcStressTestId,
+            commonOptions.requestId(),
             new JCStressTestMetadata(),
             jcStressResult);
 

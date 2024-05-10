@@ -4,7 +4,7 @@ import dev.morphia.annotations.Entity;
 
 @Entity
 public record JmhBenchmarkId(
-    String commitSha,
+    String requestId,
     String benchmarkName,
-    String benchmarkType,
-    Integer runAttempt) { }
+    String benchmarkType
+) { }

@@ -25,7 +25,6 @@ import static pl.symentis.FileUtils.ensurePathExists;
 import static pl.symentis.FileUtils.getFilenameWithoutExtension;
 import static pl.symentis.infra.ResultLoaderService.getResultLoaderService;
 import static pl.symentis.process.JmhBenchmarkProcessBuilderFactory.prepopulatedJmhBenchmarkProcessBuilder;
-import static pl.symentis.services.S3PrefixProvider.jmhWithAsyncS3Prefix;
 
 public class JmhWithAsyncProfilerSubcommandService {
     private static final Logger logger = LoggerFactory.getLogger(JmhWithAsyncProfilerSubcommandService.class);
@@ -42,7 +41,7 @@ public class JmhWithAsyncProfilerSubcommandService {
         this.commonOptions = commonOptions;
         this.jmhOptions = jmhOptions;
         this.asyncProfilerOptions = asyncProfilerOptions;
-        this.s3Prefix = jmhWithAsyncS3Prefix(commonOptions.commitSha(), commonOptions.runAttempt());
+        this.s3Prefix = Path.of(commonOptions.s3ResultPrefix(), "jmh-with-async");
     }
 
     public void executeCommand() {
@@ -89,10 +88,10 @@ public class JmhWithAsyncProfilerSubcommandService {
             }
 
             JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
-                commonOptions.commitSha(),
+                commonOptions.requestId(),
                 jmhResult.benchmark(),
-                jmhResult.mode(),
-                commonOptions.runAttempt());
+                jmhResult.mode()
+            );
             logger.info("Saving results in DB with ID: {}", benchmarkId);
             morphiaService
                 .upsert(JmhBenchmark.class)

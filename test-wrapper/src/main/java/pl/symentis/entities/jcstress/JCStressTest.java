@@ -6,7 +6,7 @@ import dev.morphia.annotations.Id;
 @Entity("jcstress-tests")
 public record JCStressTest(
     @Id
-    JCStressTestId testId,
+    String requestId,
     JCStressTestMetadata metadata,
     JCStressResult result) {
 }

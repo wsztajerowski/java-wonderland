@@ -212,7 +212,7 @@ class Sandbox {
                         throw new IllegalArgumentException("Unknown benchmark mode: " + jmhResult.mode());
                 };
                 JmhBenchmarkId benchmarkId = new JmhBenchmarkId(
-                    commitSha, jmhResult.benchmark(), jmhResult.mode(), counter++);
+                    commitSha, jmhResult.benchmark(), jmhResult.mode());
 //                String flamegraphsDir = jmhResult.benchmark + dirSuffix;
 //                String s3Preffix = format("gha-outputs/commit-{0}/attempt-{1}/", benchmarkId.commitSha(), benchmarkId.runAttempt());
                 BenchmarkMetadata benchmarkMetadata = new BenchmarkMetadata(Collections.emptyMap());
