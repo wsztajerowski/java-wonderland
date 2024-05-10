@@ -16,7 +16,6 @@ env:
   EC2_INSTANCE_TYPE: c5.2xlarge
   SUBNET_ID: subnet-3914dd42
   SECURITY_GROUP_ID: sg-09ab440252230df2a
-  COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   build:
@@ -26,6 +25,21 @@ jobs:
       id-token: write
       contents: read
     steps:
+      - uses: actions/github-script@v7
+        id: variables
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        with:
+          result-encoding: string
+          script: |
+            const runAttempt = process.env.RUN_ATTEMPT
+            const fullSha = process.env.COMMIT_SHA
+            const sha = fullSha.substring(0,7)
+            const prefix = `gha-outputs/commit-${sha}/attempt-${runAttempt}`
+            console.log(`Hello ${prefix}`)
+            core.info(`S3_PREFIX=${prefix}`)
+            core.exportVariable('S3_PREFIX', prefix);
       - name: Checkout sources
         uses: actions/checkout@v4
       - name: Set up Java JDK
