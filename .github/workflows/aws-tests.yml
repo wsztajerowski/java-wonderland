@@ -42,11 +42,11 @@ jobs:
             
             const prefix = `gha-outputs/commit-${sha}/attempt-${runAttempt}`
             core.info(`S3_PREFIX: ${prefix}`)
-            echo `s3prefix=${prefix}` >> "$GITHUB_OUTPUT"
+            core.setOutput('s3prefix', prefix);
             
             const id = `${sha}-${runAttempt}`
             core.info(`Workflow run id=${id}`)
-            echo `runid=${id}` >> "$GITHUB_OUTPUT"
+            core.setOutput('runid', id);
       - name: Checkout sources
         uses: actions/checkout@v4
       - name: Set up Java JDK
