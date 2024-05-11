@@ -14,6 +14,10 @@ public class ApiCommonSharedOptions {
         description = "MongoDB connection string - you could provide it as a option value or put in MONGO_CONNECTION_STRING env variable. For details see: https://www.mongodb.com/docs/manual/reference/connection-string/")
     URI mongoConnectionString;
 
+    @Option(names = "--s3-service-endpoint",
+        description = "Custom S3 Service endpoint")
+    URI s3ServiceEndpoint;
+
     @Option(names = "--s3-bucket", defaultValue = "java-wonderland", description = "S3 bucket name where benchmark will be placed.")
     String s3BucketName;
 
@@ -29,5 +33,9 @@ public class ApiCommonSharedOptions {
 
     public URI getMongoConnectionString() {
         return mongoConnectionString;
+    }
+
+    public URI getS3ServiceEndpoint() {
+        return s3ServiceEndpoint;
     }
 }

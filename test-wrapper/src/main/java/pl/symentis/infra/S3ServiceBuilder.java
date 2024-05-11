@@ -17,11 +17,10 @@ public class S3ServiceBuilder {
         return new S3ServiceBuilder();
     }
 
-    public static S3ServiceBuilder getDefaultS3ServiceBuilder(){
-        String customEndpoint = System.getenv("AWS_ENDPOINT");
+    public static S3ServiceBuilder getDefaultS3ServiceBuilder(URI customEndpoint){
         S3Client client = S3Client
             .builder()
-            .endpointOverride(customEndpoint != null ? URI.create(customEndpoint) : null)
+            .endpointOverride(customEndpoint)
             .build();
         return new S3ServiceBuilder()
             .withS3Client(client);

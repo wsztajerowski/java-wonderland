@@ -19,6 +19,7 @@ public final class JCStressSubcommandServiceBuilder {
     private Path benchmarkPath;
     private JCStressOptions jcStressOptions;
     private boolean useDefaultS3Service = false;
+    private URI s3ServiceEndpoint;
 
     private JCStressSubcommandServiceBuilder() {
     }
@@ -52,7 +53,8 @@ public final class JCStressSubcommandServiceBuilder {
         return this;
     }
 
-    public JCStressSubcommandServiceBuilder withDefaultS3Service() {
+    public JCStressSubcommandServiceBuilder withDefaultS3Service(URI s3ServiceEndpoint) {
+        this.s3ServiceEndpoint = s3ServiceEndpoint;
         this.useDefaultS3Service = true;
         return this;
     }
@@ -60,7 +62,7 @@ public final class JCStressSubcommandServiceBuilder {
     public JCStressSubcommandService build() {
         Objects.requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
         if (useDefaultS3Service) {
-            s3Service = getDefaultS3ServiceBuilder()
+            s3Service = getDefaultS3ServiceBuilder(s3ServiceEndpoint)
                 .withBucketName(commonOptions.s3BucketName())
                 .build();
         }

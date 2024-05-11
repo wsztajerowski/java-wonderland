@@ -59,7 +59,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
                 .withAsyncOutputPath(asyncOutputPath)
                 .build())
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
-            .withDefaultS3Service()
+            .withDefaultS3Service(apiCommonSharedOptions.getS3ServiceEndpoint())
             .build()
             .executeCommand();
     }
