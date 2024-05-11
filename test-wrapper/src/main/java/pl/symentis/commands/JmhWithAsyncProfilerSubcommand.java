@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import static picocli.CommandLine.Model.CommandSpec;
 import static picocli.CommandLine.ParameterException;
 import static picocli.CommandLine.Spec;
-import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.serviceBuilderWithDefaultS3Service;
+import static pl.symentis.services.JmhWithAsyncProfilerSubcommandServiceBuilder.serviceBuilder;
 
 @Command(name = "jmh-with-async", description = "Run JHM benchmarks with Async profiler")
 public class JmhWithAsyncProfilerSubcommand implements Runnable {
@@ -49,7 +49,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
 
     @Override
     public void run() {
-        serviceBuilderWithDefaultS3Service()
+        serviceBuilder()
             .withCommonOptions(apiCommonSharedOptions.getValues())
             .withJmhOptions(apiJmhOptions.getJmhOptions())
             .withAsyncProfilerOptions(AsyncProfilerOptions.asyncProfilerOptionsBuilder()
@@ -59,6 +59,7 @@ public class JmhWithAsyncProfilerSubcommand implements Runnable {
                 .withAsyncOutputPath(asyncOutputPath)
                 .build())
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
+            .withDefaultS3Service()
             .build()
             .executeCommand();
     }

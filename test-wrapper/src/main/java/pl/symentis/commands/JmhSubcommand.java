@@ -3,7 +3,7 @@ package pl.symentis.commands;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 
-import static pl.symentis.services.JmhSubcommandServiceBuilder.serviceBuilderWithDefaultS3Service;
+import static pl.symentis.services.JmhSubcommandServiceBuilder.serviceBuilder;
 
 @Command(name = "jmh", description = "Run JHM benchmarks")
 public class JmhSubcommand implements Runnable {
@@ -17,10 +17,11 @@ public class JmhSubcommand implements Runnable {
 
     @Override
     public void run() {
-        serviceBuilderWithDefaultS3Service()
+        serviceBuilder()
             .withCommonOptions(apiCommonSharedOptions.getValues())
             .withJmhOptions(apiJmhOptions.getJmhOptions())
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
+            .withDefaultS3Service()
             .build()
             .executeCommand();
     }

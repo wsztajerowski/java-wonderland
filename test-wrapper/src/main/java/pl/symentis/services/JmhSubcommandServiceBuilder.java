@@ -2,30 +2,27 @@ package pl.symentis.services;
 
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
-import pl.symentis.infra.S3ServiceBuilder;
 import pl.symentis.services.options.CommonSharedOptions;
 import pl.symentis.services.options.JmhOptions;
 
 import java.net.URI;
+import java.util.Objects;
 
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
+import static pl.symentis.infra.S3ServiceBuilder.getDefaultS3ServiceBuilder;
 
 public final class JmhSubcommandServiceBuilder {
     private S3Service s3Service;
     private CommonSharedOptions commonOptions;
     private JmhOptions jmhOptions;
     private URI mongoConnectionString;
+    private boolean useDefaultS3Service = false;
 
     private JmhSubcommandServiceBuilder() {
     }
 
     public static JmhSubcommandServiceBuilder serviceBuilder() {
         return new JmhSubcommandServiceBuilder();
-    }
-
-    public static JmhSubcommandServiceBuilder serviceBuilderWithDefaultS3Service() {
-        return new JmhSubcommandServiceBuilder()
-            .withS3Service(S3ServiceBuilder.getDefaultS3ServiceBuilder().build());
     }
 
     public JmhSubcommandServiceBuilder withCommonOptions(CommonSharedOptions commonOptions) {
@@ -48,7 +45,18 @@ public final class JmhSubcommandServiceBuilder {
         return this;
     }
 
+    public JmhSubcommandServiceBuilder withDefaultS3Service() {
+        this.useDefaultS3Service = true;
+        return this;
+    }
+
     public JmhSubcommandService build() {
+        Objects.requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
+        if (useDefaultS3Service) {
+            s3Service = getDefaultS3ServiceBuilder()
+                .withBucketName(commonOptions.s3BucketName())
+                .build();
+        }
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();

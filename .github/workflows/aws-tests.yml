@@ -41,11 +41,11 @@ jobs:
             const sha = fullSha.substring(0,7)
             
             const prefix = `gha-outputs/commit-${sha}/attempt-${runAttempt}`
-            core.info(`S3_PREFIX: ${prefix}`)
+            core.info(`Setting S3 bucket prefix for benchmark results to: ${prefix}`)
             core.setOutput('s3prefix', prefix);
             
             const id = `${sha}-${runAttempt}`
-            core.info(`Workflow run id=${id}`)
+            core.info(`Setting workflow run id to: ${id}`)
             core.setOutput('runid', id);
       - name: Checkout sources
         uses: actions/checkout@v4

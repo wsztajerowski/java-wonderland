@@ -4,10 +4,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 import java.net.URI;
 
+import static java.util.Objects.requireNonNull;
+
 public class S3ServiceBuilder {
-    public static final String DEFAULT_BUCKET_NAME = "java-wonderland";
     private S3Client s3Client;
-    private String bucketName = DEFAULT_BUCKET_NAME;
+    private String bucketName;
 
     private S3ServiceBuilder(){
     }
@@ -37,6 +38,8 @@ public class S3ServiceBuilder {
     }
 
     public S3Service build(){
+        requireNonNull(s3Client, "Please either provide a S3 client or invoke getDefaultS3ServiceBuilder method before");
+        requireNonNull(bucketName, "Please provide AWS S3 bucket name");
         return new S3Service(s3Client, bucketName);
     }
 }
