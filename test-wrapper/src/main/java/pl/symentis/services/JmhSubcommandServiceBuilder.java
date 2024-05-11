@@ -17,6 +17,7 @@ public final class JmhSubcommandServiceBuilder {
     private JmhOptions jmhOptions;
     private URI mongoConnectionString;
     private boolean useDefaultS3Service = false;
+    private URI s3ServiceEndpoint;
 
     private JmhSubcommandServiceBuilder() {
     }
@@ -45,7 +46,8 @@ public final class JmhSubcommandServiceBuilder {
         return this;
     }
 
-    public JmhSubcommandServiceBuilder withDefaultS3Service() {
+    public JmhSubcommandServiceBuilder withDefaultS3Service(URI s3ServiceEndpoint) {
+        this.s3ServiceEndpoint = s3ServiceEndpoint;
         this.useDefaultS3Service = true;
         return this;
     }
@@ -53,7 +55,7 @@ public final class JmhSubcommandServiceBuilder {
     public JmhSubcommandService build() {
         Objects.requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
         if (useDefaultS3Service) {
-            s3Service = getDefaultS3ServiceBuilder()
+            s3Service = getDefaultS3ServiceBuilder(s3ServiceEndpoint)
                 .withBucketName(commonOptions.s3BucketName())
                 .build();
         }

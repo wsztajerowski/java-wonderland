@@ -19,6 +19,7 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     private URI mongoConnectionString;
     private JmhOptions jmhOptions;
     private boolean useDefaultS3Service = false;
+    private URI s3ServiceEndpoint;
 
     private JmhWithAsyncProfilerSubcommandServiceBuilder() {
     }
@@ -52,7 +53,8 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
         return this;
     }
 
-    public JmhWithAsyncProfilerSubcommandServiceBuilder withDefaultS3Service() {
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withDefaultS3Service(URI s3ServiceEndpoint) {
+        this.s3ServiceEndpoint = s3ServiceEndpoint;
         this.useDefaultS3Service = true;
         return this;
     }
@@ -60,7 +62,7 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     public JmhWithAsyncProfilerSubcommandService build() {
         Objects.requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
         if (useDefaultS3Service) {
-            s3Service = getDefaultS3ServiceBuilder()
+            s3Service = getDefaultS3ServiceBuilder(s3ServiceEndpoint)
                 .withBucketName(commonOptions.s3BucketName())
                 .build();
         }

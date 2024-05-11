@@ -21,7 +21,7 @@ public class JmhSubcommand implements Runnable {
             .withCommonOptions(apiCommonSharedOptions.getValues())
             .withJmhOptions(apiJmhOptions.getJmhOptions())
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
-            .withDefaultS3Service()
+            .withDefaultS3Service(apiCommonSharedOptions.getS3ServiceEndpoint())
             .build()
             .executeCommand();
     }
