@@ -6,7 +6,7 @@ import picocli.CommandLine.Mixin;
 
 import java.nio.file.Path;
 
-import static pl.symentis.services.JCStressSubcommandServiceBuilder.serviceBuilderWithDefaultS3Service;
+import static pl.symentis.services.JCStressSubcommandServiceBuilder.serviceBuilder;
 
 @Command(name = "jcstress", description = "Run JCStress performance tests")
 public class JCStressSubcommand implements Runnable {
@@ -24,10 +24,11 @@ public class JCStressSubcommand implements Runnable {
 
     @Override
     public void run() {
-        serviceBuilderWithDefaultS3Service()
+        serviceBuilder()
             .withCommonOptions(apiCommonSharedOptions.getValues())
             .withJCStressOptions(apiJCStressOptions.getValues())
             .withBenchmarkPath(benchmarkPath)
+            .withDefaultS3Service()
             .withMongoConnectionString(apiCommonSharedOptions.getMongoConnectionString())
             .build()
             .executeCommand();

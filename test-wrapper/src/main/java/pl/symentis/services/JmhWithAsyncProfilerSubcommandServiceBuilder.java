@@ -2,14 +2,15 @@ package pl.symentis.services;
 
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
-import pl.symentis.infra.S3ServiceBuilder;
 import pl.symentis.services.options.AsyncProfilerOptions;
 import pl.symentis.services.options.CommonSharedOptions;
 import pl.symentis.services.options.JmhOptions;
 
 import java.net.URI;
+import java.util.Objects;
 
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
+import static pl.symentis.infra.S3ServiceBuilder.getDefaultS3ServiceBuilder;
 
 public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     private AsyncProfilerOptions asyncProfilerOptions;
@@ -17,17 +18,13 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
     private S3Service s3Service;
     private URI mongoConnectionString;
     private JmhOptions jmhOptions;
+    private boolean useDefaultS3Service = false;
 
     private JmhWithAsyncProfilerSubcommandServiceBuilder() {
     }
 
     public static JmhWithAsyncProfilerSubcommandServiceBuilder serviceBuilder() {
         return new JmhWithAsyncProfilerSubcommandServiceBuilder();
-    }
-
-    public static JmhWithAsyncProfilerSubcommandServiceBuilder serviceBuilderWithDefaultS3Service() {
-        return new JmhWithAsyncProfilerSubcommandServiceBuilder()
-            .withS3Service(S3ServiceBuilder.getDefaultS3ServiceBuilder().build());
     }
 
     public JmhWithAsyncProfilerSubcommandServiceBuilder withCommonOptions(CommonSharedOptions commonOptions) {
@@ -55,7 +52,18 @@ public final class JmhWithAsyncProfilerSubcommandServiceBuilder {
         return this;
     }
 
+    public JmhWithAsyncProfilerSubcommandServiceBuilder withDefaultS3Service() {
+        this.useDefaultS3Service = true;
+        return this;
+    }
+
     public JmhWithAsyncProfilerSubcommandService build() {
+        Objects.requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
+        if (useDefaultS3Service) {
+            s3Service = getDefaultS3ServiceBuilder()
+                .withBucketName(commonOptions.s3BucketName())
+                .build();
+        }
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();

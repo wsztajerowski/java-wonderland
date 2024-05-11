@@ -2,14 +2,15 @@ package pl.symentis.services;
 
 import pl.symentis.infra.MorphiaService;
 import pl.symentis.infra.S3Service;
-import pl.symentis.infra.S3ServiceBuilder;
 import pl.symentis.services.options.CommonSharedOptions;
 import pl.symentis.services.options.JCStressOptions;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
+import static pl.symentis.infra.S3ServiceBuilder.getDefaultS3ServiceBuilder;
 
 public final class JCStressSubcommandServiceBuilder {
     private CommonSharedOptions commonOptions;
@@ -17,17 +18,13 @@ public final class JCStressSubcommandServiceBuilder {
     private URI mongoConnectionString;
     private Path benchmarkPath;
     private JCStressOptions jcStressOptions;
+    private boolean useDefaultS3Service = false;
 
     private JCStressSubcommandServiceBuilder() {
     }
 
     public static JCStressSubcommandServiceBuilder serviceBuilder() {
         return new JCStressSubcommandServiceBuilder();
-    }
-
-    public static JCStressSubcommandServiceBuilder serviceBuilderWithDefaultS3Service() {
-        return new JCStressSubcommandServiceBuilder()
-            .withS3Service(S3ServiceBuilder.getDefaultS3ServiceBuilder().build());
     }
 
     public JCStressSubcommandServiceBuilder withBenchmarkPath(Path benchmarkPath) {
@@ -55,7 +52,18 @@ public final class JCStressSubcommandServiceBuilder {
         return this;
     }
 
+    public JCStressSubcommandServiceBuilder withDefaultS3Service() {
+        this.useDefaultS3Service = true;
+        return this;
+    }
+
     public JCStressSubcommandService build() {
+        Objects.requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
+        if (useDefaultS3Service) {
+            s3Service = getDefaultS3ServiceBuilder()
+                .withBucketName(commonOptions.s3BucketName())
+                .build();
+        }
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
