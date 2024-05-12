@@ -7,8 +7,8 @@ import pl.symentis.services.options.JCStressOptions;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static pl.symentis.infra.MorphiaServiceBuilder.getMorphiaServiceBuilder;
 import static pl.symentis.infra.S3ServiceBuilder.getDefaultS3ServiceBuilder;
 
@@ -60,12 +60,13 @@ public final class JCStressSubcommandServiceBuilder {
     }
 
     public JCStressSubcommandService build() {
-        Objects.requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
+        requireNonNull(mongoConnectionString, "Please provide connectionString for Mongo");
         if (useDefaultS3Service) {
             s3Service = getDefaultS3ServiceBuilder(s3ServiceEndpoint)
                 .withBucketName(commonOptions.s3BucketName())
                 .build();
         }
+        requireNonNull(s3Service, "Please either provide a S3 service or invoke withDefaultS3Service method before");
         MorphiaService morphiaService = getMorphiaServiceBuilder()
             .withConnectionString(mongoConnectionString)
             .build();
