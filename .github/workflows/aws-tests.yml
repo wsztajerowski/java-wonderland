@@ -28,6 +28,11 @@ jobs:
       s3-prefix: ${{ steps.variables.outputs.s3prefix }}
       run-id: ${{ steps.variables.outputs.runid }}
     steps:
+      - uses: robinraju/release-downloader@v1.10
+        with:
+          repository: 'wsztajerowski/benchmark-as-a-service'
+          latest: true
+          fileName: 'benchmark-runner.jar'
       - uses: actions/github-script@v7
         id: variables
         env:
