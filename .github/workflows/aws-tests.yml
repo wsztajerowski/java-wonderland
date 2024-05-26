@@ -124,10 +124,11 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-      - name: Download Test wrapper
-        uses: actions/download-artifact@v4
+      - uses: robinraju/release-downloader@v1.10
         with:
-          name: test-wrapper
+          repository: 'wsztajerowski/benchmark-as-a-service'
+          latest: true
+          fileName: 'benchmark-runner.jar'
       - name: Download JMH runner jar
         uses: actions/download-artifact@v4
         with:
@@ -135,7 +136,7 @@ jobs:
       - name: Run JMH benchmarks
         env:
           MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
-        run: java -jar test-wrapper.jar jmh --s3-result-prefix ${{ needs.build.outputs.s3-prefix }} -id ${{ needs.build.outputs.run-id }} -f 1
+        run: java -jar benchmark-runner.jar jmh --s3-result-prefix ${{ needs.build.outputs.s3-prefix }} -id ${{ needs.build.outputs.run-id }} -f 1
 
   stop-runner-1:
     name: Stop EC2 runner 1
