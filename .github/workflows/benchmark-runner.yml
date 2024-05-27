@@ -47,53 +47,56 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    # outputs:
-    #   label: ${{ steps.start-ec2-runner.outputs.label }}
-    #   ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
-  #   steps:
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
-  #         aws-region: ${{ env.AWS_REGION }}
-  #     - name: Start EC2 runner
-  #       id: start-ec2-runner
-  #       uses: machulav/ec2-github-runner@v2
-  #       with:
-  #         mode: start
-  #         github-token: ${{ secrets.GHA_EC2_PAT }}
-  #         ec2-image-id: ${{ env.AMI_ID }}
-  #         ec2-instance-type: ${{ env.EC2_INSTANCE_TYPE }}
-  #         subnet-id: ${{ env.SUBNET_ID }}
-  #         security-group-id: ${{ env.SECURITY_GROUP_ID }}
-  #         iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
-  #         aws-resource-tags: > 
-  #           [
-  #             {"Key": "project", "Value": "java-wonderland"},
-  #             {"Key": "run_id", "Value": "${{ github.run_id }}" },
-  #             {"Key": "runner", "Value": "request-benchmark-runner"}
-  #           ]
-  # run-benchmark:
-  #   name: Run JMH tests
-  #   needs:
-  #    - start-runner
-  #   runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
     steps:
-  #     - name: Set up Java JDK
-  #       uses: actions/setup-java@v4
-  #       with:
-  #         java-version: ${{ env.JAVA_VERSION }}
-  #         distribution: ${{ env.JAVA_DISTRIBUTION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GHA_EC2_PAT }}
+          ec2-image-id: ${{ env.AMI_ID }}
+          ec2-instance-type: ${{ env.EC2_INSTANCE_TYPE }}
+          subnet-id: ${{ env.SUBNET_ID }}
+          security-group-id: ${{ env.SECURITY_GROUP_ID }}
+          iam-role-name: ${{ env.RUNNER_ROLE_NAME }}
+          aws-resource-tags: > 
+            [
+              {"Key": "project", "Value": "java-wonderland"},
+              {"Key": "run_id", "Value": "${{ github.run_id }}" },
+              {"Key": "runner", "Value": "request-benchmark-runner"}
+            ]
+  run-benchmark:
+    name: Run JMH tests
+    needs:
+     - start-runner
+    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
+    steps:
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
       - name: Download Benchmark runner
         uses: robinraju/release-downloader@v1
         with:
           repository: 'wsztajerowski/benchmark-as-a-service'
           latest: true
           fileName: 'benchmark-runner.jar'
-      # - name: Download benchmark from S3
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: jmh-benchmarks
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Download benchmark from S3
+        run: aws s3 cp ${{ inputs.benchmark_path }} benchmark_under_test.jar
       - name: Print values
         run: echo "benchmark_type= ${{ inputs.benchmark_type }} s3-result-prefix= ${{ inputs.result_prefix }} request-id= ${{ inputs.request_id }} s3-bucket= ${{ inputs.s3_result_bucket }} benchmark-path=${{ inputs.benchmark_path }}"
       - name: Run benchmarks
@@ -107,26 +110,26 @@ jobs:
           --benchmark-path benchmark_under_test.jar \
           -f 1
 
-  # stop-runner:
-  #   name: Stop EC2 runner
-  #   needs:
-  #     - start-runner
-  #     - run-benchmark
-  #   if: always()
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-  #   steps:
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
-  #         aws-region: ${{ env.AWS_REGION }}
-  #     - name: Stop EC2 runner
-  #       uses: machulav/ec2-github-runner@v2
-  #       with:
-  #         mode: stop
-  #         github-token: ${{ secrets.GHA_EC2_PAT }}
-  #         label: ${{ needs.start-runner.outputs.label }}
-  #         ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
+  stop-runner:
+    name: Stop EC2 runner
+    needs:
+      - start-runner
+      - run-benchmark
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GHA_EC2_PAT }}
+          label: ${{ needs.start-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
