@@ -103,7 +103,7 @@ jobs:
           --request-id ${{ inputs.request_id }} \
           --s3-bucket ${{ inputs.s3_result_bucket }} \
           --benchmark-path benchmark_under_test.jar \
-          -f 1
+          -f 1 ${{ inputs.parameters }}
 
   stop-runner:
     name: Stop EC2 runner
