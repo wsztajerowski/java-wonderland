@@ -90,11 +90,6 @@ jobs:
           repository: 'wsztajerowski/benchmark-as-a-service'
           latest: true
           fileName: 'benchmark-runner.jar'
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.WORKFLOW_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
       - name: Download benchmark from S3
         run: aws s3 cp ${{ inputs.benchmark_path }} benchmark_under_test.jar
       - name: Print values
