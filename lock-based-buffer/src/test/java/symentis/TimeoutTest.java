@@ -28,7 +28,7 @@ class TimeoutTest {
     void read_value_from_buffer_timeouts_after_given_delay() {
         //when
         Exception caughtException = catchException(() -> circularBuffer
-            .pop(1, TimeUnit.MILLISECONDS));
+            .pop(3));
 
         // then
         assertThat(caughtException)
@@ -39,15 +39,15 @@ class TimeoutTest {
     @Test
     void pop_method_canceled_operation_after_timeout_occurred(){
         // when
-        Exception caughtException = catchException(() -> circularBuffer.pop(1, TimeUnit.MILLISECONDS));
+        Exception caughtException = catchException(() -> circularBuffer.pop(2));
 
         // and
         try (ScheduledExecutorService executorService = newScheduledThreadPool(1)) {
-            executorService.schedule(() -> circularBuffer.push(1), 1, TimeUnit.MILLISECONDS);
+            executorService.schedule(() -> circularBuffer.push(1), 2, TimeUnit.MILLISECONDS);
         }
 
         // then
-        assertDoesNotThrow(() -> circularBuffer.pop(1, TimeUnit.MILLISECONDS));
+        assertDoesNotThrow(() -> circularBuffer.pop(2));
         // and
         assertThat(caughtException)
             .isExactlyInstanceOf(TimeoutException.class);
@@ -59,7 +59,7 @@ class TimeoutTest {
         circularBuffer.push(1);
 
         // when
-        Exception caughtException = catchException(() -> circularBuffer.pop(1, TimeUnit.MILLISECONDS));
+        Exception caughtException = catchException(() -> circularBuffer.pop(1));
 
         // then
         assertThat(caughtException)

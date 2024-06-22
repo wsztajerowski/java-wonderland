@@ -1,10 +1,14 @@
 package pl.symentis;
 
 import java.lang.reflect.Array;
-import java.util.concurrent.*;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static java.lang.System.currentTimeMillis;
 
 public class LockBasedCircularBuffer<T> {
     private int readPosition;
@@ -45,12 +49,14 @@ public class LockBasedCircularBuffer<T> {
         }
     }
 
-    public T pop(long timeout, TimeUnit unit) throws TimeoutException {
+    public T pop(long timeoutInMilliseconds) throws TimeoutException {
+        long timeoutTime = currentTimeMillis() + timeoutInMilliseconds;
         lock.lock();
         try {
             while (buffer[readPosition] == null) {
-                boolean awaitSuccessfully = canIReadCondition.await(timeout, unit);
-                if(!awaitSuccessfully){
+                var millisecondsUntilTimeout = timeoutTime - currentTimeMillis();
+                var awaitSuccessfully = canIReadCondition.await(millisecondsUntilTimeout, TimeUnit.MILLISECONDS);
+                if( !awaitSuccessfully || currentTimeMillis() > timeoutTime ){
                     throw new TimeoutException();
                 }
             }
@@ -84,13 +90,14 @@ public class LockBasedCircularBuffer<T> {
         }
     }
 
-    public void push(T element, long timeout, TimeUnit unit) throws TimeoutException {
+    public void push(T element, long timeoutInMilliseconds) throws TimeoutException {
+        long timeoutTime = currentTimeMillis() + timeoutInMilliseconds;
         lock.lock();
         try {
             while (buffer[writePosition] != null) {
-                canIWriteCondition.await();
-                boolean awaitSuccessfully = canIWriteCondition.await(timeout, unit);
-                if(!awaitSuccessfully){
+                var millisecondsUntilTimeout = timeoutTime - currentTimeMillis();
+                boolean awaitSuccessfully = canIWriteCondition.await(millisecondsUntilTimeout, TimeUnit.MILLISECONDS);
+                if( !awaitSuccessfully ||  currentTimeMillis() > timeoutTime ){
                     throw new TimeoutException();
                 }
             }

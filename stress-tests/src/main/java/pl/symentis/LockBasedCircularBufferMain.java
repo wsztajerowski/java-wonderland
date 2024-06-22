@@ -3,12 +3,15 @@ package pl.symentis;
 import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.I_Result;
 
+import java.util.concurrent.TimeoutException;
+
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE;
 import static org.openjdk.jcstress.annotations.Expect.ACCEPTABLE_INTERESTING;
 import static pl.symentis.LockBasedCircularBufferBuilder.integerCircularBufferBuilder;
 
+@Outcome(id = "-1", expect = ACCEPTABLE_INTERESTING, desc = "Pop method timeouts.")
 @Outcome(id = "0", expect = ACCEPTABLE_INTERESTING, desc = "With single element added to buffer, no elements were read from it.")
-@Outcome(id = "1", expect = ACCEPTABLE, desc = "Producer pushed data, and consumer get it from buffer.")
+@Outcome(id = "5", expect = ACCEPTABLE, desc = "Producer pushed data, and consumer get it from buffer.")
 public class LockBasedCircularBufferMain {
     @JCStressTest
     @JCStressMeta(LockBasedCircularBufferMain.class)
@@ -24,12 +27,20 @@ public class LockBasedCircularBufferMain {
 
         @Actor
         public void actor1() {
-            circularBuffer.push(1);
+            try {
+                circularBuffer.push(5, 1);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Actor
         public void actor2(I_Result r) {
-            r.r1 = circularBuffer.pop();
+            try {
+                r.r1 = circularBuffer.pop(2);
+            } catch (TimeoutException e) {
+                r.r1 = -1;
+            }
         }
 
     }
