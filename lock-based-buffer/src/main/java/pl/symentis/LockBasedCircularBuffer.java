@@ -49,12 +49,13 @@ public class LockBasedCircularBuffer<T> {
         }
     }
 
-    public T pop(long timeout, TimeUnit unit) throws TimeoutException {
+    public T pop(long timeoutInMilliseconds) throws TimeoutException {
+        long timeoutTime = currentTimeMillis() + timeoutInMilliseconds;
         lock.lock();
         try {
-            long timeoutTime = currentTimeMillis() + Duration.of(timeout, unit.toChronoUnit()).toMillis();
             while (buffer[readPosition] == null) {
-                boolean awaitSuccessfully = canIReadCondition.await(timeout, unit);
+                var millisecondsUntilTimeout = timeoutTime - currentTimeMillis();
+                var awaitSuccessfully = canIReadCondition.await(millisecondsUntilTimeout, TimeUnit.MILLISECONDS);
                 if( !awaitSuccessfully || currentTimeMillis() > timeoutTime ){
                     throw new TimeoutException();
                 }
@@ -89,12 +90,13 @@ public class LockBasedCircularBuffer<T> {
         }
     }
 
-    public void push(T element, long timeout, TimeUnit unit) throws TimeoutException {
+    public void push(T element, long timeoutInMilliseconds) throws TimeoutException {
+        long timeoutTime = currentTimeMillis() + timeoutInMilliseconds;
         lock.lock();
         try {
-            long timeoutTime = currentTimeMillis() + Duration.of(timeout, unit.toChronoUnit()).toMillis();
             while (buffer[writePosition] != null) {
-                boolean awaitSuccessfully = canIWriteCondition.await(timeout, unit);
+                var millisecondsUntilTimeout = timeoutTime - currentTimeMillis();
+                boolean awaitSuccessfully = canIWriteCondition.await(millisecondsUntilTimeout, TimeUnit.MILLISECONDS);
                 if( !awaitSuccessfully ||  currentTimeMillis() > timeoutTime ){
                     throw new TimeoutException();
                 }
