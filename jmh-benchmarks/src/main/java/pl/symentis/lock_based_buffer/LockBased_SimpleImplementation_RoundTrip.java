@@ -2,7 +2,6 @@ package pl.symentis.lock_based_buffer;
 
 import org.openjdk.jmh.annotations.*;
 import pl.symentis.LockBasedCircularBuffer;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -25,7 +24,6 @@ public class LockBased_SimpleImplementation_RoundTrip {
             .withBufferSize(10_000)
             .build();
     }
-
 
     @Benchmark
     @GroupThreads(1)
@@ -51,5 +49,4 @@ public class LockBased_SimpleImplementation_RoundTrip {
             return -1;
         }
     }
-
 }
